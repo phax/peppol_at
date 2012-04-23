@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
 import com.phloc.commons.annotations.Nonempty;
-import com.phloc.commons.compare.EqualsUtils;
+import com.phloc.commons.equals.EqualsUtils;
 import com.phloc.commons.hash.HashCodeGenerator;
 import com.phloc.commons.string.StringHelper;
 import com.phloc.commons.string.ToStringGenerator;
@@ -45,7 +45,7 @@ public final class SchemedID {
     if (!(o instanceof SchemedID))
       return false;
     final SchemedID rhs = (SchemedID) o;
-    return EqualsUtils.nullSafeEquals (m_sSchemeID, rhs.m_sSchemeID) && m_sID.equals (rhs.m_sID);
+    return EqualsUtils.equals (m_sSchemeID, rhs.m_sSchemeID) && m_sID.equals (rhs.m_sID);
   }
 
   @Override
