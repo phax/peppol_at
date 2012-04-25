@@ -46,6 +46,12 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>
-    </dependency>    
+    </dependency>
+    <dependency>
+      <groupId>at.peppol</groupId>
+      <artifactId>peppol-test-files</artifactId>
+      <version>2.3.0-RC1</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

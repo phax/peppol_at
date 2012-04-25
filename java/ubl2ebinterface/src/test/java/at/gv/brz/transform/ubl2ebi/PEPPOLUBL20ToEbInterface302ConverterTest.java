@@ -8,8 +8,10 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+import at.peppol.test.ETestFileType;
+import at.peppol.test.TestFiles;
+
 import com.phloc.commons.io.IReadableResource;
-import com.phloc.commons.io.resource.ClassPathResource;
 import com.phloc.commons.xml.serialize.XMLReader;
 import com.phloc.ebinterface.EbInterface302Marshaller;
 import com.phloc.ubl.UBL20DocumentMarshaller;
@@ -20,17 +22,10 @@ import com.phloc.ubl.UBL20DocumentMarshaller;
  * @author PEPPOL.AT, BRZ, Philip Helger
  */
 public class PEPPOLUBL20ToEbInterface302ConverterTest {
-  private static final String [] VALID_FILES = new String [] { "peppol-p4-aug-2011.xml",
-                                                              "peppol1.xml",
-                                                              "peppol-it1.xml",
-                                                              "peppol-it2.xml",
-                                                              "at-ubl-42-8.xml" };
-
   @Test
   public void testConvert () throws SAXException {
-    for (final String sFilename : VALID_FILES) {
-      // Build resource
-      final IReadableResource aRes = new ClassPathResource ("ubl20/" + sFilename);
+    for (final IReadableResource aRes : TestFiles.getSuccessFiles (ETestFileType.INVOICE)) {
+      System.out.println (aRes.getPath ());
       assertTrue (aRes.exists ());
 
       // Read XML
