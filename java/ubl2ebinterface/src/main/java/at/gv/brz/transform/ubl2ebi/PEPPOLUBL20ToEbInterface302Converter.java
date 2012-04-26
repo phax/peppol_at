@@ -134,9 +134,12 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
   @Nonnull
   private static String _concatenate (@Nonnull final String sSep, @Nonnull final String... aValues) {
     final StringBuilder aSB = new StringBuilder ();
+    boolean bFirst = true;
     for (final String sValue : aValues)
       if (StringHelper.hasText (sValue)) {
-        if (aSB.length () > 0)
+        if (bFirst)
+          bFirst = false;
+        else
           aSB.append (sSep);
         aSB.append (sValue);
       }
@@ -153,6 +156,7 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
       ret.setName (aUBLPartyName.getName () == null ? null : aUBLPartyName.getName ().getValue ());
     }
 
+    // Convert main address
     final oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.AddressType aUBLAddress = aUBLParty.getPostalAddress ();
     if (aUBLAddress != null) {
       ret.setStreet (_concatenate (" ",
@@ -170,6 +174,7 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
         ret.setCountry (aUBLAddress.getCountry ().getIdentificationCode ().getValue ());
     }
 
+    // Contact
     final ContactType aUBLContact = aUBLParty.getContact ();
     if (aUBLContact != null) {
       if (aUBLContact.getTelephone () != null)
@@ -178,6 +183,7 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
         ret.setEmail (aUBLContact.getElectronicMail ().getValue ());
     }
 
+    // Person name
     final PersonType aUBLPerson = aUBLParty.getPerson ();
     if (aUBLPerson != null) {
       ret.setContact (_concatenate (" ",
@@ -404,25 +410,32 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
       final ItemListType aNewItemList = aObjectFactory.createItemListType ();
       int nInvoiceLineIndex = 1;
       for (final InvoiceLineType aUBLInvoiceLine : aUBLInvoice.getInvoiceLine ()) {
-        // Try to resolve tax percentage
+        // Try to resolve tax category
         TaxCategoryType aUBLTaxCategory = ContainerHelper.getSafe (aUBLInvoiceLine.getItem ()
                                                                                   .getClassifiedTaxCategory (), 0);
         if (aUBLTaxCategory == null) {
-          final TaxTotalType aUBLTaxTotal = ContainerHelper.getFirstElement (aUBLInvoiceLine.getTaxTotal ());
-          if (aUBLTaxTotal != null) {
-            final TaxSubtotalType aUBLTaxSubTotal = ContainerHelper.getFirstElement (aUBLTaxTotal.getTaxSubtotal ());
-            if (aUBLTaxSubTotal != null)
+          // No direct tax category -> check if it is somewhere in the tax total
+          outer: for (final TaxTotalType aUBLTaxTotal : aUBLInvoiceLine.getTaxTotal ())
+            for (final TaxSubtotalType aUBLTaxSubTotal : aUBLTaxTotal.getTaxSubtotal ()) {
               aUBLTaxCategory = aUBLTaxSubTotal.getTaxCategory ();
-          }
+              if (aUBLTaxCategory != null) {
+                // We found one -> just use it
+                break outer;
+              }
+            }
         }
 
+        // Try to resolve tax percentage
         BigDecimal aUBLPercent = null;
         if (aUBLTaxCategory != null) {
           // Specified at tax category?
           if (aUBLTaxCategory.getPercent () != null)
             aUBLPercent = aUBLTaxCategory.getPercent ().getValue ();
 
-          if (aUBLPercent == null) {
+          if (aUBLPercent == null &&
+              aUBLTaxCategory.getID () != null &&
+              aUBLTaxCategory.getTaxScheme () != null &&
+              aUBLTaxCategory.getTaxScheme ().getID () != null) {
             // Not specified - check from previous map
             final String sUBLTaxSchemeSchemeID = aUBLTaxCategory.getTaxScheme ().getID ().getSchemeID ();
             final String sUBLTaxSchemeID = aUBLTaxCategory.getTaxScheme ().getID ().getValue ();

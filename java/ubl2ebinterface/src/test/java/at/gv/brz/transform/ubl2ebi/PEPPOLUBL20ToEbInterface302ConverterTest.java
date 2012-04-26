@@ -23,7 +23,8 @@ import com.phloc.ubl.UBL20DocumentMarshaller;
  */
 public class PEPPOLUBL20ToEbInterface302ConverterTest {
   @Test
-  public void testConvert () throws SAXException {
+  public void testConvertPEPPOLInvoice () throws SAXException {
+    // For all PEPPOL test invoices
     for (final IReadableResource aRes : TestFiles.getSuccessFiles (ETestFileType.INVOICE)) {
       System.out.println (aRes.getPath ());
       assertTrue (aRes.exists ());
