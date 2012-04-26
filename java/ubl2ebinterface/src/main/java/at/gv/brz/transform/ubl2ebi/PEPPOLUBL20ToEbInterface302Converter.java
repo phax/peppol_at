@@ -116,13 +116,13 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
     }
 
     // Invoice type code
-    InvoiceTypeCodeType aInvoiceTypeCode = aUBLInvoice.getInvoiceTypeCode ();
+    final InvoiceTypeCodeType aInvoiceTypeCode = aUBLInvoice.getInvoiceTypeCode ();
     if (aInvoiceTypeCode == null) {
-      s_aLogger.warn ("No InvoiceTypeCode present! Setting to default.");
-      aInvoiceTypeCode = new InvoiceTypeCodeType ();
-      aInvoiceTypeCode.setValue (CPeppolUBL.INVOICE_TYPE_CODE);
+      // None present
+      s_aLogger.warn ("No InvoiceTypeCode present! Assuming " + CPeppolUBL.INVOICE_TYPE_CODE);
     }
     else {
+      // If one is present, it must match
       if (!CPeppolUBL.INVOICE_TYPE_CODE.equals (aInvoiceTypeCode.getValue ()))
         return "Invalid InvoiceTypeCode value present!";
     }
@@ -216,6 +216,8 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
    * @param aUBLInvoice
    *        The UBL invoice to be converted
    * @return The created ebInterface 3.0.2 document
+   * @throws IllegalArgumentException
+   *         If the passed UBL invoice cannot be converted
    */
   @Nonnull
   public static InvoiceType convertToEbInterface (@Nonnull final oasis.names.specification.ubl.schema.xsd.invoice_2.InvoiceType aUBLInvoice) {
@@ -224,7 +226,7 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
 
     final ObjectFactory aObjectFactory = new ObjectFactory ();
 
-    // Consistency check
+    // Consistency check before starting the conversion
     final String sConsistencyValidationResult = _checkConsistency (aUBLInvoice);
     if (sConsistencyValidationResult != null)
       throw new IllegalArgumentException ("Consistency validation failed: " + sConsistencyValidationResult);
