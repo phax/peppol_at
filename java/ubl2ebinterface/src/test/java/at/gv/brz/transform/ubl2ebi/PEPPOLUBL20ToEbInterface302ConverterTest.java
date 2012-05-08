@@ -42,7 +42,7 @@ public class PEPPOLUBL20ToEbInterface302ConverterTest {
       assertNotNull (aEbInvoice);
 
       // Convert ebInterface to XML
-      final Document aDocEb = EbInterface302Marshaller.getInstance ().writeInvoice (aEbInvoice);
+      final Document aDocEb = new EbInterface302Marshaller ().write (aEbInvoice);
       assertNotNull (aDocEb);
     }
   }
