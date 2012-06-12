@@ -323,7 +323,7 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
 
       // Concatenate accounting area and main order reference for ebInterface
       // 3.x
-      sOrderReferenceID = StringHelper.concatenateOnDemand (sAccountingArea, ":", sUBLOrderReferenceID);
+      sOrderReferenceID = StringHelper.getConcatenatedOnDemand (sAccountingArea, ":", sUBLOrderReferenceID);
       if (StringHelper.hasNoText (sOrderReferenceID)) {
         s_aLogger.error ("Failed to get order reference ID!");
         sOrderReferenceID = DUMMY_VALUE;
@@ -578,7 +578,7 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
 
           // IBAN
           aNewAccount.setIBAN (aUBLPaymentMeans.getPayeeFinancialAccount ().getID ().getValue ());
-          if (StringHelper.length (aNewAccount.getIBAN ()) > 34) {
+          if (StringHelper.getLength (aNewAccount.getIBAN ()) > 34) {
             s_aLogger.warn ("The IBAN '" + aNewAccount.getIBAN () + "' is too long and cut to 34 chars.");
             aNewAccount.setIBAN (aNewAccount.getIBAN ().substring (0, 34));
           }
