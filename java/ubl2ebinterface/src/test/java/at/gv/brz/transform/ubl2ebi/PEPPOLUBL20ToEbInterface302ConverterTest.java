@@ -5,6 +5,8 @@ import static org.junit.Assert.assertTrue;
 import oasis.names.specification.ubl.schema.xsd.invoice_2.InvoiceType;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -22,11 +24,13 @@ import com.phloc.ubl.UBL20DocumentMarshaller;
  * @author PEPPOL.AT, BRZ, Philip Helger
  */
 public class PEPPOLUBL20ToEbInterface302ConverterTest {
+  private static final Logger s_aLogger = LoggerFactory.getLogger (PEPPOLUBL20ToEbInterface302ConverterTest.class);
+
   @Test
   public void testConvertPEPPOLInvoice () throws SAXException {
     // For all PEPPOL test invoices
     for (final IReadableResource aRes : TestFiles.getSuccessFiles (ETestFileType.INVOICE)) {
-      System.out.println (aRes.getPath ());
+      s_aLogger.info (aRes.getPath ());
       assertTrue (aRes.exists ());
 
       // Read XML

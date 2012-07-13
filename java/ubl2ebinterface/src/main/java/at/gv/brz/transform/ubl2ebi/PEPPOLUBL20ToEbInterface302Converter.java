@@ -73,7 +73,7 @@ import com.phloc.ebinterface.v302.VATType;
 public final class PEPPOLUBL20ToEbInterface302Converter {
   private static final Logger s_aLogger = LoggerFactory.getLogger (PEPPOLUBL20ToEbInterface302Converter.class);
   private static final String DUMMY_VALUE = "DUMMY_VALUE";
-  private static final String REGEX_BIC = "[0-9 | A-Z | a-z]{8}([0-9 | A-Z | a-z]{3})?";
+  private static final String REGEX_BIC = "[0-9|A-Z|a-z]{8}([0-9|A-Z|a-z]{3})?";
 
   private PEPPOLUBL20ToEbInterface302Converter () {}
 
@@ -212,7 +212,7 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
     return ret;
   }
 
-  private static boolean _isSupportedTaxSchemeSchemeID (final String sUBLTaxSchemeSchemeID) {
+  private static boolean _isSupportedTaxSchemeSchemeID (@Nullable final String sUBLTaxSchemeSchemeID) {
     return sUBLTaxSchemeSchemeID == null || sUBLTaxSchemeSchemeID.equals ("UN/ECE 5153");
   }
 
