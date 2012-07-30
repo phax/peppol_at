@@ -44,6 +44,7 @@ import com.phloc.commons.CGlobal;
 import com.phloc.commons.collections.ContainerHelper;
 import com.phloc.commons.regex.RegExHelper;
 import com.phloc.commons.string.StringHelper;
+import com.phloc.commons.string.StringParser;
 import com.phloc.ebinterface.v302.AccountType;
 import com.phloc.ebinterface.v302.AddressType;
 import com.phloc.ebinterface.v302.BillerType;
@@ -457,7 +458,7 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
         final ListLineItemType aNewListLineItem = aObjectFactory.createListLineItemType ();
 
         // Invoice line number
-        BigInteger aUBLPositionNumber = StringHelper.parseBigInteger (aUBLInvoiceLine.getID ().getValue ());
+        BigInteger aUBLPositionNumber = StringParser.parseBigInteger (aUBLInvoiceLine.getID ().getValue ());
         if (aUBLPositionNumber == null) {
           s_aLogger.warn ("Failed to parse UBL invoice line '" +
                           aUBLInvoiceLine.getID ().getValue () +
