@@ -36,9 +36,9 @@ import org.slf4j.LoggerFactory;
 
 import at.gv.brz.transform.ubl2ebi.helper.SchemedID;
 import at.gv.brz.transform.ubl2ebi.helper.TaxCategoryKey;
-import at.peppol.commons.identifier.docid.IPredefinedDocumentTypeIdentifier;
-import at.peppol.commons.identifier.procid.IPredefinedProcessIdentifier;
-import at.peppol.commons.identifier.procid.PredefinedProcessIdentifierManager;
+import at.peppol.commons.identifier.doctype.IPeppolPredefinedDocumentTypeIdentifier;
+import at.peppol.commons.identifier.process.IPeppolPredefinedProcessIdentifier;
+import at.peppol.commons.identifier.process.PredefinedProcessIdentifierManager;
 
 import com.phloc.commons.CGlobal;
 import com.phloc.commons.collections.ContainerHelper;
@@ -92,7 +92,7 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
     if (aProfileID == null)
       return "No ProfileID present!";
     final String sProfileID = aProfileID.getValue ();
-    final IPredefinedProcessIdentifier aProcID = PredefinedProcessIdentifierManager.getProcessIdentifierOfID (sProfileID);
+    final IPeppolPredefinedProcessIdentifier aProcID = PredefinedProcessIdentifierManager.getProcessIdentifierOfID (sProfileID);
     if (aProcID == null)
       return "Invalid ProfileID value present!";
 
@@ -105,8 +105,8 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
       if (!CPeppolUBL.CUSTOMIZATION_SCHEMEID.equals (aCustomizationID.getSchemeID ()))
         return "Invalid CustomizationID schemeID present!";
       final String sCustomizationID = aCustomizationID.getValue ();
-      IPredefinedDocumentTypeIdentifier aMatchingDocID = null;
-      for (final IPredefinedDocumentTypeIdentifier aDocID : aProcID.getDocumentTypeIdentifiers ())
+      IPeppolPredefinedDocumentTypeIdentifier aMatchingDocID = null;
+      for (final IPeppolPredefinedDocumentTypeIdentifier aDocID : aProcID.getDocumentTypeIdentifiers ())
         if (aDocID.getAsUBLCustomizationID ().equals (sCustomizationID)) {
           // We found a match
           aMatchingDocID = aDocID;
