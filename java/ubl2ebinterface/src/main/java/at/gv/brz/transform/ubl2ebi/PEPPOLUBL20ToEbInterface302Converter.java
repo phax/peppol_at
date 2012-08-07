@@ -75,9 +75,21 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
   private static final Logger s_aLogger = LoggerFactory.getLogger (PEPPOLUBL20ToEbInterface302Converter.class);
   private static final String DUMMY_VALUE = "DUMMY_VALUE";
   private static final String REGEX_BIC = "[0-9|A-Z|a-z]{8}([0-9|A-Z|a-z]{3})?";
+  private static final String SUPPORTED_TAX_SCHEME_SCHEME_ID = "UN/ECE 5153";
+  private static final int IBAN_MAX_LENGTH = 34;
+  private static final String PAYMENT_CHANNEL_CODE_IBAN = "IBAN";
+  private static final String SUPPORTED_TAX_SCHEME_ID = "VAT";
+  private static final String EBI_GENERATING_SYSTEM = "UBL 2.0 to ebInterface 3.0.2 converter";
 
   private PEPPOLUBL20ToEbInterface302Converter () {}
 
+  /**
+   * Check if the passed UBL invoice is transformable
+   * 
+   * @param aUBLInvoice
+   *        The UBL invoice to check
+   * @return <code>null</code> in case of no error, the error message otherwise
+   */
   @Nullable
   private static String _checkConsistency (final oasis.names.specification.ubl.schema.xsd.invoice_2.InvoiceType aUBLInvoice) {
     // Check UBLVersionID
@@ -133,21 +145,6 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
   }
 
   @Nonnull
-  private static String _concatenate (@Nonnull final String sSep, @Nonnull final String... aValues) {
-    final StringBuilder aSB = new StringBuilder ();
-    boolean bFirst = true;
-    for (final String sValue : aValues)
-      if (StringHelper.hasText (sValue)) {
-        if (bFirst)
-          bFirst = false;
-        else
-          aSB.append (sSep);
-        aSB.append (sValue);
-      }
-    return aSB.toString ();
-  }
-
-  @Nonnull
   private static AddressType _convertAddress (final ObjectFactory aObjectFactory, final PartyType aUBLParty) {
     final AddressType ret = aObjectFactory.createAddressType ();
 
@@ -155,16 +152,22 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
     final PartyNameType aUBLPartyName = ContainerHelper.getSafe (aUBLParty.getPartyName (), 0);
     if (aUBLPartyName != null) {
       ret.setName (aUBLPartyName.getName () == null ? null : aUBLPartyName.getName ().getValue ());
+      if (aUBLParty.getPartyName ().size () > 1)
+        s_aLogger.warn ("UBL invoice has multiple party names - only the first one is used!");
     }
 
     // Convert main address
     final oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.AddressType aUBLAddress = aUBLParty.getPostalAddress ();
     if (aUBLAddress != null) {
-      ret.setStreet (_concatenate (" ",
-                                   aUBLAddress.getStreetName () == null ? null : aUBLAddress.getStreetName ()
-                                                                                            .getValue (),
-                                   aUBLAddress.getBuildingNumber () == null ? null : aUBLAddress.getBuildingNumber ()
-                                                                                                .getValue ()));
+      ret.setStreet (StringHelper.getImplodedNonEmpty (" ",
+                                                       aUBLAddress.getStreetName () == null
+                                                                                           ? null
+                                                                                           : aUBLAddress.getStreetName ()
+                                                                                                        .getValue (),
+                                                       aUBLAddress.getBuildingNumber () == null
+                                                                                               ? null
+                                                                                               : aUBLAddress.getBuildingNumber ()
+                                                                                                            .getValue ()));
       if (aUBLAddress.getPostbox () != null)
         ret.setPOBox (aUBLAddress.getPostbox ().getValue ());
       if (aUBLAddress.getCityName () != null)
@@ -187,15 +190,24 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
     // Person name
     final PersonType aUBLPerson = aUBLParty.getPerson ();
     if (aUBLPerson != null) {
-      ret.setContact (_concatenate (" ",
-                                    aUBLPerson.getTitle () == null ? null : aUBLPerson.getTitle ().getValue (),
-                                    aUBLPerson.getFirstName () == null ? null : aUBLPerson.getFirstName ().getValue (),
-                                    aUBLPerson.getMiddleName () == null ? null : aUBLPerson.getMiddleName ()
-                                                                                           .getValue (),
-                                    aUBLPerson.getFamilyName () == null ? null : aUBLPerson.getFamilyName ()
-                                                                                           .getValue (),
-                                    aUBLPerson.getNameSuffix () == null ? null : aUBLPerson.getNameSuffix ()
-                                                                                           .getValue ()));
+      ret.setContact (StringHelper.getImplodedNonEmpty (" ",
+                                                        aUBLPerson.getTitle () == null ? null : aUBLPerson.getTitle ()
+                                                                                                          .getValue (),
+                                                        aUBLPerson.getFirstName () == null ? null
+                                                                                          : aUBLPerson.getFirstName ()
+                                                                                                      .getValue (),
+                                                        aUBLPerson.getMiddleName () == null
+                                                                                           ? null
+                                                                                           : aUBLPerson.getMiddleName ()
+                                                                                                       .getValue (),
+                                                        aUBLPerson.getFamilyName () == null
+                                                                                           ? null
+                                                                                           : aUBLPerson.getFamilyName ()
+                                                                                                       .getValue (),
+                                                        aUBLPerson.getNameSuffix () == null
+                                                                                           ? null
+                                                                                           : aUBLPerson.getNameSuffix ()
+                                                                                                       .getValue ()));
     }
 
     // Check all mandatory fields
@@ -214,7 +226,7 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
   }
 
   private static boolean _isSupportedTaxSchemeSchemeID (@Nullable final String sUBLTaxSchemeSchemeID) {
-    return sUBLTaxSchemeSchemeID == null || sUBLTaxSchemeSchemeID.equals ("UN/ECE 5153");
+    return sUBLTaxSchemeSchemeID == null || sUBLTaxSchemeSchemeID.equals (SUPPORTED_TAX_SCHEME_SCHEME_ID);
   }
 
   /**
@@ -240,7 +252,7 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
 
     // Build ebInterface invoice
     final InvoiceType aNewInvoice = aObjectFactory.createInvoiceType ();
-    aNewInvoice.setGeneratingSystem ("UBL 2.0 to ebInterface 3.0.2 converter");
+    aNewInvoice.setGeneratingSystem (EBI_GENERATING_SYSTEM);
     aNewInvoice.setDocumentType (DocumentTypeType.INVOICE);
     aNewInvoice.setInvoiceCurrency (CurrencyType.fromValue (StringHelper.trim (aUBLInvoice.getDocumentCurrencyCode ()
                                                                                           .getValue ())));
@@ -253,7 +265,7 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
       final BillerType aNewBiller = aObjectFactory.createBillerType ();
       // Find the tax scheme that uses VAT
       for (final PartyTaxSchemeType aPartyTaxScheme : aUBLSupplier.getParty ().getPartyTaxScheme ())
-        if (aPartyTaxScheme.getTaxScheme ().getID ().getValue ().equals ("VAT")) {
+        if (aPartyTaxScheme.getTaxScheme ().getID ().getValue ().equals (SUPPORTED_TAX_SCHEME_ID)) {
           aNewBiller.setVATIdentificationNumber (aPartyTaxScheme.getCompanyID ().getValue ());
           break;
         }
@@ -276,7 +288,7 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
       final InvoiceRecipientType aNewRecipient = aObjectFactory.createInvoiceRecipientType ();
       // Find the tax scheme that uses VAT
       for (final PartyTaxSchemeType aPartyTaxScheme : aUBLCustomer.getParty ().getPartyTaxScheme ())
-        if (aPartyTaxScheme.getTaxScheme ().getID ().getValue ().equals ("VAT")) {
+        if (aPartyTaxScheme.getTaxScheme ().getID ().getValue ().equals (SUPPORTED_TAX_SCHEME_ID)) {
           aNewRecipient.setVATIdentificationNumber (aPartyTaxScheme.getCompanyID ().getValue ());
           break;
         }
@@ -375,7 +387,7 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
                                                        new SchemedID (sUBLTaxCategorySchemeID, sUBLTaxCategoryID)),
                                    aUBLPercentage);
 
-          if (_isSupportedTaxSchemeSchemeID (sUBLTaxSchemeSchemeID) && "VAT".equals (sUBLTaxSchemeID)) {
+          if (_isSupportedTaxSchemeSchemeID (sUBLTaxSchemeSchemeID) && SUPPORTED_TAX_SCHEME_ID.equals (sUBLTaxSchemeID)) {
             // add VAT item
             final ItemType aNewVATItem = aObjectFactory.createItemType ();
             // Base amount
@@ -561,7 +573,7 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
       for (final PaymentMeansType aUBLPaymentMeans : aUBLInvoice.getPaymentMeans ()) {
         // Is a payment channel code present?
         if (aUBLPaymentMeans.getPaymentChannelCode () != null &&
-            aUBLPaymentMeans.getPaymentChannelCode ().getValue ().equals ("IBAN")) {
+            aUBLPaymentMeans.getPaymentChannelCode ().getValue ().equals (PAYMENT_CHANNEL_CODE_IBAN)) {
           final UniversalBankTransactionType aNewUBTMethod = aObjectFactory.createUniversalBankTransactionType ();
           // Beneficiary account
           final AccountType aNewAccount = aObjectFactory.createAccountType ();
@@ -579,9 +591,13 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
 
           // IBAN
           aNewAccount.setIBAN (aUBLPaymentMeans.getPayeeFinancialAccount ().getID ().getValue ());
-          if (StringHelper.getLength (aNewAccount.getIBAN ()) > 34) {
-            s_aLogger.warn ("The IBAN '" + aNewAccount.getIBAN () + "' is too long and cut to 34 chars.");
-            aNewAccount.setIBAN (aNewAccount.getIBAN ().substring (0, 34));
+          if (StringHelper.getLength (aNewAccount.getIBAN ()) > IBAN_MAX_LENGTH) {
+            s_aLogger.warn ("The IBAN '" +
+                            aNewAccount.getIBAN () +
+                            "' is too long and cut to " +
+                            IBAN_MAX_LENGTH +
+                            " chars.");
+            aNewAccount.setIBAN (aNewAccount.getIBAN ().substring (0, IBAN_MAX_LENGTH));
           }
 
           aNewUBTMethod.getBeneficiaryAccount ().add (aNewAccount);
