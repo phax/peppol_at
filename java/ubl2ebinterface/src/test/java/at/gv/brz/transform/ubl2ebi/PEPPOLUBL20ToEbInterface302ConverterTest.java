@@ -2,6 +2,10 @@ package at.gv.brz.transform.ubl2ebi;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.util.List;
+
 import oasis.names.specification.ubl.schema.xsd.invoice_2.InvoiceType;
 
 import org.junit.Test;
@@ -14,6 +18,9 @@ import at.peppol.test.ETestFileType;
 import at.peppol.test.TestFiles;
 
 import com.phloc.commons.io.IReadableResource;
+import com.phloc.commons.io.file.FileUtils;
+import com.phloc.commons.io.file.filter.FilenameFilterEndsWith;
+import com.phloc.commons.io.resource.FileSystemResource;
 import com.phloc.commons.xml.serialize.XMLReader;
 import com.phloc.ebinterface.EbInterface302Marshaller;
 import com.phloc.ubl.UBL20DocumentMarshaller;
@@ -28,8 +35,13 @@ public class PEPPOLUBL20ToEbInterface302ConverterTest {
 
   @Test
   public void testConvertPEPPOLInvoice () throws SAXException {
+    final List <IReadableResource> aTestFiles = TestFiles.getSuccessFiles (ETestFileType.INVOICE);
+    for (final File aFile : FileUtils.getDirectoryContent (new File ("src/test/resources/ubl20"),
+                                                           new FilenameFilterEndsWith (".xml")))
+      aTestFiles.add (new FileSystemResource (aFile));
+
     // For all PEPPOL test invoices
-    for (final IReadableResource aRes : TestFiles.getSuccessFiles (ETestFileType.INVOICE)) {
+    for (final IReadableResource aRes : aTestFiles) {
       s_aLogger.info (aRes.getPath ());
       assertTrue (aRes.exists ());
 

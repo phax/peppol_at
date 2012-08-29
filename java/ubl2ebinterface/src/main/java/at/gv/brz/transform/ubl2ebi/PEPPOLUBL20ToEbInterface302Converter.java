@@ -330,8 +330,10 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
       else {
         // Check if a contract reference is present
         final List <DocumentReferenceType> aUBLContractDocumentReferences = aUBLInvoice.getContractDocumentReference ();
-        if (!aUBLContractDocumentReferences.isEmpty ())
+        if (!aUBLContractDocumentReferences.isEmpty ()) {
+          // ID is mandatory
           sUBLOrderReferenceID = ContainerHelper.getFirstElement (aUBLContractDocumentReferences).getID ().getValue ();
+        }
       }
 
       // Concatenate accounting area and main order reference for ebInterface
