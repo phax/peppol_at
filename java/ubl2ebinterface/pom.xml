@@ -32,12 +32,12 @@
     <dependency>
       <groupId>com.phloc</groupId>
       <artifactId>phloc-commons</artifactId>
-      <version>4.0.3</version>
+      <version>4.0.4</version>
     </dependency>
     <dependency>
       <groupId>com.phloc</groupId>
       <artifactId>phloc-ubl</artifactId>
-      <version>3.1.0</version>
+      <version>3.1.1</version>
       <exclusions>
         <exclusion>
           <groupId>com.phloc</groupId>
@@ -56,7 +56,7 @@
     <dependency>
       <groupId>com.phloc</groupId>
       <artifactId>phloc-datetime</artifactId>
-      <version>3.0.4</version>
+      <version>3.0.5</version>
     </dependency>
     <dependency>
       <groupId>com.phloc</groupId>
