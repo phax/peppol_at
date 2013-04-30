@@ -152,8 +152,8 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
     // Convert name
     final PartyNameType aUBLPartyName = ContainerHelper.getSafe (aUBLParty.getPartyName (), 0);
     if (aUBLPartyName != null) {
-      ret.setName (aUBLPartyName.getName () == null ? null : aUBLPartyName.getName ().getValue ());
-      if (aUBLParty.getPartyName ().size () > 1)
+      ret.setName (aUBLPartyName.getNameValue ());
+      if (aUBLParty.getPartyNameCount () > 1)
         s_aLogger.warn ("UBL invoice has multiple party names - only the first one is used!");
     }
 
@@ -161,49 +161,31 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
     final oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.AddressType aUBLAddress = aUBLParty.getPostalAddress ();
     if (aUBLAddress != null) {
       ret.setStreet (StringHelper.getImplodedNonEmpty (" ",
-                                                       aUBLAddress.getStreetName () == null ? null
-                                                                                           : aUBLAddress.getStreetName ()
-                                                                                                        .getValue (),
-                                                       aUBLAddress.getBuildingNumber () == null ? null
-                                                                                               : aUBLAddress.getBuildingNumber ()
-                                                                                                            .getValue ()));
-      if (aUBLAddress.getPostbox () != null)
-        ret.setPOBox (aUBLAddress.getPostbox ().getValue ());
-      if (aUBLAddress.getCityName () != null)
-        ret.setTown (aUBLAddress.getCityName ().getValue ());
-      if (aUBLAddress.getPostalZone () != null)
-        ret.setZIP (aUBLAddress.getPostalZone ().getValue ());
+                                                       aUBLAddress.getStreetNameValue (),
+                                                       aUBLAddress.getBuildingNumberValue ()));
+      ret.setPOBox (aUBLAddress.getPostboxValue ());
+      ret.setTown (aUBLAddress.getCityNameValue ());
+      ret.setZIP (aUBLAddress.getPostalZoneValue ());
       if (aUBLAddress.getCountry () != null)
-        ret.setCountry (aUBLAddress.getCountry ().getIdentificationCode ().getValue ());
+        ret.setCountry (aUBLAddress.getCountry ().getIdentificationCodeValue ());
     }
 
     // Contact
     final ContactType aUBLContact = aUBLParty.getContact ();
     if (aUBLContact != null) {
-      if (aUBLContact.getTelephone () != null)
-        ret.setPhone (aUBLContact.getTelephone ().getValue ());
-      if (aUBLContact.getElectronicMail () != null)
-        ret.setEmail (aUBLContact.getElectronicMail ().getValue ());
+      ret.setPhone (aUBLContact.getTelephoneValue ());
+      ret.setEmail (aUBLContact.getElectronicMailValue ());
     }
 
     // Person name
     final PersonType aUBLPerson = aUBLParty.getPerson ();
     if (aUBLPerson != null) {
       ret.setContact (StringHelper.getImplodedNonEmpty (" ",
-                                                        aUBLPerson.getTitle () == null ? null : aUBLPerson.getTitle ()
-                                                                                                          .getValue (),
-                                                        aUBLPerson.getFirstName () == null ? null
-                                                                                          : aUBLPerson.getFirstName ()
-                                                                                                      .getValue (),
-                                                        aUBLPerson.getMiddleName () == null ? null
-                                                                                           : aUBLPerson.getMiddleName ()
-                                                                                                       .getValue (),
-                                                        aUBLPerson.getFamilyName () == null ? null
-                                                                                           : aUBLPerson.getFamilyName ()
-                                                                                                       .getValue (),
-                                                        aUBLPerson.getNameSuffix () == null ? null
-                                                                                           : aUBLPerson.getNameSuffix ()
-                                                                                                       .getValue ()));
+                                                        aUBLPerson.getTitleValue (),
+                                                        aUBLPerson.getFirstNameValue (),
+                                                        aUBLPerson.getMiddleNameValue (),
+                                                        aUBLPerson.getFamilyNameValue (),
+                                                        aUBLPerson.getNameSuffixValue ()));
     }
 
     // Check all mandatory fields
@@ -364,12 +346,11 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
           final TaxCategoryType aUBLTaxCategory = aUBLSubtotal.getTaxCategory ();
 
           // Is the percentage value directly specified
-          BigDecimal aUBLPercentage = aUBLTaxCategory.getPercent () != null ? aUBLTaxCategory.getPercent ().getValue ()
-                                                                           : null;
+          BigDecimal aUBLPercentage = aUBLTaxCategory.getPercentValue ();
           if (aUBLPercentage == null) {
             // no it is not :(
-            final BigDecimal aUBLTaxAmount = aUBLSubtotal.getTaxAmount ().getValue ();
-            final BigDecimal aUBLTaxableAmount = aUBLSubtotal.getTaxableAmount ().getValue ();
+            final BigDecimal aUBLTaxAmount = aUBLSubtotal.getTaxAmountValue ();
+            final BigDecimal aUBLTaxableAmount = aUBLSubtotal.getTaxableAmountValue ();
             if (aUBLTaxAmount != null && aUBLTaxableAmount != null)
               aUBLPercentage = aUBLTaxAmount.divide (aUBLTaxableAmount).multiply (CGlobal.BIGDEC_100);
           }
@@ -389,14 +370,14 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
             // add VAT item
             final ItemType aNewVATItem = aObjectFactory.createItemType ();
             // Base amount
-            aNewVATItem.setTaxedAmount (aUBLSubtotal.getTaxableAmount ().getValue ());
+            aNewVATItem.setTaxedAmount (aUBLSubtotal.getTaxableAmountValue ());
             // tax rate
             final TaxRateType aNewVATTaxRate = aObjectFactory.createTaxRateType ();
             aNewVATTaxRate.setTaxCode (sUBLTaxCategoryID);
             aNewVATTaxRate.setValue (aUBLPercentage);
             aNewVATItem.setTaxRate (aNewVATTaxRate);
             // Tax amount
-            aNewVATItem.setAmount (aUBLSubtotal.getTaxAmount ().getValue ());
+            aNewVATItem.setAmount (aUBLSubtotal.getTaxAmountValue ());
             // Add to list
             aNewVAT.getItem ().add (aNewVATItem);
           }
@@ -441,7 +422,7 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
         if (aUBLTaxCategory != null) {
           // Specified at tax category?
           if (aUBLTaxCategory.getPercent () != null)
-            aUBLPercent = aUBLTaxCategory.getPercent ().getValue ();
+            aUBLPercent = aUBLTaxCategory.getPercentValue ();
 
           if (aUBLPercent == null &&
               aUBLTaxCategory.getID () != null &&
@@ -449,10 +430,10 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
               aUBLTaxCategory.getTaxScheme ().getID () != null) {
             // Not specified - check from previous map
             final String sUBLTaxSchemeSchemeID = aUBLTaxCategory.getTaxScheme ().getID ().getSchemeID ();
-            final String sUBLTaxSchemeID = aUBLTaxCategory.getTaxScheme ().getID ().getValue ();
+            final String sUBLTaxSchemeID = aUBLTaxCategory.getTaxScheme ().getIDValue ();
 
             final String sUBLTaxCategorySchemeID = aUBLTaxCategory.getID ().getSchemeID ();
-            final String sUBLTaxCategoryID = aUBLTaxCategory.getID ().getValue ();
+            final String sUBLTaxCategoryID = aUBLTaxCategory.getIDValue ();
 
             final TaxCategoryKey aKey = new TaxCategoryKey (new SchemedID (sUBLTaxSchemeSchemeID, sUBLTaxSchemeID),
                                                             new SchemedID (sUBLTaxCategorySchemeID, sUBLTaxCategoryID));
@@ -468,10 +449,10 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
         final ListLineItemType aNewListLineItem = aObjectFactory.createListLineItemType ();
 
         // Invoice line number
-        BigInteger aUBLPositionNumber = StringParser.parseBigInteger (aUBLInvoiceLine.getID ().getValue ());
+        BigInteger aUBLPositionNumber = StringParser.parseBigInteger (aUBLInvoiceLine.getIDValue ());
         if (aUBLPositionNumber == null) {
           s_aLogger.warn ("Failed to parse UBL invoice line '" +
-                          aUBLInvoiceLine.getID ().getValue () +
+                          aUBLInvoiceLine.getIDValue () +
                           "' into a numeric value. Defaulting to index " +
                           nInvoiceLineIndex);
           aUBLPositionNumber = BigInteger.valueOf (nInvoiceLineIndex);
@@ -492,7 +473,7 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
         final UnitType aNewQuantity = aObjectFactory.createUnitType ();
         if (aUBLInvoiceLine.getInvoicedQuantity () != null) {
           aNewQuantity.setUnit (aUBLInvoiceLine.getInvoicedQuantity ().getUnitCode ().value ());
-          aNewQuantity.setValue (aUBLInvoiceLine.getInvoicedQuantity ().getValue ());
+          aNewQuantity.setValue (aUBLInvoiceLine.getInvoicedQuantityValue ());
         }
         else {
           // ebInterface requires a quantity!
@@ -504,41 +485,38 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
         // Unit price
         if (aUBLInvoiceLine.getPrice () != null) {
           // Unit price = priceAmount/baseQuantity
-          final BigDecimal aUBLPriceAmount = aUBLInvoiceLine.getPrice ().getPriceAmount ().getValue ();
+          final BigDecimal aUBLPriceAmount = aUBLInvoiceLine.getPrice ().getPriceAmountValue ();
           // If no base quantity is present, assume 1
-          final BigDecimal aUBLBaseQuantity = aUBLInvoiceLine.getPrice ().getBaseQuantity () != null ? aUBLInvoiceLine.getPrice ()
-                                                                                                                      .getBaseQuantity ()
-                                                                                                                      .getValue ()
-                                                                                                    : BigDecimal.ONE;
-          aNewListLineItem.setUnitPrice (aUBLPriceAmount.divide (aUBLBaseQuantity));
+          final BigDecimal aUBLBaseQuantity = aUBLInvoiceLine.getPrice ().getBaseQuantityValue ();
+          aNewListLineItem.setUnitPrice (aUBLBaseQuantity == null ? aUBLPriceAmount
+                                                                 : aUBLPriceAmount.divide (aUBLBaseQuantity));
         }
         else {
           // Unit price = lineExtensionAmount / quantity
-          final BigDecimal aUBLLineExtensionAmount = aUBLInvoiceLine.getLineExtensionAmount ().getValue ();
+          final BigDecimal aUBLLineExtensionAmount = aUBLInvoiceLine.getLineExtensionAmountValue ();
           aNewListLineItem.setUnitPrice (aUBLLineExtensionAmount.divide (aNewQuantity.getValue ()));
         }
 
         // Tax rate (mandatory)
         final TaxRateType aNewTaxRate = aObjectFactory.createTaxRateType ();
         aNewTaxRate.setValue (aUBLPercent);
-        if (aUBLTaxCategory != null && aUBLTaxCategory.getID () != null)
-          aNewTaxRate.setTaxCode (aUBLTaxCategory.getID ().getValue ());
+        if (aUBLTaxCategory != null)
+          aNewTaxRate.setTaxCode (aUBLTaxCategory.getIDValue ());
         aNewListLineItem.setTaxRate (aNewTaxRate);
 
         // Line item amount (quantity * unit price)
-        aNewListLineItem.setLineItemAmount (aUBLInvoiceLine.getLineExtensionAmount ().getValue ());
+        aNewListLineItem.setLineItemAmount (aUBLInvoiceLine.getLineExtensionAmountValue ());
 
         // Special handling in case no VAT item is present
         if (aUBLPercent.equals (BigDecimal.ZERO))
-          aTotalZeroPercLineExtensionAmount = aTotalZeroPercLineExtensionAmount.add (aUBLInvoiceLine.getLineExtensionAmount ()
-                                                                                                    .getValue ());
+          aTotalZeroPercLineExtensionAmount = aTotalZeroPercLineExtensionAmount.add (aUBLInvoiceLine.getLineExtensionAmountValue ());
 
         // Order reference for detail
         final OrderLineReferenceType aOrderLineReference = ContainerHelper.getFirstElement (aUBLInvoiceLine.getOrderLineReference ());
         if (aOrderLineReference != null) {
           final OrderReferenceDetailType aNewOrderReferenceDetail = aObjectFactory.createOrderReferenceDetailType ();
           aNewOrderReferenceDetail.setOrderID (sOrderReferenceID);
-          aNewOrderReferenceDetail.setOrderPositionNumber (aOrderLineReference.getLineID ().getValue ());
+          aNewOrderReferenceDetail.setOrderPositionNumber (aOrderLineReference.getLineIDValue ());
           aNewListLineItem.setInvoiceRecipientsOrderReference (aNewOrderReferenceDetail);
         }
 
@@ -563,14 +541,13 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
     }
 
     // Total gross amount
-    aNewInvoice.setTotalGrossAmount (aUBLInvoice.getLegalMonetaryTotal ().getPayableAmount ().getValue ());
+    aNewInvoice.setTotalGrossAmount (aUBLInvoice.getLegalMonetaryTotal ().getPayableAmountValue ());
 
     // Payment method
     {
       for (final PaymentMeansType aUBLPaymentMeans : aUBLInvoice.getPaymentMeans ()) {
         // Is a payment channel code present?
-        if (aUBLPaymentMeans.getPaymentChannelCode () != null &&
-            aUBLPaymentMeans.getPaymentChannelCode ().getValue ().equals (PAYMENT_CHANNEL_CODE_IBAN)) {
+        if (PAYMENT_CHANNEL_CODE_IBAN.equals (aUBLPaymentMeans.getPaymentChannelCodeValue ())) {
           final UniversalBankTransactionType aNewUBTMethod = aObjectFactory.createUniversalBankTransactionType ();
           // Beneficiary account
           final AccountType aNewAccount = aObjectFactory.createAccountType ();
@@ -579,15 +556,14 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
           aNewAccount.setBIC (aUBLPaymentMeans.getPayeeFinancialAccount ()
                                               .getFinancialInstitutionBranch ()
                                               .getFinancialInstitution ()
-                                              .getID ()
-                                              .getValue ());
+                                              .getIDValue ());
           if (!RegExHelper.stringMatchesPattern (REGEX_BIC, aNewAccount.getBIC ())) {
             s_aLogger.error ("The BIC '" + aNewAccount.getBIC () + "' does not match the required regular expression.");
             aNewAccount.setBIC (null);
           }
 
           // IBAN
-          aNewAccount.setIBAN (aUBLPaymentMeans.getPayeeFinancialAccount ().getID ().getValue ());
+          aNewAccount.setIBAN (aUBLPaymentMeans.getPayeeFinancialAccount ().getIDValue ());
           if (StringHelper.getLength (aNewAccount.getIBAN ()) > IBAN_MAX_LENGTH) {
             s_aLogger.warn ("The IBAN '" +
                             aNewAccount.getIBAN () +
