@@ -64,6 +64,7 @@ import com.phloc.ebinterface.v302.TaxType;
 import com.phloc.ebinterface.v302.UnitType;
 import com.phloc.ebinterface.v302.UniversalBankTransactionType;
 import com.phloc.ebinterface.v302.VATType;
+import com.phloc.ubl20.codelist.EUnitOfMeasureCode20;
 
 /**
  * Main converter between UBL 2.0 invoice and ebInterface 3.0.2 invoice.
@@ -160,12 +161,10 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
     final oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.AddressType aUBLAddress = aUBLParty.getPostalAddress ();
     if (aUBLAddress != null) {
       ret.setStreet (StringHelper.getImplodedNonEmpty (" ",
-                                                       aUBLAddress.getStreetName () == null
-                                                                                           ? null
+                                                       aUBLAddress.getStreetName () == null ? null
                                                                                            : aUBLAddress.getStreetName ()
                                                                                                         .getValue (),
-                                                       aUBLAddress.getBuildingNumber () == null
-                                                                                               ? null
+                                                       aUBLAddress.getBuildingNumber () == null ? null
                                                                                                : aUBLAddress.getBuildingNumber ()
                                                                                                             .getValue ()));
       if (aUBLAddress.getPostbox () != null)
@@ -196,16 +195,13 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
                                                         aUBLPerson.getFirstName () == null ? null
                                                                                           : aUBLPerson.getFirstName ()
                                                                                                       .getValue (),
-                                                        aUBLPerson.getMiddleName () == null
-                                                                                           ? null
+                                                        aUBLPerson.getMiddleName () == null ? null
                                                                                            : aUBLPerson.getMiddleName ()
                                                                                                        .getValue (),
-                                                        aUBLPerson.getFamilyName () == null
-                                                                                           ? null
+                                                        aUBLPerson.getFamilyName () == null ? null
                                                                                            : aUBLPerson.getFamilyName ()
                                                                                                        .getValue (),
-                                                        aUBLPerson.getNameSuffix () == null
-                                                                                           ? null
+                                                        aUBLPerson.getNameSuffix () == null ? null
                                                                                            : aUBLPerson.getNameSuffix ()
                                                                                                        .getValue ()));
     }
@@ -501,7 +497,7 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
         else {
           // ebInterface requires a quantity!
           // XXX is this correct as the default?
-          aNewQuantity.setUnit ("C62");
+          aNewQuantity.setUnit (EUnitOfMeasureCode20.C62.getID ());
           aNewQuantity.setValue (BigDecimal.ONE);
         }
         aNewListLineItem.setQuantity (aNewQuantity);
@@ -510,10 +506,9 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
           // Unit price = priceAmount/baseQuantity
           final BigDecimal aUBLPriceAmount = aUBLInvoiceLine.getPrice ().getPriceAmount ().getValue ();
           // If no base quantity is present, assume 1
-          final BigDecimal aUBLBaseQuantity = aUBLInvoiceLine.getPrice ().getBaseQuantity () != null
-                                                                                                    ? aUBLInvoiceLine.getPrice ()
-                                                                                                                     .getBaseQuantity ()
-                                                                                                                     .getValue ()
+          final BigDecimal aUBLBaseQuantity = aUBLInvoiceLine.getPrice ().getBaseQuantity () != null ? aUBLInvoiceLine.getPrice ()
+                                                                                                                      .getBaseQuantity ()
+                                                                                                                      .getValue ()
                                                                                                     : BigDecimal.ONE;
           aNewListLineItem.setUnitPrice (aUBLPriceAmount.divide (aUBLBaseQuantity));
         }
@@ -555,7 +550,7 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
       aNewInvoice.setDetails (aNewDetails);
     }
 
-    if (aNewVAT.getItem ().isEmpty ()) {
+    if (aNewVAT.hasNoItemEntries ()) {
       s_aLogger.warn ("No VAT item found. Defaulting to a single entry with 0% for amount " +
                       aTotalZeroPercLineExtensionAmount.toString ());
       final ItemType aNewVATItem = aObjectFactory.createItemType ();

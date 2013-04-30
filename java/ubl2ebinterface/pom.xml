@@ -37,12 +37,8 @@
     <dependency>
       <groupId>com.phloc</groupId>
       <artifactId>phloc-ubl</artifactId>
-      <version>3.1.1</version>
+      <version>3.1.2</version>
       <exclusions>
-        <exclusion>
-          <groupId>com.phloc</groupId>
-          <artifactId>phloc-ubl20-codelists</artifactId>
-        </exclusion>
         <exclusion>
           <groupId>com.phloc</groupId>
           <artifactId>phloc-ubl21</artifactId>
@@ -61,7 +57,7 @@
     <dependency>
       <groupId>com.phloc</groupId>
       <artifactId>phloc-ebinterface</artifactId>
-      <version>2.0.5</version>
+      <version>2.0.6</version>
     </dependency>
     <dependency>
       <groupId>at.peppol</groupId>
