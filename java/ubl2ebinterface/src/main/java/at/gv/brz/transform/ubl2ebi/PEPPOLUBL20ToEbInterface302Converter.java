@@ -36,9 +36,6 @@ import org.slf4j.LoggerFactory;
 
 import at.gv.brz.transform.ubl2ebi.helper.SchemedID;
 import at.gv.brz.transform.ubl2ebi.helper.TaxCategoryKey;
-import at.peppol.commons.identifier.doctype.IPeppolPredefinedDocumentTypeIdentifier;
-import at.peppol.commons.identifier.process.IPeppolPredefinedProcessIdentifier;
-import at.peppol.commons.identifier.process.PredefinedProcessIdentifierManager;
 
 import com.phloc.commons.CGlobal;
 import com.phloc.commons.collections.ContainerHelper;
@@ -65,6 +62,10 @@ import com.phloc.ebinterface.v302.UnitType;
 import com.phloc.ebinterface.v302.UniversalBankTransactionType;
 import com.phloc.ebinterface.v302.VATType;
 import com.phloc.ubl20.codelist.EUnitOfMeasureCode20;
+
+import eu.europa.ec.cipa.peppol.identifier.doctype.IPeppolPredefinedDocumentTypeIdentifier;
+import eu.europa.ec.cipa.peppol.identifier.process.IPeppolPredefinedProcessIdentifier;
+import eu.europa.ec.cipa.peppol.identifier.process.PredefinedProcessIdentifierManager;
 
 /**
  * Main converter between UBL 2.0 invoice and ebInterface 3.0.2 invoice.

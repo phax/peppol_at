@@ -2,7 +2,7 @@ package at.gv.brz.transform.ubl2ebi;
 
 import javax.annotation.concurrent.Immutable;
 
-import at.peppol.commons.codelist.EInvoiceTypeCode;
+import eu.europa.ec.cipa.peppol.codelist.EInvoiceTypeCode;
 
 /**
  * Contains some constants for the conversion from PEPPOL UBL to ebInterface.
