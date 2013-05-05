@@ -14,9 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import at.peppol.test.ETestFileType;
-import at.peppol.test.TestFiles;
-
 import com.phloc.commons.io.IReadableResource;
 import com.phloc.commons.io.file.FileUtils;
 import com.phloc.commons.io.file.filter.FilenameFilterEndsWith;
@@ -24,6 +21,9 @@ import com.phloc.commons.io.resource.FileSystemResource;
 import com.phloc.commons.xml.serialize.XMLReader;
 import com.phloc.ebinterface.EbInterface302Marshaller;
 import com.phloc.ubl.UBL20Reader;
+
+import eu.europa.ec.cipa.test.ETestFileType;
+import eu.europa.ec.cipa.test.TestFiles;
 
 /**
  * Test class for class {@link PEPPOLUBL20ToEbInterface302Converter}.
