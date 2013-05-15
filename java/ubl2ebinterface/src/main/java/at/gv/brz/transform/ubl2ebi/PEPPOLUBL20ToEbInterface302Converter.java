@@ -2,6 +2,7 @@ package at.gv.brz.transform.ubl2ebi;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,6 +83,8 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
   private static final String PAYMENT_CHANNEL_CODE_IBAN = "IBAN";
   private static final String SUPPORTED_TAX_SCHEME_ID = "VAT";
   private static final String EBI_GENERATING_SYSTEM = "UBL 2.0 to ebInterface 3.0.2 converter";
+  private static final int SCALE_PERC = 2;
+  private static final RoundingMode ROUNDING_MODE = RoundingMode.HALF_EVEN;
 
   private PEPPOLUBL20ToEbInterface302Converter () {}
 
@@ -99,7 +102,7 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
     if (aUBLVersionID == null)
       return "No UBLVersionID present!";
     if (!CPeppolUBL.UBL_VERSION.equals (aUBLVersionID.getValue ()))
-      return "Invalid UBLVersionID value present!";
+      return "Invalid UBLVersionID value '" + aUBLVersionID.getValue () + "' present!";
 
     // Check ProfileID
     final ProfileIDType aProfileID = aUBLInvoice.getProfileID ();
@@ -108,7 +111,7 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
     final String sProfileID = aProfileID.getValue ();
     final IPeppolPredefinedProcessIdentifier aProcID = PredefinedProcessIdentifierManager.getProcessIdentifierOfID (sProfileID);
     if (aProcID == null)
-      return "Invalid ProfileID value present!";
+      return "Invalid ProfileID value '" + sProfileID + "' present!";
 
     // Check CustomizationID
     // I'm not quite sure whether the document ID or "PEPPOL" should be used!
@@ -117,7 +120,7 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
       if (aCustomizationID == null)
         return "No CustomizationID present!";
       if (!CPeppolUBL.CUSTOMIZATION_SCHEMEID.equals (aCustomizationID.getSchemeID ()))
-        return "Invalid CustomizationID schemeID present!";
+        return "Invalid CustomizationID schemeID '" + aCustomizationID.getSchemeID () + "' present!";
       final String sCustomizationID = aCustomizationID.getValue ();
       IPeppolPredefinedDocumentTypeIdentifier aMatchingDocID = null;
       for (final IPeppolPredefinedDocumentTypeIdentifier aDocID : aProcID.getDocumentTypeIdentifiers ())
@@ -127,7 +130,7 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
           break;
         }
       if (aMatchingDocID == null)
-        return "Invalid CustomizationID value present!";
+        return "Invalid CustomizationID value '" + sCustomizationID + "' present!";
     }
 
     // Invoice type code
@@ -138,8 +141,9 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
     }
     else {
       // If one is present, it must match
-      if (!CPeppolUBL.INVOICE_TYPE_CODE.equals (aInvoiceTypeCode.getValue ()))
-        return "Invalid InvoiceTypeCode value present!";
+      final String sInvoiceTypeCode = aInvoiceTypeCode.getValue ().trim ();
+      if (!CPeppolUBL.INVOICE_TYPE_CODE.equals (sInvoiceTypeCode))
+        return "Invalid InvoiceTypeCode value '" + sInvoiceTypeCode + "' present!";
     }
 
     // Done
@@ -148,12 +152,12 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
 
   @Nonnull
   private static AddressType _convertAddress (final ObjectFactory aObjectFactory, final PartyType aUBLParty) {
-    final AddressType ret = aObjectFactory.createAddressType ();
+    final AddressType aEbiAddress = aObjectFactory.createAddressType ();
 
     // Convert name
     final PartyNameType aUBLPartyName = ContainerHelper.getSafe (aUBLParty.getPartyName (), 0);
     if (aUBLPartyName != null) {
-      ret.setName (aUBLPartyName.getNameValue ());
+      aEbiAddress.setName (aUBLPartyName.getNameValue ());
       if (aUBLParty.getPartyNameCount () > 1)
         s_aLogger.warn ("UBL invoice has multiple party names - only the first one is used!");
     }
@@ -161,47 +165,47 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
     // Convert main address
     final oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.AddressType aUBLAddress = aUBLParty.getPostalAddress ();
     if (aUBLAddress != null) {
-      ret.setStreet (StringHelper.getImplodedNonEmpty (" ",
-                                                       aUBLAddress.getStreetNameValue (),
-                                                       aUBLAddress.getBuildingNumberValue ()));
-      ret.setPOBox (aUBLAddress.getPostboxValue ());
-      ret.setTown (aUBLAddress.getCityNameValue ());
-      ret.setZIP (aUBLAddress.getPostalZoneValue ());
+      aEbiAddress.setStreet (StringHelper.getImplodedNonEmpty (" ",
+                                                               aUBLAddress.getStreetNameValue (),
+                                                               aUBLAddress.getBuildingNumberValue ()));
+      aEbiAddress.setPOBox (aUBLAddress.getPostboxValue ());
+      aEbiAddress.setTown (aUBLAddress.getCityNameValue ());
+      aEbiAddress.setZIP (aUBLAddress.getPostalZoneValue ());
       if (aUBLAddress.getCountry () != null)
-        ret.setCountry (aUBLAddress.getCountry ().getIdentificationCodeValue ());
+        aEbiAddress.setCountry (aUBLAddress.getCountry ().getIdentificationCodeValue ());
     }
 
     // Contact
     final ContactType aUBLContact = aUBLParty.getContact ();
     if (aUBLContact != null) {
-      ret.setPhone (aUBLContact.getTelephoneValue ());
-      ret.setEmail (aUBLContact.getElectronicMailValue ());
+      aEbiAddress.setPhone (aUBLContact.getTelephoneValue ());
+      aEbiAddress.setEmail (aUBLContact.getElectronicMailValue ());
     }
 
     // Person name
     final PersonType aUBLPerson = aUBLParty.getPerson ();
     if (aUBLPerson != null) {
-      ret.setContact (StringHelper.getImplodedNonEmpty (" ",
-                                                        aUBLPerson.getTitleValue (),
-                                                        aUBLPerson.getFirstNameValue (),
-                                                        aUBLPerson.getMiddleNameValue (),
-                                                        aUBLPerson.getFamilyNameValue (),
-                                                        aUBLPerson.getNameSuffixValue ()));
+      aEbiAddress.setContact (StringHelper.getImplodedNonEmpty (" ",
+                                                                aUBLPerson.getTitleValue (),
+                                                                aUBLPerson.getFirstNameValue (),
+                                                                aUBLPerson.getMiddleNameValue (),
+                                                                aUBLPerson.getFamilyNameValue (),
+                                                                aUBLPerson.getNameSuffixValue ()));
     }
 
     // Check all mandatory fields
-    if (ret.getName () == null)
-      ret.setName (DUMMY_VALUE);
-    if (ret.getStreet () == null)
-      ret.setStreet (DUMMY_VALUE);
-    if (ret.getTown () == null)
-      ret.setTown (DUMMY_VALUE);
-    if (ret.getZIP () == null)
-      ret.setZIP (DUMMY_VALUE);
-    if (ret.getCountry () == null)
-      ret.setCountry (DUMMY_VALUE);
+    if (aEbiAddress.getName () == null)
+      aEbiAddress.setName (DUMMY_VALUE);
+    if (aEbiAddress.getStreet () == null)
+      aEbiAddress.setStreet (DUMMY_VALUE);
+    if (aEbiAddress.getTown () == null)
+      aEbiAddress.setTown (DUMMY_VALUE);
+    if (aEbiAddress.getZIP () == null)
+      aEbiAddress.setZIP (DUMMY_VALUE);
+    if (aEbiAddress.getCountry () == null)
+      aEbiAddress.setCountry (DUMMY_VALUE);
 
-    return ret;
+    return aEbiAddress;
   }
 
   private static boolean _isSupportedTaxSchemeSchemeID (@Nullable final String sUBLTaxSchemeSchemeID) {
@@ -230,65 +234,64 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
       throw new IllegalArgumentException ("Consistency validation failed: " + sConsistencyValidationResult);
 
     // Build ebInterface invoice
-    final InvoiceType aNewInvoice = aObjectFactory.createInvoiceType ();
-    aNewInvoice.setGeneratingSystem (EBI_GENERATING_SYSTEM);
-    aNewInvoice.setDocumentType (DocumentTypeType.INVOICE);
-    aNewInvoice.setInvoiceCurrency (CurrencyType.fromValue (StringHelper.trim (aUBLInvoice.getDocumentCurrencyCode ()
-                                                                                          .getValue ())));
-    aNewInvoice.setInvoiceNumber (aUBLInvoice.getID ().getValue ());
-    aNewInvoice.setInvoiceDate (aUBLInvoice.getIssueDate ().getValue ());
+    final InvoiceType aEbiInvoice = aObjectFactory.createInvoiceType ();
+    aEbiInvoice.setGeneratingSystem (EBI_GENERATING_SYSTEM);
+    aEbiInvoice.setDocumentType (DocumentTypeType.INVOICE);
+    aEbiInvoice.setInvoiceCurrency (CurrencyType.fromValue (StringHelper.trim (aUBLInvoice.getDocumentCurrencyCodeValue ())));
+    aEbiInvoice.setInvoiceNumber (aUBLInvoice.getIDValue ());
+    aEbiInvoice.setInvoiceDate (aUBLInvoice.getIssueDateValue ());
 
     // Biller (creator of the invoice)
     {
       final SupplierPartyType aUBLSupplier = aUBLInvoice.getAccountingSupplierParty ();
-      final BillerType aNewBiller = aObjectFactory.createBillerType ();
+      final BillerType aEbiBiller = aObjectFactory.createBillerType ();
       // Find the tax scheme that uses VAT
-      for (final PartyTaxSchemeType aPartyTaxScheme : aUBLSupplier.getParty ().getPartyTaxScheme ())
-        if (aPartyTaxScheme.getTaxScheme ().getID ().getValue ().equals (SUPPORTED_TAX_SCHEME_ID)) {
-          aNewBiller.setVATIdentificationNumber (aPartyTaxScheme.getCompanyID ().getValue ());
+      for (final PartyTaxSchemeType aUBLPartyTaxScheme : aUBLSupplier.getParty ().getPartyTaxScheme ())
+        if (aUBLPartyTaxScheme.getTaxScheme ().getIDValue ().equals (SUPPORTED_TAX_SCHEME_ID)) {
+          aEbiBiller.setVATIdentificationNumber (aUBLPartyTaxScheme.getCompanyIDValue ());
           break;
         }
-      if (aNewBiller.getVATIdentificationNumber () == null) {
+      if (aEbiBiller.getVATIdentificationNumber () == null) {
         // A VAT number must be present!
         s_aLogger.error ("Failed to get biller VAT number!");
-        aNewBiller.setVATIdentificationNumber (DUMMY_VALUE);
+        aEbiBiller.setVATIdentificationNumber (DUMMY_VALUE);
       }
       if (aUBLSupplier.getCustomerAssignedAccountID () != null) {
         // The customer's internal identifier for the supplier.
-        aNewBiller.setInvoiceRecipientsBillerID (aUBLSupplier.getCustomerAssignedAccountID ().getValue ());
+        aEbiBiller.setInvoiceRecipientsBillerID (aUBLSupplier.getCustomerAssignedAccountID ().getValue ());
       }
-      aNewBiller.setAddress (_convertAddress (aObjectFactory, aUBLSupplier.getParty ()));
-      aNewInvoice.setBiller (aNewBiller);
+      aEbiBiller.setAddress (_convertAddress (aObjectFactory, aUBLSupplier.getParty ()));
+      aEbiInvoice.setBiller (aEbiBiller);
     }
 
     // Invoice recipient
     {
       final CustomerPartyType aUBLCustomer = aUBLInvoice.getAccountingCustomerParty ();
-      final InvoiceRecipientType aNewRecipient = aObjectFactory.createInvoiceRecipientType ();
+      final InvoiceRecipientType aEbiRecipient = aObjectFactory.createInvoiceRecipientType ();
       // Find the tax scheme that uses VAT
-      for (final PartyTaxSchemeType aPartyTaxScheme : aUBLCustomer.getParty ().getPartyTaxScheme ())
-        if (aPartyTaxScheme.getTaxScheme ().getID ().getValue ().equals (SUPPORTED_TAX_SCHEME_ID)) {
-          aNewRecipient.setVATIdentificationNumber (aPartyTaxScheme.getCompanyID ().getValue ());
+      for (final PartyTaxSchemeType aUBLPartyTaxScheme : aUBLCustomer.getParty ().getPartyTaxScheme ())
+        if (aUBLPartyTaxScheme.getTaxScheme ().getIDValue ().equals (SUPPORTED_TAX_SCHEME_ID)) {
+          aEbiRecipient.setVATIdentificationNumber (aUBLPartyTaxScheme.getCompanyIDValue ());
           break;
         }
-      if (aNewRecipient.getVATIdentificationNumber () == null) {
+      if (aEbiRecipient.getVATIdentificationNumber () == null) {
         // Mandatory field
         s_aLogger.error ("Failed to get supplier VAT number!");
-        aNewRecipient.setVATIdentificationNumber (DUMMY_VALUE);
+        aEbiRecipient.setVATIdentificationNumber (DUMMY_VALUE);
       }
       if (aUBLCustomer.getSupplierAssignedAccountID () != null) {
         // UBL: An identifier for the Customer's account, assigned by the
         // Supplier.
         // eb: Identifikation des Rechnungsempfängers beim Rechnungssteller.
-        aNewRecipient.setBillersInvoiceRecipientID (aUBLCustomer.getSupplierAssignedAccountID ().getValue ());
+        aEbiRecipient.setBillersInvoiceRecipientID (aUBLCustomer.getSupplierAssignedAccountIDValue ());
       }
       else {
         // Mandatory field
         s_aLogger.error ("Failed to get supplier assigned account ID for customer!");
-        aNewRecipient.setBillersInvoiceRecipientID (DUMMY_VALUE);
+        aEbiRecipient.setBillersInvoiceRecipientID (DUMMY_VALUE);
       }
-      aNewRecipient.setAddress (_convertAddress (aObjectFactory, aUBLCustomer.getParty ()));
-      aNewInvoice.setInvoiceRecipient (aNewRecipient);
+      aEbiRecipient.setAddress (_convertAddress (aObjectFactory, aUBLCustomer.getParty ()));
+      aEbiInvoice.setInvoiceRecipient (aEbiRecipient);
     }
 
     // Order reference of invoice recipient
@@ -330,16 +333,16 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
           sOrderReferenceID = sOrderReferenceID.substring (0, 35);
         }
 
-      final OrderReferenceType aNewOrderReference = aObjectFactory.createOrderReferenceType ();
-      aNewOrderReference.setOrderID (sOrderReferenceID);
-      aNewInvoice.getInvoiceRecipient ().setOrderReference (aNewOrderReference);
+      final OrderReferenceType aEbiOrderReference = aObjectFactory.createOrderReferenceType ();
+      aEbiOrderReference.setOrderID (sOrderReferenceID);
+      aEbiInvoice.getInvoiceRecipient ().setOrderReference (aEbiOrderReference);
     }
 
     // Tax totals
     // Map from tax category to percentage
     final Map <TaxCategoryKey, BigDecimal> aTaxCategoryPercMap = new HashMap <TaxCategoryKey, BigDecimal> ();
-    final TaxType aNewTax = aObjectFactory.createTaxType ();
-    final VATType aNewVAT = aObjectFactory.createVATType ();
+    final TaxType aEbiTax = aObjectFactory.createTaxType ();
+    final VATType aEbiVAT = aObjectFactory.createVATType ();
     {
       for (final TaxTotalType aUBLTaxTotal : aUBLInvoice.getTaxTotal ())
         for (final TaxSubtotalType aUBLSubtotal : aUBLTaxTotal.getTaxSubtotal ()) {
@@ -353,7 +356,9 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
             final BigDecimal aUBLTaxAmount = aUBLSubtotal.getTaxAmountValue ();
             final BigDecimal aUBLTaxableAmount = aUBLSubtotal.getTaxableAmountValue ();
             if (aUBLTaxAmount != null && aUBLTaxableAmount != null)
-              aUBLPercentage = aUBLTaxAmount.divide (aUBLTaxableAmount).multiply (CGlobal.BIGDEC_100);
+              aUBLPercentage = aUBLTaxAmount.multiply (CGlobal.BIGDEC_100).divide (aUBLTaxableAmount,
+                                                                                   SCALE_PERC,
+                                                                                   ROUNDING_MODE);
           }
 
           // Save item and put in map
@@ -369,18 +374,18 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
 
           if (_isSupportedTaxSchemeSchemeID (sUBLTaxSchemeSchemeID) && SUPPORTED_TAX_SCHEME_ID.equals (sUBLTaxSchemeID)) {
             // add VAT item
-            final ItemType aNewVATItem = aObjectFactory.createItemType ();
+            final ItemType aEbiVATItem = aObjectFactory.createItemType ();
             // Base amount
-            aNewVATItem.setTaxedAmount (aUBLSubtotal.getTaxableAmountValue ());
+            aEbiVATItem.setTaxedAmount (aUBLSubtotal.getTaxableAmountValue ());
             // tax rate
-            final TaxRateType aNewVATTaxRate = aObjectFactory.createTaxRateType ();
-            aNewVATTaxRate.setTaxCode (sUBLTaxCategoryID);
-            aNewVATTaxRate.setValue (aUBLPercentage);
-            aNewVATItem.setTaxRate (aNewVATTaxRate);
+            final TaxRateType aEbiVATTaxRate = aObjectFactory.createTaxRateType ();
+            aEbiVATTaxRate.setTaxCode (sUBLTaxCategoryID);
+            aEbiVATTaxRate.setValue (aUBLPercentage);
+            aEbiVATItem.setTaxRate (aEbiVATTaxRate);
             // Tax amount
-            aNewVATItem.setAmount (aUBLSubtotal.getTaxAmountValue ());
+            aEbiVATItem.setAmount (aUBLSubtotal.getTaxAmountValue ());
             // Add to list
-            aNewVAT.getItem ().add (aNewVATItem);
+            aEbiVAT.getItem ().add (aEbiVATItem);
           }
           else {
             // TODO other tax scheme
@@ -392,15 +397,15 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
           }
         }
 
-      aNewTax.setVAT (aNewVAT);
-      aNewInvoice.setTax (aNewTax);
+      aEbiTax.setVAT (aEbiVAT);
+      aEbiInvoice.setTax (aEbiTax);
     }
 
     // Line items
     BigDecimal aTotalZeroPercLineExtensionAmount = BigDecimal.ZERO;
     {
-      final DetailsType aNewDetails = aObjectFactory.createDetailsType ();
-      final ItemListType aNewItemList = aObjectFactory.createItemListType ();
+      final DetailsType aEbiDetails = aObjectFactory.createDetailsType ();
+      final ItemListType aEbiItemList = aObjectFactory.createItemListType ();
       int nInvoiceLineIndex = 1;
       for (final InvoiceLineType aUBLInvoiceLine : aUBLInvoice.getInvoiceLine ()) {
         // Try to resolve tax category
@@ -522,14 +527,14 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
         }
 
         // Add the item to the list
-        aNewItemList.getListLineItem ().add (aNewListLineItem);
+        aEbiItemList.getListLineItem ().add (aNewListLineItem);
         nInvoiceLineIndex++;
       }
-      aNewDetails.getItemList ().add (aNewItemList);
-      aNewInvoice.setDetails (aNewDetails);
+      aEbiDetails.getItemList ().add (aEbiItemList);
+      aEbiInvoice.setDetails (aEbiDetails);
     }
 
-    if (aNewVAT.hasNoItemEntries ()) {
+    if (aEbiVAT.hasNoItemEntries ()) {
       s_aLogger.warn ("No VAT item found. Defaulting to a single entry with 0% for amount " +
                       aTotalZeroPercLineExtensionAmount.toString ());
       final ItemType aNewVATItem = aObjectFactory.createItemType ();
@@ -538,11 +543,11 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
       aNewVATTaxRate.setValue (BigDecimal.ZERO);
       aNewVATItem.setTaxRate (aNewVATTaxRate);
       aNewVATItem.setAmount (aTotalZeroPercLineExtensionAmount);
-      aNewVAT.getItem ().add (aNewVATItem);
+      aEbiVAT.getItem ().add (aNewVATItem);
     }
 
     // Total gross amount
-    aNewInvoice.setTotalGrossAmount (aUBLInvoice.getLegalMonetaryTotal ().getPayableAmountValue ());
+    aEbiInvoice.setTotalGrossAmount (aUBLInvoice.getLegalMonetaryTotal ().getPayableAmountValue ());
 
     // Payment method
     {
@@ -575,12 +580,12 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
           }
 
           aNewUBTMethod.getBeneficiaryAccount ().add (aNewAccount);
-          aNewInvoice.setPaymentMethod (aNewUBTMethod);
+          aEbiInvoice.setPaymentMethod (aNewUBTMethod);
           break;
         }
       }
     }
 
-    return aNewInvoice;
+    return aEbiInvoice;
   }
 }
