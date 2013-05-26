@@ -14,6 +14,7 @@ import javax.annotation.concurrent.Immutable;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.ContactType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.CustomerPartyType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.DocumentReferenceType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.FinancialAccountType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.InvoiceLineType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.OrderLineReferenceType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyNameType;
@@ -40,6 +41,7 @@ import at.gv.brz.transform.ubl2ebi.helper.TaxCategoryKey;
 
 import com.phloc.commons.CGlobal;
 import com.phloc.commons.collections.ContainerHelper;
+import com.phloc.commons.math.MathHelper;
 import com.phloc.commons.regex.RegExHelper;
 import com.phloc.commons.string.StringHelper;
 import com.phloc.commons.string.StringParser;
@@ -84,6 +86,7 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
   private static final String SUPPORTED_TAX_SCHEME_ID = "VAT";
   private static final String EBI_GENERATING_SYSTEM = "UBL 2.0 to ebInterface 3.0.2 converter";
   private static final int SCALE_PERC = 2;
+  private static final int SCALE_PRICE_LINE = 4;
   private static final RoundingMode ROUNDING_MODE = RoundingMode.HALF_EVEN;
 
   private PEPPOLUBL20ToEbInterface302Converter () {}
@@ -143,7 +146,11 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
       // If one is present, it must match
       final String sInvoiceTypeCode = aInvoiceTypeCode.getValue ().trim ();
       if (!CPeppolUBL.INVOICE_TYPE_CODE.equals (sInvoiceTypeCode))
-        return "Invalid InvoiceTypeCode value '" + sInvoiceTypeCode + "' present!";
+        s_aLogger.error ("Invalid InvoiceTypeCode value '" +
+                         sInvoiceTypeCode.trim () +
+                         "' present! Expected '" +
+                         CPeppolUBL.INVOICE_TYPE_CODE +
+                         "'");
     }
 
     // Done
@@ -495,7 +502,10 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
           // If no base quantity is present, assume 1
           final BigDecimal aUBLBaseQuantity = aUBLInvoiceLine.getPrice ().getBaseQuantityValue ();
           aNewListLineItem.setUnitPrice (aUBLBaseQuantity == null ? aUBLPriceAmount
-                                                                 : aUBLPriceAmount.divide (aUBLBaseQuantity));
+                                                                 : MathHelper.isEqualToZero (aUBLBaseQuantity) ? BigDecimal.ZERO
+                                                                                                              : aUBLPriceAmount.divide (aUBLBaseQuantity,
+                                                                                                                                        SCALE_PRICE_LINE,
+                                                                                                                                        ROUNDING_MODE));
         }
         else {
           // Unit price = lineExtensionAmount / quantity
@@ -559,13 +569,18 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
           final AccountType aNewAccount = aObjectFactory.createAccountType ();
 
           // BIC
-          aNewAccount.setBIC (aUBLPaymentMeans.getPayeeFinancialAccount ()
-                                              .getFinancialInstitutionBranch ()
-                                              .getFinancialInstitution ()
-                                              .getIDValue ());
-          if (!RegExHelper.stringMatchesPattern (REGEX_BIC, aNewAccount.getBIC ())) {
-            s_aLogger.error ("The BIC '" + aNewAccount.getBIC () + "' does not match the required regular expression.");
-            aNewAccount.setBIC (null);
+          final FinancialAccountType aUBLFinancialAccount = aUBLPaymentMeans.getPayeeFinancialAccount ();
+          if (aUBLFinancialAccount.getFinancialInstitutionBranch () != null &&
+              aUBLFinancialAccount.getFinancialInstitutionBranch ().getFinancialInstitution () != null) {
+            aNewAccount.setBIC (aUBLFinancialAccount.getFinancialInstitutionBranch ()
+                                                    .getFinancialInstitution ()
+                                                    .getIDValue ());
+            if (!RegExHelper.stringMatchesPattern (REGEX_BIC, aNewAccount.getBIC ())) {
+              s_aLogger.error ("The BIC '" +
+                               aNewAccount.getBIC () +
+                               "' does not match the required regular expression.");
+              aNewAccount.setBIC (null);
+            }
           }
 
           // IBAN

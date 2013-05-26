@@ -15,8 +15,8 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import com.phloc.commons.io.IReadableResource;
-import com.phloc.commons.io.file.FileUtils;
 import com.phloc.commons.io.file.filter.FilenameFilterEndsWith;
+import com.phloc.commons.io.file.iterate.FileSystemRecursiveIterator;
 import com.phloc.commons.io.resource.FileSystemResource;
 import com.phloc.commons.xml.serialize.XMLReader;
 import com.phloc.ebinterface.EbInterface302Marshaller;
@@ -30,21 +30,18 @@ import eu.europa.ec.cipa.test.TestFiles;
  * 
  * @author PEPPOL.AT, BRZ, Philip Helger
  */
-public class PEPPOLUBL20ToEbInterface302ConverterTest
-{
+public class PEPPOLUBL20ToEbInterface302ConverterTest {
   private static final Logger s_aLogger = LoggerFactory.getLogger (PEPPOLUBL20ToEbInterface302ConverterTest.class);
 
   @Test
-  public void testConvertPEPPOLInvoice () throws SAXException
-  {
+  public void testConvertPEPPOLInvoice () throws SAXException {
     final List <IReadableResource> aTestFiles = TestFiles.getSuccessFiles (ETestFileType.INVOICE);
-    for (final File aFile : FileUtils.getDirectoryContent (new File ("src/test/resources/ubl20"),
-                                                           new FilenameFilterEndsWith (".xml")))
+    for (final File aFile : FileSystemRecursiveIterator.create (new File ("src/test/resources/ubl20"),
+                                                                new FilenameFilterEndsWith (".xml")))
       aTestFiles.add (new FileSystemResource (aFile));
 
     // For all PEPPOL test invoices
-    for (final IReadableResource aRes : aTestFiles)
-    {
+    for (final IReadableResource aRes : aTestFiles) {
       s_aLogger.info (aRes.getPath ());
       assertTrue (aRes.exists ());
 
