@@ -216,7 +216,9 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
   }
 
   private static boolean _isSupportedTaxSchemeSchemeID (@Nullable final String sUBLTaxSchemeSchemeID) {
-    return sUBLTaxSchemeSchemeID == null || sUBLTaxSchemeSchemeID.equals (SUPPORTED_TAX_SCHEME_SCHEME_ID);
+    return sUBLTaxSchemeSchemeID == null ||
+           sUBLTaxSchemeSchemeID.equals (SUPPORTED_TAX_SCHEME_SCHEME_ID) ||
+           sUBLTaxSchemeSchemeID.equals ("UN/ECE 5153 Subset");
   }
 
   /**
