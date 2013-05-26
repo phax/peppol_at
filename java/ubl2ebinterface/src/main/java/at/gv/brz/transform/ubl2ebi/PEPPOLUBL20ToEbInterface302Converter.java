@@ -332,13 +332,16 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
         s_aLogger.error ("Failed to get order reference ID!");
         sOrderReferenceID = DUMMY_VALUE;
       }
-      else
+      else {
         if (sOrderReferenceID.length () > 35) {
-          s_aLogger.warn ("Order reference value '" +
-                          sOrderReferenceID +
-                          "' is too long. It will be cut to 35 characters.");
+          s_aLogger.error ("Order reference value '" +
+                           sOrderReferenceID +
+                           "' is too long. It will be cut to 35 characters.");
           sOrderReferenceID = sOrderReferenceID.substring (0, 35);
         }
+
+        sOrderReferenceID = _makeAlphaNumIDType (sOrderReferenceID);
+      }
 
       final OrderReferenceType aEbiOrderReference = aObjectFactory.createOrderReferenceType ();
       aEbiOrderReference.setOrderID (sOrderReferenceID);
@@ -602,5 +605,16 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
     }
 
     return aEbiInvoice;
+  }
+
+  @Nonnull
+  private static String _makeAlphaNumIDType (@Nonnull final String sText) {
+    if (!RegExHelper.stringMatchesPattern ("[0-9 | A-Z | a-z | -_äöüÄÖÜß]+", sText)) {
+      s_aLogger.warn ("'" + sText + "' is not an AlphaNumIDType!");
+      final String ret = RegExHelper.stringReplacePattern ("[^0-9A-Za-z-_äöüÄÖÜß]", sText, "_");
+      s_aLogger.warn ("  -> was changed to '" + ret + "'");
+      return ret;
+    }
+    return sText;
   }
 }
