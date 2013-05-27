@@ -304,49 +304,39 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
     }
 
     // Order reference of invoice recipient
-    String sOrderReferenceID;
+    String sUBLOrderReferenceID = null;
     {
-      // Get accounting area (if any)
-      String sAccountingArea = null;
-      if (aUBLInvoice.getAccountingCost () != null)
-        sAccountingArea = aUBLInvoice.getAccountingCost ().getValue ();
-
-      String sUBLOrderReferenceID = null;
-
       final oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.OrderReferenceType aUBLOrderReference = aUBLInvoice.getOrderReference ();
       if (aUBLOrderReference != null) {
         // Use directly from order reference
-        sUBLOrderReferenceID = aUBLOrderReference.getID ().getValue ();
+        sUBLOrderReferenceID = aUBLOrderReference.getIDValue ();
       }
       else {
         // Check if a contract reference is present
         final List <DocumentReferenceType> aUBLContractDocumentReferences = aUBLInvoice.getContractDocumentReference ();
         if (!aUBLContractDocumentReferences.isEmpty ()) {
           // ID is mandatory
-          sUBLOrderReferenceID = ContainerHelper.getFirstElement (aUBLContractDocumentReferences).getID ().getValue ();
+          sUBLOrderReferenceID = ContainerHelper.getFirstElement (aUBLContractDocumentReferences).getIDValue ();
         }
       }
 
-      // Concatenate accounting area and main order reference for ebInterface
-      // 3.x
-      sOrderReferenceID = StringHelper.getConcatenatedOnDemand (sAccountingArea, ":", sUBLOrderReferenceID);
-      if (StringHelper.hasNoText (sOrderReferenceID)) {
+      if (StringHelper.hasNoText (sUBLOrderReferenceID)) {
         s_aLogger.error ("Failed to get order reference ID!");
-        sOrderReferenceID = DUMMY_VALUE;
+        sUBLOrderReferenceID = DUMMY_VALUE;
       }
       else {
-        if (sOrderReferenceID.length () > 35) {
+        if (sUBLOrderReferenceID.length () > 35) {
           s_aLogger.error ("Order reference value '" +
-                           sOrderReferenceID +
+                           sUBLOrderReferenceID +
                            "' is too long. It will be cut to 35 characters.");
-          sOrderReferenceID = sOrderReferenceID.substring (0, 35);
+          sUBLOrderReferenceID = sUBLOrderReferenceID.substring (0, 35);
         }
 
-        sOrderReferenceID = _makeAlphaNumIDType (sOrderReferenceID);
+        sUBLOrderReferenceID = _makeAlphaNumIDType (sUBLOrderReferenceID);
       }
 
       final OrderReferenceType aEbiOrderReference = aObjectFactory.createOrderReferenceType ();
-      aEbiOrderReference.setOrderID (sOrderReferenceID);
+      aEbiOrderReference.setOrderID (sUBLOrderReferenceID);
       aEbiInvoice.getInvoiceRecipient ().setOrderReference (aEbiOrderReference);
     }
 
@@ -464,7 +454,7 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
         }
 
         // Start creating ebInterface line
-        final ListLineItemType aNewListLineItem = aObjectFactory.createListLineItemType ();
+        final ListLineItemType aEbiListLineItem = aObjectFactory.createListLineItemType ();
 
         // Invoice line number
         BigInteger aUBLPositionNumber = StringParser.parseBigInteger (aUBLInvoiceLine.getIDValue ());
@@ -475,16 +465,16 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
                           nInvoiceLineIndex);
           aUBLPositionNumber = BigInteger.valueOf (nInvoiceLineIndex);
         }
-        aNewListLineItem.setPositionNumber (aUBLPositionNumber);
+        aEbiListLineItem.setPositionNumber (aUBLPositionNumber);
 
         // Descriptions
         for (final DescriptionType aUBLDescription : aUBLInvoiceLine.getItem ().getDescription ())
-          aNewListLineItem.getDescription ().add (aUBLDescription.getValue ());
-        if (aNewListLineItem.getDescription ().isEmpty ()) {
+          aEbiListLineItem.getDescription ().add (aUBLDescription.getValue ());
+        if (aEbiListLineItem.getDescription ().isEmpty ()) {
           // Use item name as description
           final NameType aUBLName = aUBLInvoiceLine.getItem ().getName ();
           if (aUBLName != null)
-            aNewListLineItem.getDescription ().add (aUBLName.getValue ());
+            aEbiListLineItem.getDescription ().add (aUBLName.getValue ());
         }
 
         // Quantity
@@ -499,14 +489,15 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
           aNewQuantity.setUnit (EUnitOfMeasureCode20.C62.getID ());
           aNewQuantity.setValue (BigDecimal.ONE);
         }
-        aNewListLineItem.setQuantity (aNewQuantity);
+        aEbiListLineItem.setQuantity (aNewQuantity);
+        
         // Unit price
         if (aUBLInvoiceLine.getPrice () != null) {
           // Unit price = priceAmount/baseQuantity
           final BigDecimal aUBLPriceAmount = aUBLInvoiceLine.getPrice ().getPriceAmountValue ();
           // If no base quantity is present, assume 1
           final BigDecimal aUBLBaseQuantity = aUBLInvoiceLine.getPrice ().getBaseQuantityValue ();
-          aNewListLineItem.setUnitPrice (aUBLBaseQuantity == null ? aUBLPriceAmount
+          aEbiListLineItem.setUnitPrice (aUBLBaseQuantity == null ? aUBLPriceAmount
                                                                  : MathHelper.isEqualToZero (aUBLBaseQuantity) ? BigDecimal.ZERO
                                                                                                               : aUBLPriceAmount.divide (aUBLBaseQuantity,
                                                                                                                                         SCALE_PRICE_LINE,
@@ -515,7 +506,7 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
         else {
           // Unit price = lineExtensionAmount / quantity
           final BigDecimal aUBLLineExtensionAmount = aUBLInvoiceLine.getLineExtensionAmountValue ();
-          aNewListLineItem.setUnitPrice (aUBLLineExtensionAmount.divide (aNewQuantity.getValue ()));
+          aEbiListLineItem.setUnitPrice (aUBLLineExtensionAmount.divide (aNewQuantity.getValue ()));
         }
 
         // Tax rate (mandatory)
@@ -523,10 +514,10 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
         aNewTaxRate.setValue (aUBLPercent);
         if (aUBLTaxCategory != null)
           aNewTaxRate.setTaxCode (aUBLTaxCategory.getIDValue ());
-        aNewListLineItem.setTaxRate (aNewTaxRate);
+        aEbiListLineItem.setTaxRate (aNewTaxRate);
 
         // Line item amount (quantity * unit price)
-        aNewListLineItem.setLineItemAmount (aUBLInvoiceLine.getLineExtensionAmountValue ());
+        aEbiListLineItem.setLineItemAmount (aUBLInvoiceLine.getLineExtensionAmountValue ());
 
         // Special handling in case no VAT item is present
         if (aUBLPercent.equals (BigDecimal.ZERO))
@@ -536,13 +527,13 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
         final OrderLineReferenceType aOrderLineReference = ContainerHelper.getFirstElement (aUBLInvoiceLine.getOrderLineReference ());
         if (aOrderLineReference != null) {
           final OrderReferenceDetailType aNewOrderReferenceDetail = aObjectFactory.createOrderReferenceDetailType ();
-          aNewOrderReferenceDetail.setOrderID (sOrderReferenceID);
+          aNewOrderReferenceDetail.setOrderID (sUBLOrderReferenceID);
           aNewOrderReferenceDetail.setOrderPositionNumber (aOrderLineReference.getLineIDValue ());
-          aNewListLineItem.setInvoiceRecipientsOrderReference (aNewOrderReferenceDetail);
+          aEbiListLineItem.setInvoiceRecipientsOrderReference (aNewOrderReferenceDetail);
         }
 
         // Add the item to the list
-        aEbiItemList.getListLineItem ().add (aNewListLineItem);
+        aEbiItemList.getListLineItem ().add (aEbiListLineItem);
         nInvoiceLineIndex++;
       }
       aEbiDetails.getItemList ().add (aEbiItemList);
