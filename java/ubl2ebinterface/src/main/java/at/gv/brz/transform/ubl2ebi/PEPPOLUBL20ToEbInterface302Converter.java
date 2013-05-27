@@ -111,7 +111,7 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
     final ProfileIDType aProfileID = aUBLInvoice.getProfileID ();
     if (aProfileID == null)
       return "No ProfileID present!";
-    final String sProfileID = aProfileID.getValue ();
+    final String sProfileID = StringHelper.trim (aProfileID.getValue ());
     final IPeppolPredefinedProcessIdentifier aProcID = PredefinedProcessIdentifierManager.getProcessIdentifierOfID (sProfileID);
     if (aProcID == null)
       return "Invalid ProfileID value '" + sProfileID + "' present!";
