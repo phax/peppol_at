@@ -490,7 +490,7 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
           aNewQuantity.setValue (BigDecimal.ONE);
         }
         aEbiListLineItem.setQuantity (aNewQuantity);
-        
+
         // Unit price
         if (aUBLInvoiceLine.getPrice () != null) {
           // Unit price = priceAmount/baseQuantity
