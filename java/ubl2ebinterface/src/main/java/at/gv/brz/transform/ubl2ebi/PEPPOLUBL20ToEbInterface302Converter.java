@@ -600,11 +600,11 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
     return aEbiInvoice;
   }
 
-  @Nonnull
-  private static String _makeAlphaNumIDType (@Nonnull final String sText) {
-    if (!RegExHelper.stringMatchesPattern ("[0-9 | A-Z | a-z | -_äöüÄÖÜß]+", sText)) {
+  @Nullable
+  private static String _makeAlphaNumIDType (@Nullable final String sText) {
+    if (sText != null && !RegExHelper.stringMatchesPattern ("[0-9 | A-Z | a-z | -_äöüÄÖÜß]+", sText)) {
       s_aLogger.warn ("'" + sText + "' is not an AlphaNumIDType!");
-      final String ret = RegExHelper.stringReplacePattern ("[^0-9A-Za-z-_äöüÄÖÜß]", sText, "_");
+      final String ret = RegExHelper.stringReplacePattern ("[^0-9 | A-Z | a-z | -_äöüÄÖÜß]", sText, "_");
       s_aLogger.warn ("  -> was changed to '" + ret + "'");
       return ret;
     }
