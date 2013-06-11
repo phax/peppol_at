@@ -79,7 +79,7 @@ import eu.europa.ec.cipa.peppol.identifier.process.PredefinedProcessIdentifierMa
 public final class PEPPOLUBL20ToEbInterface302Converter {
   private static final Logger s_aLogger = LoggerFactory.getLogger (PEPPOLUBL20ToEbInterface302Converter.class);
   private static final String DUMMY_VALUE = "DUMMY_VALUE";
-  private static final String REGEX_BIC = "[0-9|A-Z|a-z]{8}([0-9|A-Z|a-z]{3})?";
+  private static final String REGEX_BIC = "[0-9A-Za-z]{8}([0-9A-Za-z]{3})?";
   private static final String SUPPORTED_TAX_SCHEME_SCHEME_ID = "UN/ECE 5153";
   private static final int IBAN_MAX_LENGTH = 34;
   private static final String PAYMENT_CHANNEL_CODE_IBAN = "IBAN";
