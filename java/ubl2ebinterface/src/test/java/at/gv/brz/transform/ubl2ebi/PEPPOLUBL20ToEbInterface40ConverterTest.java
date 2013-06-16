@@ -17,19 +17,19 @@ import com.phloc.commons.io.IReadableResource;
 import com.phloc.commons.io.file.filter.FilenameFilterEndsWith;
 import com.phloc.commons.io.file.iterate.FileSystemRecursiveIterator;
 import com.phloc.commons.io.resource.FileSystemResource;
-import com.phloc.ebinterface.EbInterface302Marshaller;
+import com.phloc.ebinterface.EbInterface40Marshaller;
 import com.phloc.ubl.UBL20Reader;
 
 import eu.europa.ec.cipa.test.ETestFileType;
 import eu.europa.ec.cipa.test.TestFiles;
 
 /**
- * Test class for class {@link PEPPOLUBL20ToEbInterface302Converter}.
+ * Test class for class {@link PEPPOLUBL20ToEbInterface40Converter}.
  * 
  * @author PEPPOL.AT, BRZ, Philip Helger
  */
-public class PEPPOLUBL20ToEbInterface302ConverterTest {
-  private static final Logger s_aLogger = LoggerFactory.getLogger (PEPPOLUBL20ToEbInterface302ConverterTest.class);
+public class PEPPOLUBL20ToEbInterface40ConverterTest {
+  private static final Logger s_aLogger = LoggerFactory.getLogger (PEPPOLUBL20ToEbInterface40ConverterTest.class);
 
   @Test
   public void testConvertPEPPOLInvoice () {
@@ -48,11 +48,11 @@ public class PEPPOLUBL20ToEbInterface302ConverterTest {
       assertNotNull (aUBLInvoice);
 
       // Convert to ebInterface
-      final com.phloc.ebinterface.v302.InvoiceType aEbInvoice = PEPPOLUBL20ToEbInterface302Converter.convertToEbInterface (aUBLInvoice);
+      final com.phloc.ebinterface.v40.InvoiceType aEbInvoice = PEPPOLUBL20ToEbInterface40Converter.convertToEbInterface (aUBLInvoice);
       assertNotNull (aEbInvoice);
 
       // Convert ebInterface to XML
-      final Document aDocEb = new EbInterface302Marshaller ().write (aEbInvoice);
+      final Document aDocEb = new EbInterface40Marshaller ().write (aEbInvoice);
       assertNotNull (aDocEb);
     }
   }

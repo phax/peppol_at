@@ -45,25 +45,27 @@ import com.phloc.commons.math.MathHelper;
 import com.phloc.commons.regex.RegExHelper;
 import com.phloc.commons.string.StringHelper;
 import com.phloc.commons.string.StringParser;
-import com.phloc.ebinterface.v302.AccountType;
-import com.phloc.ebinterface.v302.AddressType;
-import com.phloc.ebinterface.v302.BillerType;
-import com.phloc.ebinterface.v302.CurrencyType;
-import com.phloc.ebinterface.v302.DetailsType;
-import com.phloc.ebinterface.v302.DocumentTypeType;
-import com.phloc.ebinterface.v302.InvoiceRecipientType;
-import com.phloc.ebinterface.v302.InvoiceType;
-import com.phloc.ebinterface.v302.ItemListType;
-import com.phloc.ebinterface.v302.ItemType;
-import com.phloc.ebinterface.v302.ListLineItemType;
-import com.phloc.ebinterface.v302.ObjectFactory;
-import com.phloc.ebinterface.v302.OrderReferenceDetailType;
-import com.phloc.ebinterface.v302.OrderReferenceType;
-import com.phloc.ebinterface.v302.TaxRateType;
-import com.phloc.ebinterface.v302.TaxType;
-import com.phloc.ebinterface.v302.UnitType;
-import com.phloc.ebinterface.v302.UniversalBankTransactionType;
-import com.phloc.ebinterface.v302.VATType;
+import com.phloc.ebinterface.v40.AccountType;
+import com.phloc.ebinterface.v40.AddressType;
+import com.phloc.ebinterface.v40.BillerType;
+import com.phloc.ebinterface.v40.CountryCodeType;
+import com.phloc.ebinterface.v40.CountryType;
+import com.phloc.ebinterface.v40.CurrencyType;
+import com.phloc.ebinterface.v40.DetailsType;
+import com.phloc.ebinterface.v40.DocumentTypeType;
+import com.phloc.ebinterface.v40.InvoiceRecipientType;
+import com.phloc.ebinterface.v40.InvoiceType;
+import com.phloc.ebinterface.v40.ItemListType;
+import com.phloc.ebinterface.v40.ItemType;
+import com.phloc.ebinterface.v40.ListLineItemType;
+import com.phloc.ebinterface.v40.ObjectFactory;
+import com.phloc.ebinterface.v40.OrderReferenceDetailType;
+import com.phloc.ebinterface.v40.OrderReferenceType;
+import com.phloc.ebinterface.v40.TaxRateType;
+import com.phloc.ebinterface.v40.TaxType;
+import com.phloc.ebinterface.v40.UnitType;
+import com.phloc.ebinterface.v40.UniversalBankTransactionType;
+import com.phloc.ebinterface.v40.VATType;
 import com.phloc.ubl20.codelist.EUnitOfMeasureCode20;
 
 import eu.europa.ec.cipa.peppol.identifier.doctype.IPeppolPredefinedDocumentTypeIdentifier;
@@ -76,20 +78,20 @@ import eu.europa.ec.cipa.peppol.identifier.process.PredefinedProcessIdentifierMa
  * @author philip
  */
 @Immutable
-public final class PEPPOLUBL20ToEbInterface302Converter {
-  private static final Logger s_aLogger = LoggerFactory.getLogger (PEPPOLUBL20ToEbInterface302Converter.class);
+public final class PEPPOLUBL20ToEbInterface40Converter {
+  private static final Logger s_aLogger = LoggerFactory.getLogger (PEPPOLUBL20ToEbInterface40Converter.class);
   private static final String DUMMY_VALUE = "DUMMY_VALUE";
   private static final String REGEX_BIC = "[0-9A-Za-z]{8}([0-9A-Za-z]{3})?";
   private static final String SUPPORTED_TAX_SCHEME_SCHEME_ID = "UN/ECE 5153";
   private static final int IBAN_MAX_LENGTH = 34;
   private static final String PAYMENT_CHANNEL_CODE_IBAN = "IBAN";
   private static final String SUPPORTED_TAX_SCHEME_ID = "VAT";
-  private static final String EBI_GENERATING_SYSTEM = "UBL 2.0 to ebInterface 3.0.2 converter";
+  private static final String EBI_GENERATING_SYSTEM = "UBL 2.0 to ebInterface 4.0 converter";
   private static final int SCALE_PERC = 2;
   private static final int SCALE_PRICE_LINE = 4;
   private static final RoundingMode ROUNDING_MODE = RoundingMode.HALF_EVEN;
 
-  private PEPPOLUBL20ToEbInterface302Converter () {}
+  private PEPPOLUBL20ToEbInterface40Converter () {}
 
   /**
    * Check if the passed UBL invoice is transformable
@@ -178,8 +180,17 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
       aEbiAddress.setPOBox (aUBLAddress.getPostboxValue ());
       aEbiAddress.setTown (aUBLAddress.getCityNameValue ());
       aEbiAddress.setZIP (aUBLAddress.getPostalZoneValue ());
-      if (aUBLAddress.getCountry () != null)
-        aEbiAddress.setCountry (aUBLAddress.getCountry ().getIdentificationCodeValue ());
+      if (aUBLAddress.getCountry () != null) {
+        final CountryType aEbiCountry = new CountryType ();
+        CountryCodeType aCC = null;
+        try {
+          aCC = CountryCodeType.fromValue (aUBLAddress.getCountry ().getIdentificationCodeValue ());
+        }
+        catch (final IllegalArgumentException ex) {}
+        aEbiCountry.setCountryCode (aCC);
+        aEbiCountry.setContent (aUBLAddress.getCountry ().getNameValue ());
+        aEbiAddress.setCountry (aEbiCountry);
+      }
     }
 
     // Contact
@@ -209,8 +220,11 @@ public final class PEPPOLUBL20ToEbInterface302Converter {
       aEbiAddress.setTown (DUMMY_VALUE);
     if (aEbiAddress.getZIP () == null)
       aEbiAddress.setZIP (DUMMY_VALUE);
-    if (aEbiAddress.getCountry () == null)
-      aEbiAddress.setCountry (DUMMY_VALUE);
+    if (aEbiAddress.getCountry () == null) {
+      final CountryType aCountry = new CountryType ();
+      aCountry.setContent (DUMMY_VALUE);
+      aEbiAddress.setCountry (aCountry);
+    }
 
     return aEbiAddress;
   }
