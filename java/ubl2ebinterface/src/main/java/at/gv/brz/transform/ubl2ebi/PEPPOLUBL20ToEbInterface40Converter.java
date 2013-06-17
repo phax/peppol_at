@@ -395,7 +395,9 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
             aEbiVATItem.setTaxedAmount (aUBLSubtotal.getTaxableAmountValue ());
             // tax rate
             final TaxRateType aEbiVATTaxRate = aObjectFactory.createTaxRateType ();
-            aEbiVATTaxRate.setTaxCode (sUBLTaxCategoryID);
+            // Optional
+            if (false)
+              aEbiVATTaxRate.setTaxCode (sUBLTaxCategoryID);
             aEbiVATTaxRate.setValue (aUBLPercentage);
             aEbiVATItem.setTaxRate (aEbiVATTaxRate);
             // Tax amount
@@ -527,7 +529,9 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
         final TaxRateType aNewTaxRate = aObjectFactory.createTaxRateType ();
         aNewTaxRate.setValue (aUBLPercent);
         if (aUBLTaxCategory != null)
-          aNewTaxRate.setTaxCode (aUBLTaxCategory.getIDValue ());
+          // Optional
+          if (false)
+            aNewTaxRate.setTaxCode (aUBLTaxCategory.getIDValue ());
         aEbiListLineItem.setTaxRate (aNewTaxRate);
 
         // Line item amount (quantity * unit price)
