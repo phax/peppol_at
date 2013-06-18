@@ -11,6 +11,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.AllowanceChargeType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.ContactType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.CustomerPartyType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.DocumentReferenceType;
@@ -43,6 +44,7 @@ import com.phloc.commons.CGlobal;
 import com.phloc.commons.collections.ContainerHelper;
 import com.phloc.commons.math.MathHelper;
 import com.phloc.commons.regex.RegExHelper;
+import com.phloc.commons.state.ETriState;
 import com.phloc.commons.string.StringHelper;
 import com.phloc.commons.string.StringParser;
 import com.phloc.ebinterface.v40.AccountType;
@@ -58,9 +60,10 @@ import com.phloc.ebinterface.v40.InvoiceType;
 import com.phloc.ebinterface.v40.ItemListType;
 import com.phloc.ebinterface.v40.ItemType;
 import com.phloc.ebinterface.v40.ListLineItemType;
-import com.phloc.ebinterface.v40.ObjectFactory;
 import com.phloc.ebinterface.v40.OrderReferenceDetailType;
 import com.phloc.ebinterface.v40.OrderReferenceType;
+import com.phloc.ebinterface.v40.ReductionAndSurchargeBaseType;
+import com.phloc.ebinterface.v40.ReductionAndSurchargeListLineItemDetailsType;
 import com.phloc.ebinterface.v40.TaxRateType;
 import com.phloc.ebinterface.v40.TaxType;
 import com.phloc.ebinterface.v40.UnitType;
@@ -73,7 +76,7 @@ import eu.europa.ec.cipa.peppol.identifier.process.IPeppolPredefinedProcessIdent
 import eu.europa.ec.cipa.peppol.identifier.process.PredefinedProcessIdentifierManager;
 
 /**
- * Main converter between UBL 2.0 invoice and ebInterface 3.0.2 invoice.
+ * Main converter between UBL 2.0 invoice and ebInterface 4.0 invoice.
  * 
  * @author philip
  */
@@ -160,8 +163,8 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
   }
 
   @Nonnull
-  private static AddressType _convertAddress (final ObjectFactory aObjectFactory, final PartyType aUBLParty) {
-    final AddressType aEbiAddress = aObjectFactory.createAddressType ();
+  private static AddressType _convertAddress (final PartyType aUBLParty) {
+    final AddressType aEbiAddress = new AddressType ();
 
     // Convert name
     final PartyNameType aUBLPartyName = ContainerHelper.getSafe (aUBLParty.getPartyName (), 0);
@@ -249,15 +252,13 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
     if (aUBLInvoice == null)
       throw new NullPointerException ("UBLInvoice");
 
-    final ObjectFactory aObjectFactory = new ObjectFactory ();
-
     // Consistency check before starting the conversion
     final String sConsistencyValidationResult = _checkConsistency (aUBLInvoice);
     if (sConsistencyValidationResult != null)
       throw new IllegalArgumentException ("Consistency validation failed: " + sConsistencyValidationResult);
 
     // Build ebInterface invoice
-    final InvoiceType aEbiInvoice = aObjectFactory.createInvoiceType ();
+    final InvoiceType aEbiInvoice = new InvoiceType ();
     aEbiInvoice.setGeneratingSystem (EBI_GENERATING_SYSTEM);
     aEbiInvoice.setDocumentType (DocumentTypeType.INVOICE);
     aEbiInvoice.setInvoiceCurrency (CurrencyType.fromValue (StringHelper.trim (aUBLInvoice.getDocumentCurrencyCodeValue ())));
@@ -267,7 +268,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
     // Biller (creator of the invoice)
     {
       final SupplierPartyType aUBLSupplier = aUBLInvoice.getAccountingSupplierParty ();
-      final BillerType aEbiBiller = aObjectFactory.createBillerType ();
+      final BillerType aEbiBiller = new BillerType ();
       // Find the tax scheme that uses VAT
       for (final PartyTaxSchemeType aUBLPartyTaxScheme : aUBLSupplier.getParty ().getPartyTaxScheme ())
         if (aUBLPartyTaxScheme.getTaxScheme ().getIDValue ().equals (SUPPORTED_TAX_SCHEME_ID)) {
@@ -283,14 +284,14 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
         // The customer's internal identifier for the supplier.
         aEbiBiller.setInvoiceRecipientsBillerID (aUBLSupplier.getCustomerAssignedAccountID ().getValue ());
       }
-      aEbiBiller.setAddress (_convertAddress (aObjectFactory, aUBLSupplier.getParty ()));
+      aEbiBiller.setAddress (_convertAddress (aUBLSupplier.getParty ()));
       aEbiInvoice.setBiller (aEbiBiller);
     }
 
     // Invoice recipient
     {
       final CustomerPartyType aUBLCustomer = aUBLInvoice.getAccountingCustomerParty ();
-      final InvoiceRecipientType aEbiRecipient = aObjectFactory.createInvoiceRecipientType ();
+      final InvoiceRecipientType aEbiRecipient = new InvoiceRecipientType ();
       // Find the tax scheme that uses VAT
       for (final PartyTaxSchemeType aUBLPartyTaxScheme : aUBLCustomer.getParty ().getPartyTaxScheme ())
         if (aUBLPartyTaxScheme.getTaxScheme ().getIDValue ().equals (SUPPORTED_TAX_SCHEME_ID)) {
@@ -313,7 +314,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
         s_aLogger.error ("Failed to get supplier assigned account ID for customer!");
         aEbiRecipient.setBillersInvoiceRecipientID (DUMMY_VALUE);
       }
-      aEbiRecipient.setAddress (_convertAddress (aObjectFactory, aUBLCustomer.getParty ()));
+      aEbiRecipient.setAddress (_convertAddress (aUBLCustomer.getParty ()));
       aEbiInvoice.setInvoiceRecipient (aEbiRecipient);
     }
 
@@ -349,7 +350,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
         sUBLOrderReferenceID = _makeAlphaNumIDType (sUBLOrderReferenceID);
       }
 
-      final OrderReferenceType aEbiOrderReference = aObjectFactory.createOrderReferenceType ();
+      final OrderReferenceType aEbiOrderReference = new OrderReferenceType ();
       aEbiOrderReference.setOrderID (sUBLOrderReferenceID);
       aEbiInvoice.getInvoiceRecipient ().setOrderReference (aEbiOrderReference);
     }
@@ -357,8 +358,8 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
     // Tax totals
     // Map from tax category to percentage
     final Map <TaxCategoryKey, BigDecimal> aTaxCategoryPercMap = new HashMap <TaxCategoryKey, BigDecimal> ();
-    final TaxType aEbiTax = aObjectFactory.createTaxType ();
-    final VATType aEbiVAT = aObjectFactory.createVATType ();
+    final TaxType aEbiTax = new TaxType ();
+    final VATType aEbiVAT = new VATType ();
     {
       for (final TaxTotalType aUBLTaxTotal : aUBLInvoice.getTaxTotal ())
         for (final TaxSubtotalType aUBLSubtotal : aUBLTaxTotal.getTaxSubtotal ()) {
@@ -390,11 +391,11 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
 
           if (_isSupportedTaxSchemeSchemeID (sUBLTaxSchemeSchemeID) && SUPPORTED_TAX_SCHEME_ID.equals (sUBLTaxSchemeID)) {
             // add VAT item
-            final ItemType aEbiVATItem = aObjectFactory.createItemType ();
+            final ItemType aEbiVATItem = new ItemType ();
             // Base amount
             aEbiVATItem.setTaxedAmount (aUBLSubtotal.getTaxableAmountValue ());
             // tax rate
-            final TaxRateType aEbiVATTaxRate = aObjectFactory.createTaxRateType ();
+            final TaxRateType aEbiVATTaxRate = new TaxRateType ();
             // Optional
             if (false)
               aEbiVATTaxRate.setTaxCode (sUBLTaxCategoryID);
@@ -422,8 +423,8 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
     // Line items
     BigDecimal aTotalZeroPercLineExtensionAmount = BigDecimal.ZERO;
     {
-      final DetailsType aEbiDetails = aObjectFactory.createDetailsType ();
-      final ItemListType aEbiItemList = aObjectFactory.createItemListType ();
+      final DetailsType aEbiDetails = new DetailsType ();
+      final ItemListType aEbiItemList = new ItemListType ();
       int nInvoiceLineIndex = 1;
       for (final InvoiceLineType aUBLInvoiceLine : aUBLInvoice.getInvoiceLine ()) {
         // Try to resolve tax category
@@ -470,7 +471,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
         }
 
         // Start creating ebInterface line
-        final ListLineItemType aEbiListLineItem = aObjectFactory.createListLineItemType ();
+        final ListLineItemType aEbiListLineItem = new ListLineItemType ();
 
         // Invoice line number
         BigInteger aUBLPositionNumber = StringParser.parseBigInteger (aUBLInvoiceLine.getIDValue ());
@@ -494,18 +495,18 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
         }
 
         // Quantity
-        final UnitType aNewQuantity = aObjectFactory.createUnitType ();
+        final UnitType aEbiQuantity = new UnitType ();
         if (aUBLInvoiceLine.getInvoicedQuantity () != null) {
-          aNewQuantity.setUnit (aUBLInvoiceLine.getInvoicedQuantity ().getUnitCode ().value ());
-          aNewQuantity.setValue (aUBLInvoiceLine.getInvoicedQuantityValue ());
+          aEbiQuantity.setUnit (aUBLInvoiceLine.getInvoicedQuantity ().getUnitCode ().value ());
+          aEbiQuantity.setValue (aUBLInvoiceLine.getInvoicedQuantityValue ());
         }
         else {
           // ebInterface requires a quantity!
           // XXX is this correct as the default?
-          aNewQuantity.setUnit (EUnitOfMeasureCode20.C62.getID ());
-          aNewQuantity.setValue (BigDecimal.ONE);
+          aEbiQuantity.setUnit (EUnitOfMeasureCode20.C62.getID ());
+          aEbiQuantity.setValue (BigDecimal.ONE);
         }
-        aEbiListLineItem.setQuantity (aNewQuantity);
+        aEbiListLineItem.setQuantity (aEbiQuantity);
 
         // Unit price
         if (aUBLInvoiceLine.getPrice () != null) {
@@ -522,17 +523,17 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
         else {
           // Unit price = lineExtensionAmount / quantity
           final BigDecimal aUBLLineExtensionAmount = aUBLInvoiceLine.getLineExtensionAmountValue ();
-          aEbiListLineItem.setUnitPrice (aUBLLineExtensionAmount.divide (aNewQuantity.getValue ()));
+          aEbiListLineItem.setUnitPrice (aUBLLineExtensionAmount.divide (aEbiQuantity.getValue ()));
         }
 
         // Tax rate (mandatory)
-        final TaxRateType aNewTaxRate = aObjectFactory.createTaxRateType ();
-        aNewTaxRate.setValue (aUBLPercent);
+        final TaxRateType aEbiTaxRate = new TaxRateType ();
+        aEbiTaxRate.setValue (aUBLPercent);
         if (aUBLTaxCategory != null)
           // Optional
           if (false)
-            aNewTaxRate.setTaxCode (aUBLTaxCategory.getIDValue ());
-        aEbiListLineItem.setTaxRate (aNewTaxRate);
+            aEbiTaxRate.setTaxCode (aUBLTaxCategory.getIDValue ());
+        aEbiListLineItem.setTaxRate (aEbiTaxRate);
 
         // Line item amount (quantity * unit price)
         aEbiListLineItem.setLineItemAmount (aUBLInvoiceLine.getLineExtensionAmountValue ());
@@ -544,10 +545,59 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
         // Order reference for detail
         final OrderLineReferenceType aOrderLineReference = ContainerHelper.getFirstElement (aUBLInvoiceLine.getOrderLineReference ());
         if (aOrderLineReference != null) {
-          final OrderReferenceDetailType aNewOrderReferenceDetail = aObjectFactory.createOrderReferenceDetailType ();
-          aNewOrderReferenceDetail.setOrderID (sUBLOrderReferenceID);
-          aNewOrderReferenceDetail.setOrderPositionNumber (aOrderLineReference.getLineIDValue ());
-          aEbiListLineItem.setInvoiceRecipientsOrderReference (aNewOrderReferenceDetail);
+          final OrderReferenceDetailType aEbiOrderReferenceDetail = new OrderReferenceDetailType ();
+          aEbiOrderReferenceDetail.setOrderID (sUBLOrderReferenceID);
+          aEbiOrderReferenceDetail.setOrderPositionNumber (aOrderLineReference.getLineIDValue ());
+          aEbiListLineItem.setInvoiceRecipientsOrderReference (aEbiOrderReferenceDetail);
+        }
+
+        // Reduction and surcharge
+        if (aUBLInvoiceLine.hasAllowanceChargeEntries ()) {
+          // Start with quantity*unitPrice for base amount
+          BigDecimal aEbiBaseAmount = aEbiListLineItem.getQuantity ()
+                                                      .getValue ()
+                                                      .multiply (aEbiListLineItem.getUnitPrice ());
+          final ReductionAndSurchargeListLineItemDetailsType aEbiRSDetails = new ReductionAndSurchargeListLineItemDetailsType ();
+
+          // ebInterface can handle only Reduction or only Surcharge
+          ETriState eSurcharge = ETriState.UNDEFINED;
+
+          for (final AllowanceChargeType aUBLAllowanceCharge : aUBLInvoiceLine.getAllowanceCharge ()) {
+            final boolean bItemIsSurcharge = aUBLAllowanceCharge.getChargeIndicator ().isValue ();
+            if (eSurcharge.isUndefined ())
+              eSurcharge = ETriState.valueOf (bItemIsSurcharge);
+            final boolean bSwapSigns = bItemIsSurcharge != eSurcharge.isTrue ();
+            if (bSwapSigns)
+              s_aLogger.warn ("Reduction/Surcharge is mixed in this invoice!");
+
+            final ReductionAndSurchargeBaseType aEbiRSItem = new ReductionAndSurchargeBaseType ();
+            final BigDecimal aAmount = aUBLAllowanceCharge.getAmountValue ();
+            aEbiRSItem.setAmount (bSwapSigns ? aAmount.negate () : aAmount);
+            if (aUBLAllowanceCharge.getBaseAmount () != null)
+              aEbiBaseAmount = aUBLAllowanceCharge.getBaseAmountValue ();
+            aEbiRSItem.setBaseAmount (aEbiBaseAmount);
+            if (aUBLAllowanceCharge.getMultiplierFactorNumeric () != null) {
+              final BigDecimal aPerc = aUBLAllowanceCharge.getMultiplierFactorNumericValue ()
+                                                          .multiply (CGlobal.BIGDEC_100);
+              aEbiRSItem.setPercentage (bSwapSigns ? aPerc.negate () : aPerc);
+            }
+
+            if (eSurcharge.isTrue ()) {
+              // Surcharge
+              aEbiRSDetails.getSurchargeListLineItem ().add (aEbiRSItem);
+
+              // Update base amount with this item
+              aEbiBaseAmount = aEbiBaseAmount.add (aUBLAllowanceCharge.getAmountValue ());
+            }
+            else {
+              // Reduction
+              aEbiRSDetails.getReductionListLineItem ().add (aEbiRSItem);
+
+              // Update base amount with this item
+              aEbiBaseAmount = aEbiBaseAmount.subtract (aUBLAllowanceCharge.getAmountValue ());
+            }
+          }
+          aEbiListLineItem.setReductionAndSurchargeListLineItemDetails (aEbiRSDetails);
         }
 
         // Add the item to the list
@@ -561,13 +611,13 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
     if (aEbiVAT.hasNoItemEntries ()) {
       s_aLogger.warn ("No VAT item found. Defaulting to a single entry with 0% for amount " +
                       aTotalZeroPercLineExtensionAmount.toString ());
-      final ItemType aNewVATItem = aObjectFactory.createItemType ();
-      aNewVATItem.setTaxedAmount (aTotalZeroPercLineExtensionAmount);
-      final TaxRateType aNewVATTaxRate = aObjectFactory.createTaxRateType ();
-      aNewVATTaxRate.setValue (BigDecimal.ZERO);
-      aNewVATItem.setTaxRate (aNewVATTaxRate);
-      aNewVATItem.setAmount (aTotalZeroPercLineExtensionAmount);
-      aEbiVAT.getItem ().add (aNewVATItem);
+      final ItemType aEbiVATItem = new ItemType ();
+      aEbiVATItem.setTaxedAmount (aTotalZeroPercLineExtensionAmount);
+      final TaxRateType aEbiVATTaxRate = new TaxRateType ();
+      aEbiVATTaxRate.setValue (BigDecimal.ZERO);
+      aEbiVATItem.setTaxRate (aEbiVATTaxRate);
+      aEbiVATItem.setAmount (aTotalZeroPercLineExtensionAmount);
+      aEbiVAT.getItem ().add (aEbiVATItem);
     }
 
     // Total gross amount
@@ -578,38 +628,38 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
       for (final PaymentMeansType aUBLPaymentMeans : aUBLInvoice.getPaymentMeans ()) {
         // Is a payment channel code present?
         if (PAYMENT_CHANNEL_CODE_IBAN.equals (aUBLPaymentMeans.getPaymentChannelCodeValue ())) {
-          final UniversalBankTransactionType aNewUBTMethod = aObjectFactory.createUniversalBankTransactionType ();
+          final UniversalBankTransactionType aEbiUBTMethod = new UniversalBankTransactionType ();
           // Beneficiary account
-          final AccountType aNewAccount = aObjectFactory.createAccountType ();
+          final AccountType aEbiAccount = new AccountType ();
 
           // BIC
           final FinancialAccountType aUBLFinancialAccount = aUBLPaymentMeans.getPayeeFinancialAccount ();
           if (aUBLFinancialAccount.getFinancialInstitutionBranch () != null &&
               aUBLFinancialAccount.getFinancialInstitutionBranch ().getFinancialInstitution () != null) {
-            aNewAccount.setBIC (aUBLFinancialAccount.getFinancialInstitutionBranch ()
+            aEbiAccount.setBIC (aUBLFinancialAccount.getFinancialInstitutionBranch ()
                                                     .getFinancialInstitution ()
                                                     .getIDValue ());
-            if (!RegExHelper.stringMatchesPattern (REGEX_BIC, aNewAccount.getBIC ())) {
+            if (!RegExHelper.stringMatchesPattern (REGEX_BIC, aEbiAccount.getBIC ())) {
               s_aLogger.error ("The BIC '" +
-                               aNewAccount.getBIC () +
+                               aEbiAccount.getBIC () +
                                "' does not match the required regular expression.");
-              aNewAccount.setBIC (null);
+              aEbiAccount.setBIC (null);
             }
           }
 
           // IBAN
-          aNewAccount.setIBAN (aUBLPaymentMeans.getPayeeFinancialAccount ().getIDValue ());
-          if (StringHelper.getLength (aNewAccount.getIBAN ()) > IBAN_MAX_LENGTH) {
+          aEbiAccount.setIBAN (aUBLPaymentMeans.getPayeeFinancialAccount ().getIDValue ());
+          if (StringHelper.getLength (aEbiAccount.getIBAN ()) > IBAN_MAX_LENGTH) {
             s_aLogger.warn ("The IBAN '" +
-                            aNewAccount.getIBAN () +
+                            aEbiAccount.getIBAN () +
                             "' is too long and cut to " +
                             IBAN_MAX_LENGTH +
                             " chars.");
-            aNewAccount.setIBAN (aNewAccount.getIBAN ().substring (0, IBAN_MAX_LENGTH));
+            aEbiAccount.setIBAN (aEbiAccount.getIBAN ().substring (0, IBAN_MAX_LENGTH));
           }
 
-          aNewUBTMethod.getBeneficiaryAccount ().add (aNewAccount);
-          aEbiInvoice.setPaymentMethod (aNewUBTMethod);
+          aEbiUBTMethod.getBeneficiaryAccount ().add (aEbiAccount);
+          aEbiInvoice.setPaymentMethod (aEbiUBTMethod);
           break;
         }
       }

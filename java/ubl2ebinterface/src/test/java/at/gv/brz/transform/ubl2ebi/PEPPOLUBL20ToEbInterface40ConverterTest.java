@@ -14,9 +14,12 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import com.phloc.commons.io.IReadableResource;
+import com.phloc.commons.io.file.FileUtils;
+import com.phloc.commons.io.file.FilenameHelper;
 import com.phloc.commons.io.file.filter.FilenameFilterEndsWith;
 import com.phloc.commons.io.file.iterate.FileSystemRecursiveIterator;
 import com.phloc.commons.io.resource.FileSystemResource;
+import com.phloc.commons.xml.serialize.XMLWriter;
 import com.phloc.ebinterface.EbInterface40Marshaller;
 import com.phloc.ubl.UBL20Reader;
 
@@ -54,6 +57,9 @@ public class PEPPOLUBL20ToEbInterface40ConverterTest {
       // Convert ebInterface to XML
       final Document aDocEb = new EbInterface40Marshaller ().write (aEbInvoice);
       assertNotNull (aDocEb);
+
+      XMLWriter.writeToStream (aDocEb,
+                               FileUtils.getOutputStream ("target/" + FilenameHelper.getWithoutPath (aRes.getPath ())));
     }
   }
 }
