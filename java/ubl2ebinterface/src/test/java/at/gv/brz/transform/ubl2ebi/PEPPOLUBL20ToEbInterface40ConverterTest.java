@@ -21,6 +21,7 @@ import com.phloc.commons.io.file.iterate.FileSystemRecursiveIterator;
 import com.phloc.commons.io.resource.FileSystemResource;
 import com.phloc.commons.xml.serialize.XMLWriter;
 import com.phloc.ebinterface.EbInterface40Marshaller;
+import com.phloc.ebinterface.v40.Ebi40InvoiceType;
 import com.phloc.ubl.UBL20Reader;
 
 import eu.europa.ec.cipa.test.ETestFileType;
@@ -51,7 +52,7 @@ public class PEPPOLUBL20ToEbInterface40ConverterTest {
       assertNotNull (aUBLInvoice);
 
       // Convert to ebInterface
-      final com.phloc.ebinterface.v40.InvoiceType aEbInvoice = PEPPOLUBL20ToEbInterface40Converter.convertToEbInterface (aUBLInvoice);
+      final Ebi40InvoiceType aEbInvoice = PEPPOLUBL20ToEbInterface40Converter.convertToEbInterface (aUBLInvoice);
       assertNotNull (aEbInvoice);
 
       // Convert ebInterface to XML
