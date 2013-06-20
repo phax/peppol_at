@@ -11,7 +11,7 @@
       <ns2:POBox>5467</ns2:POBox>
       <ns2:Town>Big city</ns2:Town>
       <ns2:ZIP>54321</ns2:ZIP>
-      <ns2:Country ns2:CountryCode="NO" />
+      <ns2:Country ns2:CountryCode="NO">Norwegen</ns2:Country>
       <ns2:Phone>46211230</ns2:Phone>
       <ns2:Email>antonio@salescompany.dk</ns2:Email>
       <ns2:Contact>Antonio M Salemacher</ns2:Contact>
@@ -30,7 +30,7 @@
       <ns2:POBox>123</ns2:POBox>
       <ns2:Town>Anytown</ns2:Town>
       <ns2:ZIP>101</ns2:ZIP>
-      <ns2:Country ns2:CountryCode="BE" />
+      <ns2:Country ns2:CountryCode="BE">Belgien</ns2:Country>
       <ns2:Phone>5121230</ns2:Phone>
       <ns2:Email>john@buyercompany.eu</ns2:Email>
       <ns2:Contact>John X Doe</ns2:Contact>

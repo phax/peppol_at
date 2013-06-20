@@ -10,7 +10,7 @@
       <ns2:Street>Johannesgasse 15</ns2:Street>
       <ns2:Town>Wien</ns2:Town>
       <ns2:ZIP>1010</ns2:ZIP>
-      <ns2:Country ns2:CountryCode="AT" />
+      <ns2:Country ns2:CountryCode="AT">Österreich</ns2:Country>
       <ns2:Phone>47111</ns2:Phone>
       <ns2:Email>test@example.org</ns2:Email>
     </ns2:Address>
@@ -26,7 +26,7 @@
       <ns2:Street>Hintere Zollamtsstraße 2b</ns2:Street>
       <ns2:Town>Wien</ns2:Town>
       <ns2:ZIP>1030</ns2:ZIP>
-      <ns2:Country ns2:CountryCode="AT" />
+      <ns2:Country ns2:CountryCode="AT">Österreich</ns2:Country>
     </ns2:Address>
   </ns2:InvoiceRecipient>
   <ns2:Details>

@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
@@ -46,6 +47,7 @@ import at.gv.brz.transform.ubl2ebi.helper.TaxCategoryKey;
 
 import com.phloc.commons.CGlobal;
 import com.phloc.commons.collections.ContainerHelper;
+import com.phloc.commons.locale.country.CountryCache;
 import com.phloc.commons.math.MathHelper;
 import com.phloc.commons.regex.RegExHelper;
 import com.phloc.commons.state.ETriState;
@@ -202,6 +204,10 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
         catch (final IllegalArgumentException ex) {}
         aEbiCountry.setCountryCode (aCC);
         aEbiCountry.setContent (aUBLAddress.getCountry ().getNameValue ());
+        if (StringHelper.hasNoText (aEbiCountry.getContent ()) && aCC != null) {
+          final Locale aLocale = CountryCache.getCountry (aCC.value ());
+          aEbiCountry.setContent (aLocale.getDisplayCountry (Locale.GERMANY));
+        }
         aEbiAddress.setCountry (aEbiCountry);
       }
     }
