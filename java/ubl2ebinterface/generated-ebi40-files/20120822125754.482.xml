@@ -5,6 +5,7 @@
   <ns2:Biller>
     <ns2:VATIdentificationNumber>NO999999999MVA</ns2:VATIdentificationNumber>
     <ns2:Address>
+      <ns2:AddressIdentifier ns2:AddressIdentifierType="GLN">1234567890123</ns2:AddressIdentifier>
       <ns2:Name>Salescompany ltd.</ns2:Name>
       <ns2:Street>Main street 1</ns2:Street>
       <ns2:POBox>5467</ns2:POBox>
@@ -23,6 +24,7 @@
       <ns2:OrderID>123</ns2:OrderID>
     </ns2:OrderReference>
     <ns2:Address>
+      <ns2:AddressIdentifier ns2:AddressIdentifierType="GLN">1234567987654</ns2:AddressIdentifier>
       <ns2:Name>Buyercompany ltd</ns2:Name>
       <ns2:Street>Anystreet 8</ns2:Street>
       <ns2:POBox>123</ns2:POBox>

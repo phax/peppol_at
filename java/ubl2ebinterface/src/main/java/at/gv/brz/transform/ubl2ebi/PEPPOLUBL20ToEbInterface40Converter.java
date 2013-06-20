@@ -11,6 +11,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.AddressType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.AllowanceChargeType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.ContactType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.CustomerPartyType;
@@ -34,6 +35,7 @@ import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.InvoiceT
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.NameType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ProfileIDType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.UBLVersionIDType;
+import oasis.names.specification.ubl.schema.xsd.invoice_2.InvoiceType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +51,8 @@ import com.phloc.commons.state.ETriState;
 import com.phloc.commons.string.StringHelper;
 import com.phloc.commons.string.StringParser;
 import com.phloc.ebinterface.v40.Ebi40AccountType;
+import com.phloc.ebinterface.v40.Ebi40AddressIdentifierType;
+import com.phloc.ebinterface.v40.Ebi40AddressIdentifierTypeType;
 import com.phloc.ebinterface.v40.Ebi40AddressType;
 import com.phloc.ebinterface.v40.Ebi40BillerType;
 import com.phloc.ebinterface.v40.Ebi40CountryCodeType;
@@ -105,7 +109,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
    * @return <code>null</code> in case of no error, the error message otherwise
    */
   @Nullable
-  private static String _checkConsistency (final oasis.names.specification.ubl.schema.xsd.invoice_2.InvoiceType aUBLInvoice) {
+  private static String _checkConsistency (final InvoiceType aUBLInvoice) {
     // Check UBLVersionID
     final UBLVersionIDType aUBLVersionID = aUBLInvoice.getUBLVersionID ();
     if (aUBLVersionID == null)
@@ -164,7 +168,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
   }
 
   @Nonnull
-  private static Ebi40AddressType _convertAddress (final PartyType aUBLParty) {
+  private static Ebi40AddressType _convertAddress (@Nonnull final PartyType aUBLParty) {
     final Ebi40AddressType aEbiAddress = new Ebi40AddressType ();
 
     // Convert name
@@ -176,7 +180,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
     }
 
     // Convert main address
-    final oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.AddressType aUBLAddress = aUBLParty.getPostalAddress ();
+    final AddressType aUBLAddress = aUBLParty.getPostalAddress ();
     if (aUBLAddress != null) {
       aEbiAddress.setStreet (StringHelper.getImplodedNonEmpty (" ",
                                                                aUBLAddress.getStreetNameValue (),
@@ -215,6 +219,28 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
                                                                 aUBLPerson.getNameSuffixValue ()));
     }
 
+    // GLN and DUNS number
+    if (aUBLParty.getEndpointID () != null) {
+      final String sEndpointID = aUBLParty.getEndpointIDValue ();
+      if (StringHelper.hasText (sEndpointID)) {
+        if ("GLN".equals (aUBLParty.getEndpointID ().getSchemeID ())) {
+          // Add GLN number
+          final Ebi40AddressIdentifierType aEbiType = new Ebi40AddressIdentifierType ();
+          aEbiType.setAddressIdentifierType (Ebi40AddressIdentifierTypeType.GLN);
+          aEbiType.setContent (sEndpointID);
+          aEbiAddress.setAddressIdentifier (aEbiType);
+        }
+        else
+          if ("DUNS".equals (aUBLParty.getEndpointID ().getSchemeID ())) {
+            // Add DUNS number
+            final Ebi40AddressIdentifierType aEbiType = new Ebi40AddressIdentifierType ();
+            aEbiType.setAddressIdentifierType (Ebi40AddressIdentifierTypeType.DUNS);
+            aEbiType.setContent (sEndpointID);
+            aEbiAddress.setAddressIdentifier (aEbiType);
+          }
+      }
+    }
+
     // Check all mandatory fields
     if (aEbiAddress.getName () == null)
       aEbiAddress.setName (DUMMY_VALUE);
@@ -249,7 +275,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
    *         If the passed UBL invoice cannot be converted
    */
   @Nonnull
-  public static Ebi40InvoiceType convertToEbInterface (@Nonnull final oasis.names.specification.ubl.schema.xsd.invoice_2.InvoiceType aUBLInvoice) {
+  public static Ebi40InvoiceType convertToEbInterface (@Nonnull final InvoiceType aUBLInvoice) {
     if (aUBLInvoice == null)
       throw new NullPointerException ("UBLInvoice");
 
