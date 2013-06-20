@@ -20,6 +20,7 @@ import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.Fina
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.InvoiceLineType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.OrderLineReferenceType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.OrderReferenceType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyIdentificationType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyNameType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyTaxSchemeType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyType;
@@ -238,6 +239,33 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
             aEbiType.setContent (sEndpointID);
             aEbiAddress.setAddressIdentifier (aEbiType);
           }
+          else
+            s_aLogger.warn ("Ignoring party endpoint ID '" +
+                            sEndpointID +
+                            "' of type '" +
+                            aUBLParty.getEndpointID ().getSchemeID () +
+                            "'");
+      }
+    }
+
+    if (aEbiAddress.getAddressIdentifier () == null) {
+      // check party identification
+      outer: for (final PartyIdentificationType aUBLPartyID : aUBLParty.getPartyIdentification ()) {
+        final String sUBLPartyID = aUBLPartyID.getIDValue ();
+        for (final Ebi40AddressIdentifierTypeType eType : Ebi40AddressIdentifierTypeType.values ())
+          if (eType.value ().equalsIgnoreCase (aUBLPartyID.getID ().getSchemeID ())) {
+            // Add GLN number
+            final Ebi40AddressIdentifierType aEbiType = new Ebi40AddressIdentifierType ();
+            aEbiType.setAddressIdentifierType (eType);
+            aEbiType.setContent (sUBLPartyID);
+            aEbiAddress.setAddressIdentifier (aEbiType);
+            break outer;
+          }
+        s_aLogger.warn ("Ignoring party identification '" +
+                        sUBLPartyID +
+                        "' of type '" +
+                        aUBLPartyID.getID ().getSchemeID () +
+                        "'");
       }
     }
 
