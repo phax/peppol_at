@@ -111,6 +111,18 @@
       </ns2:ListLineItem>
     </ns2:ItemList>
   </ns2:Details>
+  <ns2:ReductionAndSurchargeDetails>
+    <ns2:Surcharge>
+      <ns2:BaseAmount>1436.5</ns2:BaseAmount>
+      <ns2:Amount>100</ns2:Amount>
+      <ns2:TaxRate>25</ns2:TaxRate>
+    </ns2:Surcharge>
+    <ns2:Surcharge>
+      <ns2:BaseAmount>1536.5</ns2:BaseAmount>
+      <ns2:Amount>-100</ns2:Amount>
+      <ns2:TaxRate>25</ns2:TaxRate>
+    </ns2:Surcharge>
+  </ns2:ReductionAndSurchargeDetails>
   <ns2:Tax>
     <ns2:VAT>
       <ns2:Item>

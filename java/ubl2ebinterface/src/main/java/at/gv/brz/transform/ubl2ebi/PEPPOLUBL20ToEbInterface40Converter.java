@@ -51,6 +51,7 @@ import com.phloc.commons.regex.RegExHelper;
 import com.phloc.commons.state.ETriState;
 import com.phloc.commons.string.StringHelper;
 import com.phloc.commons.string.StringParser;
+import com.phloc.ebinterface.codelist.ETaxCode;
 import com.phloc.ebinterface.v40.Ebi40AccountType;
 import com.phloc.ebinterface.v40.Ebi40AddressIdentifierType;
 import com.phloc.ebinterface.v40.Ebi40AddressIdentifierTypeType;
@@ -69,12 +70,15 @@ import com.phloc.ebinterface.v40.Ebi40ListLineItemType;
 import com.phloc.ebinterface.v40.Ebi40OrderReferenceDetailType;
 import com.phloc.ebinterface.v40.Ebi40OrderReferenceType;
 import com.phloc.ebinterface.v40.Ebi40ReductionAndSurchargeBaseType;
+import com.phloc.ebinterface.v40.Ebi40ReductionAndSurchargeDetailsType;
 import com.phloc.ebinterface.v40.Ebi40ReductionAndSurchargeListLineItemDetailsType;
+import com.phloc.ebinterface.v40.Ebi40ReductionAndSurchargeType;
 import com.phloc.ebinterface.v40.Ebi40TaxRateType;
 import com.phloc.ebinterface.v40.Ebi40TaxType;
 import com.phloc.ebinterface.v40.Ebi40UnitType;
 import com.phloc.ebinterface.v40.Ebi40UniversalBankTransactionType;
 import com.phloc.ebinterface.v40.Ebi40VATType;
+import com.phloc.ebinterface.v40.ObjectFactory;
 import com.phloc.ubl20.codelist.EUnitOfMeasureCode20;
 
 import eu.europa.ec.cipa.peppol.identifier.doctype.IPeppolPredefinedDocumentTypeIdentifier;
@@ -224,27 +228,22 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
     if (aUBLParty.getEndpointID () != null) {
       final String sEndpointID = aUBLParty.getEndpointIDValue ();
       if (StringHelper.hasText (sEndpointID)) {
-        if ("GLN".equals (aUBLParty.getEndpointID ().getSchemeID ())) {
-          // Add GLN number
-          final Ebi40AddressIdentifierType aEbiType = new Ebi40AddressIdentifierType ();
-          aEbiType.setAddressIdentifierType (Ebi40AddressIdentifierTypeType.GLN);
-          aEbiType.setContent (sEndpointID);
-          aEbiAddress.setAddressIdentifier (aEbiType);
-        }
-        else
-          if ("DUNS".equals (aUBLParty.getEndpointID ().getSchemeID ())) {
-            // Add DUNS number
+        // We have an endpoint ID
+        for (final Ebi40AddressIdentifierTypeType eType : Ebi40AddressIdentifierTypeType.values ())
+          if (eType.value ().equalsIgnoreCase (aUBLParty.getEndpointID ().getSchemeID ())) {
             final Ebi40AddressIdentifierType aEbiType = new Ebi40AddressIdentifierType ();
-            aEbiType.setAddressIdentifierType (Ebi40AddressIdentifierTypeType.DUNS);
+            aEbiType.setAddressIdentifierType (eType);
             aEbiType.setContent (sEndpointID);
             aEbiAddress.setAddressIdentifier (aEbiType);
+            break;
           }
-          else
-            s_aLogger.warn ("Ignoring party endpoint ID '" +
-                            sEndpointID +
-                            "' of type '" +
-                            aUBLParty.getEndpointID ().getSchemeID () +
-                            "'");
+
+        if (aEbiAddress.getAddressIdentifier () == null)
+          s_aLogger.warn ("Ignoring party endpoint ID '" +
+                          sEndpointID +
+                          "' of type '" +
+                          aUBLParty.getEndpointID ().getSchemeID () +
+                          "'");
       }
     }
 
@@ -254,7 +253,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
         final String sUBLPartyID = aUBLPartyID.getIDValue ();
         for (final Ebi40AddressIdentifierTypeType eType : Ebi40AddressIdentifierTypeType.values ())
           if (eType.value ().equalsIgnoreCase (aUBLPartyID.getID ().getSchemeID ())) {
-            // Add GLN number
+            // Add GLN/DUNS number
             final Ebi40AddressIdentifierType aEbiType = new Ebi40AddressIdentifierType ();
             aEbiType.setAddressIdentifierType (eType);
             aEbiType.setContent (sUBLPartyID);
@@ -673,6 +672,69 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
       aEbiVATItem.setTaxRate (aEbiVATTaxRate);
       aEbiVATItem.setAmount (aTotalZeroPercLineExtensionAmount);
       aEbiVAT.getItem ().add (aEbiVATItem);
+    }
+
+    // Global reduction and surcharge
+    if (aUBLInvoice.hasAllowanceChargeEntries ()) {
+      // Start with quantity*unitPrice for base amount
+      BigDecimal aEbiBaseAmount = aUBLInvoice.getLegalMonetaryTotal ().getLineExtensionAmountValue ();
+      final Ebi40ReductionAndSurchargeDetailsType aEbiRS = new Ebi40ReductionAndSurchargeDetailsType ();
+
+      // ebInterface can handle only Reduction or only Surcharge
+      ETriState eSurcharge = ETriState.UNDEFINED;
+
+      for (final AllowanceChargeType aUBLAllowanceCharge : aUBLInvoice.getAllowanceCharge ()) {
+        final boolean bItemIsSurcharge = aUBLAllowanceCharge.getChargeIndicator ().isValue ();
+        if (eSurcharge.isUndefined ())
+          eSurcharge = ETriState.valueOf (bItemIsSurcharge);
+        final boolean bSwapSigns = bItemIsSurcharge != eSurcharge.isTrue ();
+        if (bSwapSigns)
+          s_aLogger.warn ("Reduction/Surcharge is mixed in this invoice!");
+
+        final Ebi40ReductionAndSurchargeType aEbiRSItem = new Ebi40ReductionAndSurchargeType ();
+        final BigDecimal aAmount = aUBLAllowanceCharge.getAmountValue ();
+        aEbiRSItem.setAmount (bSwapSigns ? aAmount.negate () : aAmount);
+        if (aUBLAllowanceCharge.getBaseAmount () != null)
+          aEbiBaseAmount = aUBLAllowanceCharge.getBaseAmountValue ();
+        aEbiRSItem.setBaseAmount (aEbiBaseAmount);
+        if (aUBLAllowanceCharge.getMultiplierFactorNumeric () != null) {
+          final BigDecimal aPerc = aUBLAllowanceCharge.getMultiplierFactorNumericValue ().multiply (CGlobal.BIGDEC_100);
+          aEbiRSItem.setPercentage (bSwapSigns ? aPerc.negate () : aPerc);
+        }
+
+        Ebi40TaxRateType aEbiTaxRate = null;
+        for (final TaxCategoryType aUBLTaxCategory : aUBLAllowanceCharge.getTaxCategory ())
+          if (aUBLTaxCategory.getPercent () != null) {
+            aEbiTaxRate = new Ebi40TaxRateType ();
+            aEbiTaxRate.setValue (aUBLTaxCategory.getPercentValue ());
+            if (false)
+              aEbiTaxRate.setTaxCode (aUBLTaxCategory.getIDValue ());
+            break;
+          }
+        if (aEbiTaxRate == null) {
+          s_aLogger.warn ("Failed to resolve tax percentage for global AllowanceCharge! Using default of 0%.");
+          aEbiTaxRate = new Ebi40TaxRateType ();
+          aEbiTaxRate.setValue (BigDecimal.ZERO);
+          aEbiTaxRate.setTaxCode (ETaxCode.NOT_TAXABLE.getID ());
+        }
+        aEbiRSItem.setTaxRate (aEbiTaxRate);
+
+        if (eSurcharge.isTrue ()) {
+          // Surcharge
+          aEbiRS.getReductionOrSurcharge ().add (new ObjectFactory ().createSurcharge (aEbiRSItem));
+
+          // Update base amount with this item
+          aEbiBaseAmount = aEbiBaseAmount.add (aUBLAllowanceCharge.getAmountValue ());
+        }
+        else {
+          // Reduction
+          aEbiRS.getReductionOrSurcharge ().add (new ObjectFactory ().createReduction (aEbiRSItem));
+
+          // Update base amount with this item
+          aEbiBaseAmount = aEbiBaseAmount.subtract (aUBLAllowanceCharge.getAmountValue ());
+        }
+      }
+      aEbiInvoice.setReductionAndSurchargeDetails (aEbiRS);
     }
 
     // Total gross amount
