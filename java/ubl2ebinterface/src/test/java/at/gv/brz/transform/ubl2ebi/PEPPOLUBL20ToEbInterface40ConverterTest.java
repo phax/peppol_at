@@ -60,7 +60,8 @@ public class PEPPOLUBL20ToEbInterface40ConverterTest {
       assertNotNull (aDocEb);
 
       XMLWriter.writeToStream (aDocEb,
-                               FileUtils.getOutputStream ("target/" + FilenameHelper.getWithoutPath (aRes.getPath ())));
+                               FileUtils.getOutputStream ("generated-ebi40-files/" +
+                                                          FilenameHelper.getWithoutPath (aRes.getPath ())));
     }
   }
 }
