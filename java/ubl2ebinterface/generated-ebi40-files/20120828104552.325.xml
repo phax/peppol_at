@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:Invoice ns2:DocumentType="Invoice" ns2:GeneratingSystem="UBL 2.0 to ebInterface 4.0 converter" ns2:InvoiceCurrency="EUR" xmlns="http://www.w3.org/2000/09/xmldsig#" xmlns:ns2="http://www.ebinterface.at/schema/4p0/" xmlns:ns3="http://www.ebinterface.at/schema/4p0/extensions/sv" xmlns:ns4="http://www.ebinterface.at/schema/4p0/extensions/ext">
+  <ns2:InvoiceNumber>B-BS-2287</ns2:InvoiceNumber>
+  <ns2:InvoiceDate>2012-04-30</ns2:InvoiceDate>
+  <ns2:Biller>
+    <ns2:VATIdentificationNumber>ATU12345678</ns2:VATIdentificationNumber>
+    <ns2:InvoiceRecipientsBillerID>11011011</ns2:InvoiceRecipientsBillerID>
+    <ns2:Address>
+      <ns2:Name>42virtual Business Services GmbH</ns2:Name>
+      <ns2:Street>Johannesgasse 15</ns2:Street>
+      <ns2:Town>Wien</ns2:Town>
+      <ns2:ZIP>1010</ns2:ZIP>
+      <ns2:Country ns2:CountryCode="AT" />
+      <ns2:Phone>47111</ns2:Phone>
+      <ns2:Email>test@example.org</ns2:Email>
+    </ns2:Address>
+  </ns2:Biller>
+  <ns2:InvoiceRecipient>
+    <ns2:VATIdentificationNumber>ATU 378 664 03</ns2:VATIdentificationNumber>
+    <ns2:BillersInvoiceRecipientID>149</ns2:BillersInvoiceRecipientID>
+    <ns2:OrderReference>
+      <ns2:OrderID>1234567890</ns2:OrderID>
+    </ns2:OrderReference>
+    <ns2:Address>
+      <ns2:Name>Bundesministerium für Finanzen</ns2:Name>
+      <ns2:Street>Hintere Zollamtsstraße 2b</ns2:Street>
+      <ns2:Town>Wien</ns2:Town>
+      <ns2:ZIP>1030</ns2:ZIP>
+      <ns2:Country ns2:CountryCode="AT" />
+    </ns2:Address>
+  </ns2:InvoiceRecipient>
+  <ns2:Details>
+    <ns2:ItemList>
+      <ns2:ListLineItem>
+        <ns2:PositionNumber>1</ns2:PositionNumber>
+        <ns2:Description>Abrechnung</ns2:Description>
+        <ns2:Quantity ns2:Unit="LH">1</ns2:Quantity>
+        <ns2:UnitPrice>135.6250</ns2:UnitPrice>
+        <ns2:TaxRate>20</ns2:TaxRate>
+        <ns2:InvoiceRecipientsOrderReference>
+          <ns2:OrderID>1234567890</ns2:OrderID>
+          <ns2:OrderPositionNumber>10</ns2:OrderPositionNumber>
+        </ns2:InvoiceRecipientsOrderReference>
+        <ns2:LineItemAmount>135.63</ns2:LineItemAmount>
+      </ns2:ListLineItem>
+    </ns2:ItemList>
+  </ns2:Details>
+  <ns2:Tax>
+    <ns2:VAT>
+      <ns2:Item>
+        <ns2:TaxedAmount>135.63</ns2:TaxedAmount>
+        <ns2:TaxRate>20</ns2:TaxRate>
+        <ns2:Amount>27.13</ns2:Amount>
+      </ns2:Item>
+    </ns2:VAT>
+  </ns2:Tax>
+  <ns2:TotalGrossAmount>162.76</ns2:TotalGrossAmount>
+  <ns2:PaymentMethod xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="ns2:UniversalBankTransactionType">
+    <ns2:BeneficiaryAccount>
+      <ns2:BIC>TUVTAT21</ns2:BIC>
+      <ns2:IBAN>AT89 1111 2222 3333 0000</ns2:IBAN>
+    </ns2:BeneficiaryAccount>
+  </ns2:PaymentMethod>
+</ns2:Invoice>
