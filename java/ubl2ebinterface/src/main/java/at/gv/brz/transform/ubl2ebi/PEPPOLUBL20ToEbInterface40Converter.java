@@ -206,7 +206,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
         aEbiCountry.setContent (aUBLAddress.getCountry ().getNameValue ());
         if (StringHelper.hasNoText (aEbiCountry.getContent ()) && aCC != null) {
           final Locale aLocale = CountryCache.getCountry (aCC.value ());
-          aEbiCountry.setContent (aLocale.getDisplayCountry (Locale.GERMANY));
+          aEbiCountry.setContent (aLocale.getDisplayCountry ());
         }
         aEbiAddress.setCountry (aEbiCountry);
       }
@@ -610,6 +610,15 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
           aEbiOrderReferenceDetail.setOrderPositionNumber (aOrderLineReference.getLineIDValue ());
           aEbiListLineItem.setInvoiceRecipientsOrderReference (aEbiOrderReferenceDetail);
         }
+
+        for (final OrderLineReferenceType aUBLOrderLineReference : aUBLInvoiceLine.getOrderLineReference ())
+          if (StringHelper.hasText (aUBLOrderLineReference.getLineIDValue ())) {
+            final Ebi40OrderReferenceDetailType aEbiOrderRefDetail = new Ebi40OrderReferenceDetailType ();
+            aEbiOrderRefDetail.setOrderID (sUBLOrderReferenceID);
+            aEbiOrderRefDetail.setOrderPositionNumber (aUBLOrderLineReference.getLineIDValue ());
+            aEbiListLineItem.setInvoiceRecipientsOrderReference (aEbiOrderRefDetail);
+            break;
+          }
 
         // Reduction and surcharge
         if (aUBLInvoiceLine.hasAllowanceChargeEntries ()) {
