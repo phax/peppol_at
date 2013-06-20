@@ -611,6 +611,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
           aEbiListLineItem.setInvoiceRecipientsOrderReference (aEbiOrderReferenceDetail);
         }
 
+        // Invoice recipients order reference
         for (final OrderLineReferenceType aUBLOrderLineReference : aUBLInvoiceLine.getOrderLineReference ())
           if (StringHelper.hasText (aUBLOrderLineReference.getLineIDValue ())) {
             final Ebi40OrderReferenceDetailType aEbiOrderRefDetail = new Ebi40OrderReferenceDetailType ();
