@@ -16,6 +16,7 @@ import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.Addr
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.AllowanceChargeType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.ContactType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.CustomerPartyType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.DeliveryType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.DocumentReferenceType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.FinancialAccountType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.InvoiceLineType;
@@ -62,6 +63,7 @@ import com.phloc.ebinterface.v40.Ebi40BillerType;
 import com.phloc.ebinterface.v40.Ebi40CountryCodeType;
 import com.phloc.ebinterface.v40.Ebi40CountryType;
 import com.phloc.ebinterface.v40.Ebi40CurrencyType;
+import com.phloc.ebinterface.v40.Ebi40DeliveryType;
 import com.phloc.ebinterface.v40.Ebi40DetailsType;
 import com.phloc.ebinterface.v40.Ebi40DocumentTypeType;
 import com.phloc.ebinterface.v40.Ebi40InvoiceRecipientType;
@@ -174,20 +176,9 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
     return null;
   }
 
-  @Nonnull
-  private static Ebi40AddressType _convertAddress (@Nonnull final PartyType aUBLParty) {
-    final Ebi40AddressType aEbiAddress = new Ebi40AddressType ();
-
-    // Convert name
-    final PartyNameType aUBLPartyName = ContainerHelper.getSafe (aUBLParty.getPartyName (), 0);
-    if (aUBLPartyName != null) {
-      aEbiAddress.setName (aUBLPartyName.getNameValue ());
-      if (aUBLParty.getPartyNameCount () > 1)
-        s_aLogger.warn ("UBL invoice has multiple party names - only the first one is used!");
-    }
-
+  private static void _setAddressData (@Nullable final AddressType aUBLAddress,
+                                       @Nonnull final Ebi40AddressType aEbiAddress) {
     // Convert main address
-    final AddressType aUBLAddress = aUBLParty.getPostalAddress ();
     if (aUBLAddress != null) {
       aEbiAddress.setStreet (StringHelper.getImplodedNonEmpty (" ",
                                                                aUBLAddress.getStreetNameValue (),
@@ -195,6 +186,8 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
       aEbiAddress.setPOBox (aUBLAddress.getPostboxValue ());
       aEbiAddress.setTown (aUBLAddress.getCityNameValue ());
       aEbiAddress.setZIP (aUBLAddress.getPostalZoneValue ());
+
+      // Country
       if (aUBLAddress.getCountry () != null) {
         final Ebi40CountryType aEbiCountry = new Ebi40CountryType ();
         Ebi40CountryCodeType aCC = null;
@@ -211,6 +204,34 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
         aEbiAddress.setCountry (aEbiCountry);
       }
     }
+
+    if (aEbiAddress.getStreet () == null)
+      aEbiAddress.setStreet (DUMMY_VALUE);
+    if (aEbiAddress.getTown () == null)
+      aEbiAddress.setTown (DUMMY_VALUE);
+    if (aEbiAddress.getZIP () == null)
+      aEbiAddress.setZIP (DUMMY_VALUE);
+    if (aEbiAddress.getCountry () == null) {
+      final Ebi40CountryType aCountry = new Ebi40CountryType ();
+      aCountry.setContent (DUMMY_VALUE);
+      aEbiAddress.setCountry (aCountry);
+    }
+  }
+
+  @Nonnull
+  private static Ebi40AddressType _convertParty (@Nonnull final PartyType aUBLParty) {
+    final Ebi40AddressType aEbiAddress = new Ebi40AddressType ();
+
+    // Convert name
+    final PartyNameType aUBLPartyName = ContainerHelper.getSafe (aUBLParty.getPartyName (), 0);
+    if (aUBLPartyName != null) {
+      aEbiAddress.setName (aUBLPartyName.getNameValue ());
+      if (aUBLParty.getPartyNameCount () > 1)
+        s_aLogger.warn ("UBL invoice has multiple party names - only the first one is used!");
+    }
+
+    // Convert main address
+    _setAddressData (aUBLParty.getPostalAddress (), aEbiAddress);
 
     // Contact
     final ContactType aUBLContact = aUBLParty.getContact ();
@@ -277,17 +298,6 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
     // Check all mandatory fields
     if (aEbiAddress.getName () == null)
       aEbiAddress.setName (DUMMY_VALUE);
-    if (aEbiAddress.getStreet () == null)
-      aEbiAddress.setStreet (DUMMY_VALUE);
-    if (aEbiAddress.getTown () == null)
-      aEbiAddress.setTown (DUMMY_VALUE);
-    if (aEbiAddress.getZIP () == null)
-      aEbiAddress.setZIP (DUMMY_VALUE);
-    if (aEbiAddress.getCountry () == null) {
-      final Ebi40CountryType aCountry = new Ebi40CountryType ();
-      aCountry.setContent (DUMMY_VALUE);
-      aEbiAddress.setCountry (aCountry);
-    }
 
     return aEbiAddress;
   }
@@ -344,7 +354,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
         // The customer's internal identifier for the supplier.
         aEbiBiller.setInvoiceRecipientsBillerID (aUBLSupplier.getCustomerAssignedAccountID ().getValue ());
       }
-      aEbiBiller.setAddress (_convertAddress (aUBLSupplier.getParty ()));
+      aEbiBiller.setAddress (_convertParty (aUBLSupplier.getParty ()));
       aEbiInvoice.setBiller (aEbiBiller);
     }
 
@@ -374,7 +384,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
         s_aLogger.error ("Failed to get supplier assigned account ID for customer!");
         aEbiRecipient.setBillersInvoiceRecipientID (DUMMY_VALUE);
       }
-      aEbiRecipient.setAddress (_convertAddress (aUBLCustomer.getParty ()));
+      aEbiRecipient.setAddress (_convertParty (aUBLCustomer.getParty ()));
       aEbiInvoice.setInvoiceRecipient (aEbiRecipient);
     }
 
@@ -796,6 +806,25 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
           break;
         }
       }
+    }
+
+    // Delivery
+    if (aUBLInvoice.getDeliveryCount () >= 1) {
+      final DeliveryType aUBLDelivery = aUBLInvoice.getDeliveryAtIndex (0);
+      final Ebi40DeliveryType aEbiDelivery = new Ebi40DeliveryType ();
+
+      if (aUBLDelivery.getActualDeliveryDate () != null)
+        aEbiDelivery.setDate (aUBLDelivery.getActualDeliveryDateValue ());
+
+      // Address
+      if (aUBLDelivery.getDeliveryLocation () != null && aUBLDelivery.getDeliveryLocation ().getAddress () != null) {
+        final Ebi40AddressType aEbiAddress = new Ebi40AddressType ();
+        aEbiAddress.setName (DUMMY_VALUE);
+        _setAddressData (aUBLDelivery.getDeliveryLocation ().getAddress (), aEbiAddress);
+        aEbiDelivery.setAddress (aEbiAddress);
+      }
+
+      aEbiInvoice.setDelivery (aEbiDelivery);
     }
 
     return aEbiInvoice;

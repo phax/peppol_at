@@ -2,6 +2,16 @@
 <ns2:Invoice ns2:DocumentType="Invoice" ns2:GeneratingSystem="UBL 2.0 to ebInterface 4.0 converter" ns2:InvoiceCurrency="EUR" xmlns="http://www.w3.org/2000/09/xmldsig#" xmlns:ns2="http://www.ebinterface.at/schema/4p0/" xmlns:ns3="http://www.ebinterface.at/schema/4p0/extensions/sv" xmlns:ns4="http://www.ebinterface.at/schema/4p0/extensions/ext">
   <ns2:InvoiceNumber>TOSL108</ns2:InvoiceNumber>
   <ns2:InvoiceDate>2009-12-15</ns2:InvoiceDate>
+  <ns2:Delivery>
+    <ns2:Date>2009-12-15</ns2:Date>
+    <ns2:Address>
+      <ns2:Name>DUMMY_VALUE</ns2:Name>
+      <ns2:Street>Deliverystreet 12</ns2:Street>
+      <ns2:Town>DeliveryCity</ns2:Town>
+      <ns2:ZIP>523427</ns2:ZIP>
+      <ns2:Country ns2:CountryCode="BE">Belgien</ns2:Country>
+    </ns2:Address>
+  </ns2:Delivery>
   <ns2:Biller>
     <ns2:VATIdentificationNumber>NO999999999MVA</ns2:VATIdentificationNumber>
     <ns2:Address>
