@@ -354,6 +354,11 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
         // The customer's internal identifier for the supplier.
         aEbiBiller.setInvoiceRecipientsBillerID (aUBLSupplier.getCustomerAssignedAccountID ().getValue ());
       }
+      if (StringHelper.hasNoText (aEbiBiller.getInvoiceRecipientsBillerID ())) {
+        // Mandatory field
+        s_aLogger.error ("Failed to get customer assigned account ID for supplier!");
+        aEbiBiller.setInvoiceRecipientsBillerID (DUMMY_VALUE);
+      }
       aEbiBiller.setAddress (_convertParty (aUBLSupplier.getParty ()));
       aEbiInvoice.setBiller (aEbiBiller);
     }
@@ -379,7 +384,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
         // eb: Identifikation des Rechnungsempfängers beim Rechnungssteller.
         aEbiRecipient.setBillersInvoiceRecipientID (aUBLCustomer.getSupplierAssignedAccountIDValue ());
       }
-      else {
+      if (StringHelper.hasNoText (aEbiRecipient.getBillersInvoiceRecipientID ())) {
         // Mandatory field
         s_aLogger.error ("Failed to get supplier assigned account ID for customer!");
         aEbiRecipient.setBillersInvoiceRecipientID (DUMMY_VALUE);

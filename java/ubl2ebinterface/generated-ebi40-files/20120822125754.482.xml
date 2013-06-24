@@ -14,6 +14,7 @@
   </ns2:Delivery>
   <ns2:Biller>
     <ns2:VATIdentificationNumber>NO999999999MVA</ns2:VATIdentificationNumber>
+    <ns2:InvoiceRecipientsBillerID>DUMMY_VALUE</ns2:InvoiceRecipientsBillerID>
     <ns2:Address>
       <ns2:AddressIdentifier ns2:AddressIdentifierType="GLN">1234567890123</ns2:AddressIdentifier>
       <ns2:Name>Salescompany ltd.</ns2:Name>
