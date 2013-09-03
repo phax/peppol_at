@@ -42,7 +42,7 @@
     <dependency>
       <groupId>com.phloc</groupId>
       <artifactId>phloc-commons</artifactId>
-      <version>4.0.9</version>
+      <version>4.0.10</version>
     </dependency>
     <dependency>
       <groupId>com.phloc</groupId>
@@ -67,7 +67,7 @@
     <dependency>
       <groupId>com.phloc</groupId>
       <artifactId>phloc-ebinterface</artifactId>
-      <version>3.0.0</version>
+      <version>3.0.1</version>
     </dependency>
     <dependency>
       <groupId>eu.europa.ec.cipa</groupId>
