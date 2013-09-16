@@ -44,6 +44,7 @@
     </cac:Attachment>
   </cac:AdditionalDocumentReference>
   <cac:AccountingSupplierParty>
+    <cbc:CustomerAssignedAccountID>1234567890</cbc:CustomerAssignedAccountID>
     <cac:Party>
       <cbc:EndpointID schemeAgencyID="9" schemeID="GLN">1234567890123</cbc:EndpointID>
       <cac:PartyIdentification>
@@ -178,6 +179,11 @@
         </cac:Country>
       </cac:Address>
     </cac:DeliveryLocation>
+    <cac:DeliveryParty>
+      <cac:PartyName>
+        <cbc:Name>Bank Account Owner</cbc:Name>
+      </cac:PartyName>
+    </cac:DeliveryParty>
   </cac:Delivery>
   <cac:PaymentMeans>
     <cbc:PaymentMeansCode listAgencyID="NES" listID="UN/ECE 4461 Subset">31</cbc:PaymentMeansCode>

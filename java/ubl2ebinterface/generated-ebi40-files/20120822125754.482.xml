@@ -5,7 +5,7 @@
   <ns2:Delivery>
     <ns2:Date>2009-12-15</ns2:Date>
     <ns2:Address>
-      <ns2:Name>DUMMY_VALUE</ns2:Name>
+      <ns2:Name>Bank Account Owner</ns2:Name>
       <ns2:Street>Deliverystreet 12</ns2:Street>
       <ns2:Town>DeliveryCity</ns2:Town>
       <ns2:ZIP>523427</ns2:ZIP>
@@ -14,7 +14,7 @@
   </ns2:Delivery>
   <ns2:Biller>
     <ns2:VATIdentificationNumber>NO999999999MVA</ns2:VATIdentificationNumber>
-    <ns2:InvoiceRecipientsBillerID>DUMMY_VALUE</ns2:InvoiceRecipientsBillerID>
+    <ns2:InvoiceRecipientsBillerID>1234567890</ns2:InvoiceRecipientsBillerID>
     <ns2:Address>
       <ns2:AddressIdentifier ns2:AddressIdentifierType="GLN">1234567890123</ns2:AddressIdentifier>
       <ns2:Name>Salescompany ltd.</ns2:Name>
@@ -30,7 +30,7 @@
   </ns2:Biller>
   <ns2:InvoiceRecipient>
     <ns2:VATIdentificationNumber>BE54321</ns2:VATIdentificationNumber>
-    <ns2:BillersInvoiceRecipientID>DUMMY_VALUE</ns2:BillersInvoiceRecipientID>
+    <ns2:BillersInvoiceRecipientID>000</ns2:BillersInvoiceRecipientID>
     <ns2:OrderReference>
       <ns2:OrderID>123</ns2:OrderID>
     </ns2:OrderReference>

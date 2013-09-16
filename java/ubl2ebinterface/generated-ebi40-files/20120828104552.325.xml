@@ -59,6 +59,7 @@
     <ns2:BeneficiaryAccount>
       <ns2:BIC>TUVTAT21</ns2:BIC>
       <ns2:IBAN>AT89 1111 2222 3333 0000</ns2:IBAN>
+      <ns2:BankAccountOwner>42virtual Business Services GmbH</ns2:BankAccountOwner>
     </ns2:BeneficiaryAccount>
   </ns2:PaymentMethod>
 </ns2:Invoice>
