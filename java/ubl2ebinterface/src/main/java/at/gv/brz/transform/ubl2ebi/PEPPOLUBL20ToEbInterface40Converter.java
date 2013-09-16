@@ -346,17 +346,17 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
    * 
    * @param aUBLInvoice
    *        The UBL invoice to be converted
-   * @param aTransformationErrorList
-   *        Error list. Must be empty!
    * @param aDisplayLocale
    *        Display locale for error message creation
+   * @param aTransformationErrorList
+   *        Error list. Must be empty!
    * @return The created ebInterface 4.0 document or <code>null</code> in case
    *         of a severe error.
    */
   @Nullable
   public static Ebi40InvoiceType convertToEbInterface (@Nonnull final InvoiceType aUBLInvoice,
-                                                       @Nonnull final ErrorList aTransformationErrorList,
-                                                       @Nonnull final Locale aDisplayLocale) {
+                                                       @Nonnull final Locale aDisplayLocale,
+                                                       @Nonnull final ErrorList aTransformationErrorList) {
     if (aUBLInvoice == null)
       throw new NullPointerException ("UBLInvoice");
     if (aTransformationErrorList == null)

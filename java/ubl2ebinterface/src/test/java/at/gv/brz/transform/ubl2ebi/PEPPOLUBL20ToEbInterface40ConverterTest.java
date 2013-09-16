@@ -60,8 +60,8 @@ public class PEPPOLUBL20ToEbInterface40ConverterTest {
       // Convert to ebInterface
       final ErrorList aLogger = new ErrorList ();
       final Ebi40InvoiceType aEbInvoice = PEPPOLUBL20ToEbInterface40Converter.convertToEbInterface (aUBLInvoice,
-                                                                                                    aLogger,
-                                                                                                    Locale.GERMANY);
+                                                                                                    Locale.GERMANY,
+                                                                                                    aLogger);
       assertTrue (aRes.getPath () + ": " + aLogger.toString (),
                   aLogger.getMostSevereErrorLevel ().isLessSevereThan (EErrorLevel.ERROR));
       assertNotNull (aEbInvoice);
