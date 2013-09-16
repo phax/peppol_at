@@ -106,6 +106,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
   // Austria uses HALF_UP mode!
   private static final RoundingMode ROUNDING_MODE = RoundingMode.HALF_UP;
 
+  @SuppressWarnings ("unused")
   private final Locale m_aDisplayLocale;
   private final boolean m_bStrictERBMode;
 
