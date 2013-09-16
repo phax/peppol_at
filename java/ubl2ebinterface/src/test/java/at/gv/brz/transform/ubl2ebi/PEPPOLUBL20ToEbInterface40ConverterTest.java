@@ -20,6 +20,7 @@ import com.phloc.commons.io.IReadableResource;
 import com.phloc.commons.io.file.FileUtils;
 import com.phloc.commons.io.file.FilenameHelper;
 import com.phloc.commons.io.file.filter.FilenameFilterEndsWith;
+import com.phloc.commons.io.file.iterate.FileSystemIterator;
 import com.phloc.commons.io.file.iterate.FileSystemRecursiveIterator;
 import com.phloc.commons.io.resource.FileSystemResource;
 import com.phloc.commons.xml.serialize.XMLWriter;
@@ -40,7 +41,7 @@ public class PEPPOLUBL20ToEbInterface40ConverterTest {
   private static final Logger s_aLogger = LoggerFactory.getLogger (PEPPOLUBL20ToEbInterface40ConverterTest.class);
 
   @Test
-  public void testConvertPEPPOLInvoice () {
+  public void testConvertPEPPOLInvoiceLax () {
     final List <IReadableResource> aTestFiles = new ArrayList <IReadableResource> ();
     if (false)
       aTestFiles.addAll (TestFiles.getSuccessFiles (ETestFileType.INVOICE));
@@ -58,16 +59,52 @@ public class PEPPOLUBL20ToEbInterface40ConverterTest {
       assertNotNull (aUBLInvoice);
 
       // Convert to ebInterface
-      final ErrorList aLogger = new ErrorList ();
-      final Ebi40InvoiceType aEbInvoice = PEPPOLUBL20ToEbInterface40Converter.convertToEbInterface (aUBLInvoice,
-                                                                                                    Locale.GERMANY,
-                                                                                                    aLogger);
-      assertTrue (aRes.getPath () + ": " + aLogger.toString (),
-                  aLogger.getMostSevereErrorLevel ().isLessSevereThan (EErrorLevel.ERROR));
+      final ErrorList aErrorList = new ErrorList ();
+      final Ebi40InvoiceType aEbInvoice = new PEPPOLUBL20ToEbInterface40Converter (Locale.GERMANY, false).convertToEbInterface (aUBLInvoice,
+                                                                                                                                aErrorList);
+      assertTrue (aRes.getPath () + ": " + aErrorList.toString (), aErrorList.getMostSevereErrorLevel ()
+                                                                             .isLessSevereThan (EErrorLevel.ERROR));
       assertNotNull (aEbInvoice);
 
-      if (aLogger.getMostSevereErrorLevel ().isMoreOrEqualSevereThan (EErrorLevel.WARN))
-        s_aLogger.info ("  " + aLogger.getAllItems ());
+      if (aErrorList.getMostSevereErrorLevel ().isMoreOrEqualSevereThan (EErrorLevel.WARN))
+        s_aLogger.info ("  " + aErrorList.getAllItems ());
+
+      // Convert ebInterface to XML
+      final Document aDocEb = new EbInterface40Marshaller ().write (aEbInvoice);
+      assertNotNull (aDocEb);
+
+      XMLWriter.writeToStream (aDocEb,
+                               FileUtils.getOutputStream ("generated-ebi40-files/" +
+                                                          FilenameHelper.getWithoutPath (aRes.getPath ())));
+    }
+  }
+
+  @Test
+  public void testConvertPEPPOLInvoiceERB () {
+    final List <IReadableResource> aTestFiles = new ArrayList <IReadableResource> ();
+    for (final File aFile : FileSystemIterator.create (new File ("src/test/resources/ubl20"),
+                                                       new FilenameFilterEndsWith (".xml")))
+      aTestFiles.add (new FileSystemResource (aFile));
+
+    // For all PEPPOL test invoices
+    for (final IReadableResource aRes : aTestFiles) {
+      s_aLogger.info (aRes.getPath ());
+      assertTrue (aRes.exists ());
+
+      // Read UBL
+      final InvoiceType aUBLInvoice = UBL20Reader.readInvoice (aRes);
+      assertNotNull (aUBLInvoice);
+
+      // Convert to ebInterface
+      final ErrorList aErrorList = new ErrorList ();
+      final Ebi40InvoiceType aEbInvoice = new PEPPOLUBL20ToEbInterface40Converter (Locale.GERMANY, true).convertToEbInterface (aUBLInvoice,
+                                                                                                                               aErrorList);
+      assertTrue (aRes.getPath () + ": " + aErrorList.toString (), aErrorList.getMostSevereErrorLevel ()
+                                                                             .isLessSevereThan (EErrorLevel.ERROR));
+      assertNotNull (aEbInvoice);
+
+      if (aErrorList.getMostSevereErrorLevel ().isMoreOrEqualSevereThan (EErrorLevel.WARN))
+        s_aLogger.info ("  " + aErrorList.getAllItems ());
 
       // Convert ebInterface to XML
       final Document aDocEb = new EbInterface40Marshaller ().write (aEbInvoice);

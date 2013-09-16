@@ -103,9 +103,19 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
   private static final String EBI_GENERATING_SYSTEM = "UBL 2.0 to ebInterface 4.0 converter";
   private static final int SCALE_PERC = 2;
   private static final int SCALE_PRICE_LINE = 4;
-  private static final RoundingMode ROUNDING_MODE = RoundingMode.HALF_EVEN;
+  // Austria uses HALF_UP mode!
+  private static final RoundingMode ROUNDING_MODE = RoundingMode.HALF_UP;
 
-  private PEPPOLUBL20ToEbInterface40Converter () {}
+  private final Locale m_aDisplayLocale;
+  private final boolean m_bStrictERBMode;
+
+  public PEPPOLUBL20ToEbInterface40Converter (@Nonnull final Locale aDisplayLocale, final boolean bStrictERBMode) {
+    if (aDisplayLocale == null)
+      throw new NullPointerException ("DisplayLocale");
+
+    m_aDisplayLocale = aDisplayLocale;
+    m_bStrictERBMode = bStrictERBMode;
+  }
 
   /**
    * Check if the passed UBL invoice is transformable
@@ -346,25 +356,20 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
    * 
    * @param aUBLInvoice
    *        The UBL invoice to be converted
-   * @param aDisplayLocale
-   *        Display locale for error message creation
    * @param aTransformationErrorList
    *        Error list. Must be empty!
    * @return The created ebInterface 4.0 document or <code>null</code> in case
    *         of a severe error.
    */
   @Nullable
-  public static Ebi40InvoiceType convertToEbInterface (@Nonnull final InvoiceType aUBLInvoice,
-                                                       @Nonnull final Locale aDisplayLocale,
-                                                       @Nonnull final ErrorList aTransformationErrorList) {
+  public Ebi40InvoiceType convertToEbInterface (@Nonnull final InvoiceType aUBLInvoice,
+                                                @Nonnull final ErrorList aTransformationErrorList) {
     if (aUBLInvoice == null)
       throw new NullPointerException ("UBLInvoice");
     if (aTransformationErrorList == null)
       throw new NullPointerException ("TransformationErrorList");
     if (!aTransformationErrorList.isEmpty ())
       throw new IllegalArgumentException ("TransformationErrorList must be empty!");
-    if (aDisplayLocale == null)
-      throw new NullPointerException ("DisplayLocale");
 
     // Consistency check before starting the conversion
     _checkConsistency (aUBLInvoice, aTransformationErrorList);
@@ -390,19 +395,21 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
           aEbiBiller.setVATIdentificationNumber (aUBLPartyTaxScheme.getCompanyIDValue ());
           break;
         }
-      if (aEbiBiller.getVATIdentificationNumber () == null) {
-        // A VAT number must be present in certain cases!
-        aTransformationErrorList.addWarning ("AccountingSupplierParty/Party/PartyTaxScheme",
-                                             "Failed to get biller VAT number!");
+      if (StringHelper.hasNoText (aEbiBiller.getVATIdentificationNumber ())) {
+        // Required by ebInterface 4.0
+        aTransformationErrorList.addError ("AccountingSupplierParty/Party/PartyTaxScheme",
+                                           "Failed to get biller VAT number!");
       }
       if (aUBLSupplier.getCustomerAssignedAccountID () != null) {
         // The customer's internal identifier for the supplier.
         aEbiBiller.setInvoiceRecipientsBillerID (aUBLSupplier.getCustomerAssignedAccountID ().getValue ());
       }
       if (StringHelper.hasNoText (aEbiBiller.getInvoiceRecipientsBillerID ())) {
-        // Mandatory field
-        aTransformationErrorList.addError ("AccountingSupplierParty/CustomerAssignedAccountID",
-                                           "Failed to get customer assigned account ID for supplier!");
+        if (m_bStrictERBMode) {
+          // Mandatory field
+          aTransformationErrorList.addError ("AccountingSupplierParty/CustomerAssignedAccountID",
+                                             "Failed to get customer assigned account ID for supplier!");
+        }
       }
       aEbiBiller.setAddress (_convertParty (aUBLSupplier.getParty (),
                                             "AccountingSupplierParty",
@@ -420,10 +427,10 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
           aEbiRecipient.setVATIdentificationNumber (aUBLPartyTaxScheme.getCompanyIDValue ());
           break;
         }
-      if (aEbiRecipient.getVATIdentificationNumber () == null) {
-        // Mandatory field in certain cases
-        aTransformationErrorList.addWarning ("AccountingCustomerParty/PartyTaxScheme",
-                                             "Failed to get supplier VAT number!");
+      if (StringHelper.hasNoText (aEbiRecipient.getVATIdentificationNumber ())) {
+        // Required by ebInterface 4.0
+        aTransformationErrorList.addError ("AccountingCustomerParty/PartyTaxScheme",
+                                           "Failed to get supplier VAT number!");
       }
       if (aUBLCustomer.getSupplierAssignedAccountID () != null) {
         // UBL: An identifier for the Customer's account, assigned by the
@@ -591,8 +598,9 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
           }
         }
         if (aUBLPercent == null) {
-          aTransformationErrorList.addError ("TaxTotal/TaxSubtotal/TaxCategory",
-                                             "Failed to resolve tax percentage for invoice line!");
+          aTransformationErrorList.addWarning ("TaxTotal/TaxSubtotal/TaxCategory",
+                                               "Failed to resolve tax percentage for invoice line! Defaulting to 0%.");
+          aUBLPercent = BigDecimal.ZERO;
         }
 
         // Start creating ebInterface line
@@ -879,9 +887,12 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
             if (aParty != null && aParty.getPartyNameCount () > 0)
               sBankAccountOwnerName = aParty.getPartyNameAtIndex (0).getNameValue ();
           }
-          if (StringHelper.hasNoText (sBankAccountOwnerName))
-            aTransformationErrorList.addError ("PayeeParty/PartyName/Name",
-                                               "Failed to determine the bank account owner name.");
+          if (StringHelper.hasNoText (sBankAccountOwnerName)) {
+            if (m_bStrictERBMode) {
+              aTransformationErrorList.addError ("PayeeParty/PartyName/Name",
+                                                 "Failed to determine the bank account owner name.");
+            }
+          }
           aEbiAccount.setBankAccountOwner (sBankAccountOwnerName);
 
           aEbiUBTMethod.getBeneficiaryAccount ().add (aEbiAccount);
@@ -907,8 +918,19 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
                          "Delivery",
                          aTransformationErrorList);
 
+        // Check delivery party
         if (aUBLDelivery.getDeliveryParty () != null && aUBLDelivery.getDeliveryParty ().hasPartyNameEntries ())
           aEbiAddress.setName (aUBLDelivery.getDeliveryParty ().getPartyNameAtIndex (0).getNameValue ());
+
+        // As fallback use accounting customer party
+        if (StringHelper.hasNoText (aEbiAddress.getName ()))
+          if (aUBLInvoice.getAccountingCustomerParty () != null &&
+              aUBLInvoice.getAccountingCustomerParty ().getParty () != null &&
+              aUBLInvoice.getAccountingCustomerParty ().getParty ().hasPartyNameEntries ())
+            aEbiAddress.setName (aUBLInvoice.getAccountingCustomerParty ()
+                                            .getParty ()
+                                            .getPartyNameAtIndex (0)
+                                            .getNameValue ());
 
         if (StringHelper.hasNoText (aEbiAddress.getName ()))
           aTransformationErrorList.addError ("Delivery/DeliveryParty",
