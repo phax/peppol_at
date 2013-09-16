@@ -70,6 +70,11 @@
       <version>3.0.1</version>
     </dependency>
     <dependency>
+      <groupId>com.phloc</groupId>
+      <artifactId>phloc-validation</artifactId>
+      <version>3.0.0</version>
+    </dependency>
+    <dependency>
       <groupId>eu.europa.ec.cipa</groupId>
       <artifactId>cipa-peppol-types</artifactId>
       <version>1.1.1</version>

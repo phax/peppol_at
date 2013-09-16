@@ -44,8 +44,9 @@ import at.gv.brz.transform.ubl2ebi.helper.TaxCategoryKey;
 
 import com.phloc.commons.CGlobal;
 import com.phloc.commons.collections.ContainerHelper;
+import com.phloc.commons.equals.EqualsUtils;
+import com.phloc.commons.error.EErrorLevel;
 import com.phloc.commons.locale.country.CountryCache;
-import com.phloc.commons.log.InMemoryLogger;
 import com.phloc.commons.math.MathHelper;
 import com.phloc.commons.regex.RegExHelper;
 import com.phloc.commons.state.ETriState;
@@ -81,6 +82,7 @@ import com.phloc.ebinterface.v40.Ebi40UniversalBankTransactionType;
 import com.phloc.ebinterface.v40.Ebi40VATType;
 import com.phloc.ebinterface.v40.ObjectFactory;
 import com.phloc.ubl20.codelist.EUnitOfMeasureCode20;
+import com.phloc.validation.error.ErrorList;
 
 import eu.europa.ec.cipa.peppol.identifier.doctype.IPeppolPredefinedDocumentTypeIdentifier;
 import eu.europa.ec.cipa.peppol.identifier.process.IPeppolPredefinedProcessIdentifier;
@@ -110,71 +112,86 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
    * 
    * @param aUBLInvoice
    *        The UBL invoice to check
-   * @return <code>null</code> in case of no error, the error message otherwise
    */
-  @Nullable
-  private static String _checkConsistency (@Nonnull final InvoiceType aUBLInvoice, @Nonnull final InMemoryLogger aLogger) {
+  private static void _checkConsistency (@Nonnull final InvoiceType aUBLInvoice,
+                                         @Nonnull final ErrorList aTransformationErrorList) {
     // Check UBLVersionID
     final UBLVersionIDType aUBLVersionID = aUBLInvoice.getUBLVersionID ();
     if (aUBLVersionID == null)
-      return "No UBLVersionID present!";
-    if (!CPeppolUBL.UBL_VERSION.equals (aUBLVersionID.getValue ()))
-      return "Invalid UBLVersionID value '" + aUBLVersionID.getValue () + "' present!";
+      aTransformationErrorList.addError ("UBLVersionID", "No UBLVersionID present!");
+    else
+      if (!CPeppolUBL.UBL_VERSION.equals (aUBLVersionID.getValue ()))
+        aTransformationErrorList.addError ("UBLVersionID", "Invalid UBLVersionID value '" +
+                                                           aUBLVersionID.getValue () +
+                                                           "' present!");
 
     // Check ProfileID
+    IPeppolPredefinedProcessIdentifier aProcID = null;
     final ProfileIDType aProfileID = aUBLInvoice.getProfileID ();
     if (aProfileID == null)
-      return "No ProfileID present!";
-    final String sProfileID = StringHelper.trim (aProfileID.getValue ());
-    final IPeppolPredefinedProcessIdentifier aProcID = PredefinedProcessIdentifierManager.getProcessIdentifierOfID (sProfileID);
-    if (aProcID == null)
-      return "Invalid ProfileID value '" + sProfileID + "' present!";
+      aTransformationErrorList.addError ("ProfileID", "No ProfileID present!");
+    else {
+      final String sProfileID = StringHelper.trim (aProfileID.getValue ());
+      aProcID = PredefinedProcessIdentifierManager.getProcessIdentifierOfID (sProfileID);
+      if (aProcID == null)
+        aTransformationErrorList.addError ("ProfileID", "Invalid ProfileID value '" + sProfileID + "' present!");
+    }
 
     // Check CustomizationID
     // I'm not quite sure whether the document ID or "PEPPOL" should be used!
     if (false) {
       final CustomizationIDType aCustomizationID = aUBLInvoice.getCustomizationID ();
       if (aCustomizationID == null)
-        return "No CustomizationID present!";
-      if (!CPeppolUBL.CUSTOMIZATION_SCHEMEID.equals (aCustomizationID.getSchemeID ()))
-        return "Invalid CustomizationID schemeID '" + aCustomizationID.getSchemeID () + "' present!";
-      final String sCustomizationID = aCustomizationID.getValue ();
-      IPeppolPredefinedDocumentTypeIdentifier aMatchingDocID = null;
-      for (final IPeppolPredefinedDocumentTypeIdentifier aDocID : aProcID.getDocumentTypeIdentifiers ())
-        if (aDocID.getAsUBLCustomizationID ().equals (sCustomizationID)) {
-          // We found a match
-          aMatchingDocID = aDocID;
-          break;
-        }
-      if (aMatchingDocID == null)
-        return "Invalid CustomizationID value '" + sCustomizationID + "' present!";
+        aTransformationErrorList.addError ("CustomizationID", "No CustomizationID present!");
+      else
+        if (!CPeppolUBL.CUSTOMIZATION_SCHEMEID.equals (aCustomizationID.getSchemeID ()))
+          aTransformationErrorList.addError ("CustomizationID",
+                                             "Invalid CustomizationID schemeID '" +
+                                                 aCustomizationID.getSchemeID () +
+                                                 "' present. Must be '" +
+                                                 CPeppolUBL.CUSTOMIZATION_SCHEMEID +
+                                                 "'");
+        else
+          if (aProcID != null) {
+            final String sCustomizationID = aCustomizationID.getValue ();
+            IPeppolPredefinedDocumentTypeIdentifier aMatchingDocID = null;
+            for (final IPeppolPredefinedDocumentTypeIdentifier aDocID : aProcID.getDocumentTypeIdentifiers ())
+              if (aDocID.getAsUBLCustomizationID ().equals (sCustomizationID)) {
+                // We found a match
+                aMatchingDocID = aDocID;
+                break;
+              }
+            if (aMatchingDocID == null)
+              aTransformationErrorList.addError ("CustomizationID", "Invalid CustomizationID value '" +
+                                                                    sCustomizationID +
+                                                                    "' present! It is not supported by the passed profile.");
+          }
     }
 
     // Invoice type code
     final InvoiceTypeCodeType aInvoiceTypeCode = aUBLInvoice.getInvoiceTypeCode ();
     if (aInvoiceTypeCode == null) {
       // None present
-      aLogger.warn ("No InvoiceTypeCode present! Assuming " + CPeppolUBL.INVOICE_TYPE_CODE);
+      aTransformationErrorList.addWarning ("InvoiceTypeCode", "No InvoiceTypeCode present! Assuming " +
+                                                              CPeppolUBL.INVOICE_TYPE_CODE);
     }
     else {
       // If one is present, it must match
       final String sInvoiceTypeCode = aInvoiceTypeCode.getValue ().trim ();
       if (!CPeppolUBL.INVOICE_TYPE_CODE.equals (sInvoiceTypeCode))
-        aLogger.error ("Invalid InvoiceTypeCode value '" +
-                       sInvoiceTypeCode.trim () +
-                       "' present! Expected '" +
-                       CPeppolUBL.INVOICE_TYPE_CODE +
-                       "'");
+        aTransformationErrorList.addError ("InvoiceTypeCode",
+                                           "Invalid InvoiceTypeCode value '" +
+                                               sInvoiceTypeCode.trim () +
+                                               "' present! Expected '" +
+                                               CPeppolUBL.INVOICE_TYPE_CODE +
+                                               "'");
     }
-
-    // Done
-    return null;
   }
 
   private static void _setAddressData (@Nullable final AddressType aUBLAddress,
                                        @Nonnull final Ebi40AddressType aEbiAddress,
                                        @Nonnull final String sPartyType,
-                                       @Nonnull final InMemoryLogger aLogger) {
+                                       @Nonnull final ErrorList aTransformationErrorList) {
     // Convert main address
     if (aUBLAddress != null) {
       aEbiAddress.setStreet (StringHelper.getImplodedNonEmpty (" ",
@@ -203,19 +220,20 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
     }
 
     if (aEbiAddress.getStreet () == null)
-      aLogger.error (sPartyType + " address is missing a street name");
+      aTransformationErrorList.addError (sPartyType + "/PostalAddress/StreetName", "Address is missing a street name");
     if (aEbiAddress.getTown () == null)
-      aLogger.error (sPartyType + " address is missing a town name");
+      aTransformationErrorList.addError (sPartyType + "/PostalAddress/CityName", "Address is missing a town name");
     if (aEbiAddress.getZIP () == null)
-      aLogger.error (sPartyType + " address is missing a ZIP code");
+      aTransformationErrorList.addError (sPartyType + "/PostalAddress/PostalZone", "Address is missing a ZIP code");
     if (aEbiAddress.getCountry () == null)
-      aLogger.error (sPartyType + " address is missing a country");
+      aTransformationErrorList.addError (sPartyType + "/PostalAddress/Country/IdentificationCode",
+                                         "Address is missing a country");
   }
 
   @Nonnull
   private static Ebi40AddressType _convertParty (@Nonnull final PartyType aUBLParty,
                                                  @Nonnull final String sPartyType,
-                                                 @Nonnull final InMemoryLogger aLogger) {
+                                                 @Nonnull final ErrorList aTransformationErrorList) {
     final Ebi40AddressType aEbiAddress = new Ebi40AddressType ();
 
     // Convert name
@@ -223,11 +241,14 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
     if (aUBLPartyName != null) {
       aEbiAddress.setName (aUBLPartyName.getNameValue ());
       if (aUBLParty.getPartyNameCount () > 1)
-        aLogger.warn ("UBL invoice has multiple " + sPartyType + " party names - only the first one is used!");
+        aTransformationErrorList.addWarning (sPartyType + "/PartyName",
+                                             "Multiple party names present - only the first one is used!");
+      if (aEbiAddress.getName () == null)
+        aTransformationErrorList.addError (sPartyType, "Party name is missing!");
     }
 
     // Convert main address
-    _setAddressData (aUBLParty.getPostalAddress (), aEbiAddress, sPartyType, aLogger);
+    _setAddressData (aUBLParty.getPostalAddress (), aEbiAddress, sPartyType, aTransformationErrorList);
 
     // Contact
     final ContactType aUBLContact = aUBLParty.getContact ();
@@ -266,13 +287,11 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
           }
 
         if (aEbiAddress.getAddressIdentifier () == null)
-          aLogger.warn ("Ignoring " +
-                        sPartyType +
-                        " endpoint ID '" +
-                        sEndpointID +
-                        "' of type '" +
-                        aUBLParty.getEndpointID ().getSchemeID () +
-                        "'");
+          aTransformationErrorList.addWarning (sPartyType, "Ignoring endpoint ID '" +
+                                                           sEndpointID +
+                                                           "' of type '" +
+                                                           aUBLParty.getEndpointID ().getSchemeID () +
+                                                           "'");
       }
     }
 
@@ -289,19 +308,13 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
             aEbiAddress.setAddressIdentifier (aEbiType);
             break outer;
           }
-        aLogger.warn ("Ignoring " +
-                      sPartyType +
-                      " identification '" +
-                      sUBLPartyID +
-                      "' of type '" +
-                      aUBLPartyID.getID ().getSchemeID () +
-                      "'");
+        aTransformationErrorList.addWarning (sPartyType + "/PartyIdentification", "Ignoring identification '" +
+                                                                                  sUBLPartyID +
+                                                                                  "' of type '" +
+                                                                                  aUBLPartyID.getID ().getSchemeID () +
+                                                                                  "'");
       }
     }
-
-    // Check all mandatory fields
-    if (aEbiAddress.getName () == null)
-      aLogger.error (sPartyType + " has no name!");
 
     return aEbiAddress;
   }
@@ -313,11 +326,16 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
   }
 
   @Nullable
-  private static String _makeAlphaNumIDType (@Nullable final String sText, @Nonnull final InMemoryLogger aLogger) {
+  private static String _makeAlphaNumIDType (@Nullable final String sText,
+                                             @Nonnull final String sContext,
+                                             @Nonnull final ErrorList aTransformationErrorList) {
     if (sText != null && !RegExHelper.stringMatchesPattern ("[0-9 | A-Z | a-z | -_äöüÄÖÜß]+", sText)) {
-      aLogger.warn ("'" + sText + "' is not an AlphaNumIDType!");
       final String ret = RegExHelper.stringReplacePattern ("[^0-9 | A-Z | a-z | -_äöüÄÖÜß]", sText, "_");
-      aLogger.warn ("  -> was changed to '" + ret + "'");
+      aTransformationErrorList.addWarning (sContext, "'" +
+                                                     sText +
+                                                     "' is not an AlphaNumIDType and was changed to '" +
+                                                     ret +
+                                                     "'!");
       return ret;
     }
     return sText;
@@ -328,20 +346,31 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
    * 
    * @param aUBLInvoice
    *        The UBL invoice to be converted
-   * @return The created ebInterface 3.0.2 document
-   * @throws IllegalArgumentException
-   *         If the passed UBL invoice cannot be converted
+   * @param aTransformationErrorList
+   *        Error list. Must be empty!
+   * @param aDisplayLocale
+   *        Display locale for error message creation
+   * @return The created ebInterface 4.0 document or <code>null</code> in case
+   *         of a severe error.
    */
-  @Nonnull
+  @Nullable
   public static Ebi40InvoiceType convertToEbInterface (@Nonnull final InvoiceType aUBLInvoice,
-                                                       @Nonnull final InMemoryLogger aLogger) {
+                                                       @Nonnull final ErrorList aTransformationErrorList,
+                                                       @Nonnull final Locale aDisplayLocale) {
     if (aUBLInvoice == null)
       throw new NullPointerException ("UBLInvoice");
+    if (aTransformationErrorList == null)
+      throw new NullPointerException ("TransformationErrorList");
+    if (!aTransformationErrorList.isEmpty ())
+      throw new IllegalArgumentException ("TransformationErrorList must be empty!");
+    if (aDisplayLocale == null)
+      throw new NullPointerException ("DisplayLocale");
 
     // Consistency check before starting the conversion
-    final String sConsistencyValidationResult = _checkConsistency (aUBLInvoice, aLogger);
-    if (sConsistencyValidationResult != null)
-      throw new IllegalArgumentException ("Consistency validation failed: " + sConsistencyValidationResult);
+    _checkConsistency (aUBLInvoice, aTransformationErrorList);
+    if (!aTransformationErrorList.isEmpty () &&
+        aTransformationErrorList.getMostSevereErrorLevel ().isMoreOrEqualSevereThan (EErrorLevel.ERROR))
+      return null;
 
     // Build ebInterface invoice
     final Ebi40InvoiceType aEbiInvoice = new Ebi40InvoiceType ();
@@ -363,7 +392,8 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
         }
       if (aEbiBiller.getVATIdentificationNumber () == null) {
         // A VAT number must be present in certain cases!
-        aLogger.warn ("Failed to get biller VAT number!");
+        aTransformationErrorList.addWarning ("AccountingSupplierParty/Party/PartyTaxScheme",
+                                             "Failed to get biller VAT number!");
       }
       if (aUBLSupplier.getCustomerAssignedAccountID () != null) {
         // The customer's internal identifier for the supplier.
@@ -371,9 +401,12 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
       }
       if (StringHelper.hasNoText (aEbiBiller.getInvoiceRecipientsBillerID ())) {
         // Mandatory field
-        aLogger.error ("Failed to get customer assigned account ID for supplier!");
+        aTransformationErrorList.addError ("AccountingSupplierParty/CustomerAssignedAccountID",
+                                           "Failed to get customer assigned account ID for supplier!");
       }
-      aEbiBiller.setAddress (_convertParty (aUBLSupplier.getParty (), "AccountingSupplierParty", aLogger));
+      aEbiBiller.setAddress (_convertParty (aUBLSupplier.getParty (),
+                                            "AccountingSupplierParty",
+                                            aTransformationErrorList));
       aEbiInvoice.setBiller (aEbiBiller);
     }
 
@@ -389,7 +422,8 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
         }
       if (aEbiRecipient.getVATIdentificationNumber () == null) {
         // Mandatory field in certain cases
-        aLogger.warn ("Failed to get supplier VAT number!");
+        aTransformationErrorList.addWarning ("AccountingCustomerParty/PartyTaxScheme",
+                                             "Failed to get supplier VAT number!");
       }
       if (aUBLCustomer.getSupplierAssignedAccountID () != null) {
         // UBL: An identifier for the Customer's account, assigned by the
@@ -399,10 +433,13 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
       }
       if (StringHelper.hasNoText (aEbiRecipient.getBillersInvoiceRecipientID ())) {
         // Mandatory field
-        aLogger.warn ("Failed to get supplier assigned account ID for customer! Defaulting to 000!");
+        aTransformationErrorList.addWarning ("AccountingCustomerParty/SupplierAssignedAccountID",
+                                             "Failed to get supplier assigned account ID for customer! Defaulting to 000!");
         aEbiRecipient.setBillersInvoiceRecipientID ("000");
       }
-      aEbiRecipient.setAddress (_convertParty (aUBLCustomer.getParty (), "AccountingCustomerParty", aLogger));
+      aEbiRecipient.setAddress (_convertParty (aUBLCustomer.getParty (),
+                                               "AccountingCustomerParty",
+                                               aTransformationErrorList));
       aEbiInvoice.setInvoiceRecipient (aEbiRecipient);
     }
 
@@ -424,17 +461,17 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
       }
 
       if (StringHelper.hasNoText (sUBLOrderReferenceID)) {
-        aLogger.error ("Failed to get order reference ID!");
+        aTransformationErrorList.addError ("OrderReference/ID", "Failed to get order reference ID!");
       }
       else {
         if (sUBLOrderReferenceID != null && sUBLOrderReferenceID.length () > 35) {
-          aLogger.warn ("Order reference value '" +
-                        sUBLOrderReferenceID +
-                        "' is too long. It will be cut to 35 characters.");
+          aTransformationErrorList.addWarning ("OrderReference/ID", "Order reference value '" +
+                                                                    sUBLOrderReferenceID +
+                                                                    "' is too long. It will be cut to 35 characters.");
           sUBLOrderReferenceID = sUBLOrderReferenceID.substring (0, 35);
         }
 
-        sUBLOrderReferenceID = _makeAlphaNumIDType (sUBLOrderReferenceID, aLogger);
+        sUBLOrderReferenceID = _makeAlphaNumIDType (sUBLOrderReferenceID, "OrderReference/ID", aTransformationErrorList);
       }
 
       final Ebi40OrderReferenceType aEbiOrderReference = new Ebi40OrderReferenceType ();
@@ -495,11 +532,12 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
           }
           else {
             // TODO other tax scheme
-            aLogger.error ("Other tax scheme found and ignored: '" +
-                           sUBLTaxSchemeSchemeID +
-                           "' and '" +
-                           sUBLTaxSchemeID +
-                           "'");
+            aTransformationErrorList.addError ("TaxTotal/TaxSubtotal/TaxCategory/",
+                                               "Other tax scheme found and ignored: '" +
+                                                   sUBLTaxSchemeSchemeID +
+                                                   "' and '" +
+                                                   sUBLTaxSchemeID +
+                                                   "'");
           }
         }
 
@@ -553,8 +591,8 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
           }
         }
         if (aUBLPercent == null) {
-          aLogger.warn ("Failed to resolve tax percentage for invoice line! Using default 0.");
-          aUBLPercent = BigDecimal.ZERO;
+          aTransformationErrorList.addError ("TaxTotal/TaxSubtotal/TaxCategory",
+                                             "Failed to resolve tax percentage for invoice line!");
         }
 
         // Start creating ebInterface line
@@ -563,10 +601,11 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
         // Invoice line number
         BigInteger aUBLPositionNumber = StringParser.parseBigInteger (aUBLInvoiceLine.getIDValue ());
         if (aUBLPositionNumber == null) {
-          aLogger.warn ("Failed to parse UBL invoice line '" +
-                        aUBLInvoiceLine.getIDValue () +
-                        "' into a numeric value. Defaulting to index " +
-                        nInvoiceLineIndex);
+          aTransformationErrorList.addWarning ("InvoiceLine/ID",
+                                               "Failed to parse UBL invoice line '" +
+                                                   aUBLInvoiceLine.getIDValue () +
+                                                   "' into a numeric value. Defaulting to index " +
+                                                   nInvoiceLineIndex);
           aUBLPositionNumber = BigInteger.valueOf (nInvoiceLineIndex);
         }
         aEbiListLineItem.setPositionNumber (aUBLPositionNumber);
@@ -628,7 +667,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
         aEbiListLineItem.setLineItemAmount (aUBLInvoiceLine.getLineExtensionAmountValue ());
 
         // Special handling in case no VAT item is present
-        if (aUBLPercent.equals (BigDecimal.ZERO))
+        if (EqualsUtils.equals (aUBLPercent, BigDecimal.ZERO))
           aTotalZeroPercLineExtensionAmount = aTotalZeroPercLineExtensionAmount.add (aUBLInvoiceLine.getLineExtensionAmountValue ());
 
         // Order reference for detail
@@ -667,7 +706,8 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
               eSurcharge = ETriState.valueOf (bItemIsSurcharge);
             final boolean bSwapSigns = bItemIsSurcharge != eSurcharge.isTrue ();
             if (bSwapSigns)
-              aLogger.warn ("Reduction/Surcharge is mixed in this invoice!");
+              aTransformationErrorList.addWarning ("InvoiceLine/AllowanceCharge",
+                                                   "Reduction and surcharge is mixed in this invoice! This might not be supported by all ebInterface 4.0 interpreters.");
 
             final Ebi40ReductionAndSurchargeBaseType aEbiRSItem = new Ebi40ReductionAndSurchargeBaseType ();
             final BigDecimal aAmount = aUBLAllowanceCharge.getAmountValue ();
@@ -708,15 +748,17 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
     }
 
     if (aEbiVAT.hasNoItemEntries ()) {
-      aLogger.warn ("No VAT item found. Defaulting to a single entry with 0% for amount " +
-                    aTotalZeroPercLineExtensionAmount.toString ());
-      final Ebi40ItemType aEbiVATItem = new Ebi40ItemType ();
-      aEbiVATItem.setTaxedAmount (aTotalZeroPercLineExtensionAmount);
-      final Ebi40TaxRateType aEbiVATTaxRate = new Ebi40TaxRateType ();
-      aEbiVATTaxRate.setValue (BigDecimal.ZERO);
-      aEbiVATItem.setTaxRate (aEbiVATTaxRate);
-      aEbiVATItem.setAmount (aTotalZeroPercLineExtensionAmount);
-      aEbiVAT.getItem ().add (aEbiVATItem);
+      aTransformationErrorList.addError ("InvoiceLine", "No single VAT item found.");
+      if (false) {
+        // No default in this case
+        final Ebi40ItemType aEbiVATItem = new Ebi40ItemType ();
+        aEbiVATItem.setTaxedAmount (aTotalZeroPercLineExtensionAmount);
+        final Ebi40TaxRateType aEbiVATTaxRate = new Ebi40TaxRateType ();
+        aEbiVATTaxRate.setValue (BigDecimal.ZERO);
+        aEbiVATItem.setTaxRate (aEbiVATTaxRate);
+        aEbiVATItem.setAmount (aTotalZeroPercLineExtensionAmount);
+        aEbiVAT.getItem ().add (aEbiVATItem);
+      }
     }
 
     // Global reduction and surcharge
@@ -734,7 +776,8 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
           eSurcharge = ETriState.valueOf (bItemIsSurcharge);
         final boolean bSwapSigns = bItemIsSurcharge != eSurcharge.isTrue ();
         if (bSwapSigns)
-          aLogger.warn ("Reduction/Surcharge is mixed in this invoice!");
+          aTransformationErrorList.addWarning ("Invoice/AllowanceCharge",
+                                               "Reduction and surcharge is mixed in this invoice! This might not be supported by all ebInterface 4.0 interpreters.");
 
         final Ebi40ReductionAndSurchargeType aEbiRSItem = new Ebi40ReductionAndSurchargeType ();
         final BigDecimal aAmount = aUBLAllowanceCharge.getAmountValue ();
@@ -757,10 +800,13 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
             break;
           }
         if (aEbiTaxRate == null) {
-          aLogger.warn ("Failed to resolve tax percentage for global AllowanceCharge! Using default of 0%.");
-          aEbiTaxRate = new Ebi40TaxRateType ();
-          aEbiTaxRate.setValue (BigDecimal.ZERO);
-          aEbiTaxRate.setTaxCode (ETaxCode.NOT_TAXABLE.getID ());
+          aTransformationErrorList.addError ("Invoice/AllowanceCharge",
+                                             "Failed to resolve tax percentage for global AllowanceCharge!");
+          if (false) {
+            aEbiTaxRate = new Ebi40TaxRateType ();
+            aEbiTaxRate.setValue (BigDecimal.ZERO);
+            aEbiTaxRate.setTaxCode (ETaxCode.NOT_TAXABLE.getID ());
+          }
         }
         aEbiRSItem.setTaxRate (aEbiTaxRate);
 
@@ -802,7 +848,10 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
                                                     .getFinancialInstitution ()
                                                     .getIDValue ());
             if (!RegExHelper.stringMatchesPattern (REGEX_BIC, aEbiAccount.getBIC ())) {
-              aLogger.error ("The BIC '" + aEbiAccount.getBIC () + "' does not match the required regular expression.");
+              aTransformationErrorList.addError ("PaymentMeans/PayeeFinancialAccount/FinancialInstitutionBranch/FinancialInstitution/ID",
+                                                 "The BIC '" +
+                                                     aEbiAccount.getBIC () +
+                                                     "' does not match the required regular expression.");
               aEbiAccount.setBIC (null);
             }
           }
@@ -810,11 +859,12 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
           // IBAN
           aEbiAccount.setIBAN (aUBLPaymentMeans.getPayeeFinancialAccount ().getIDValue ());
           if (StringHelper.getLength (aEbiAccount.getIBAN ()) > IBAN_MAX_LENGTH) {
-            aLogger.warn ("The IBAN '" +
-                          aEbiAccount.getIBAN () +
-                          "' is too long and cut to " +
-                          IBAN_MAX_LENGTH +
-                          " chars.");
+            aTransformationErrorList.addWarning ("PaymentMeans/PayeeFinancialAccount/ID",
+                                                 "The IBAN '" +
+                                                     aEbiAccount.getIBAN () +
+                                                     "' is too long and cut to " +
+                                                     IBAN_MAX_LENGTH +
+                                                     " chars.");
             aEbiAccount.setIBAN (aEbiAccount.getIBAN ().substring (0, IBAN_MAX_LENGTH));
           }
 
@@ -822,7 +872,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
           // SupplierPartyName
           String sBankAccountOwnerName = null;
           if (aUBLInvoice.getPayeeParty () != null && aUBLInvoice.getPayeeParty ().getPartyNameCount () > 0) {
-            sBankAccountOwnerName = aUBLInvoice.getPayeeParty ().getPartyIdentificationAtIndex (0).getIDValue ();
+            sBankAccountOwnerName = aUBLInvoice.getPayeeParty ().getPartyNameAtIndex (0).getNameValue ();
           }
           if (StringHelper.hasNoText (sBankAccountOwnerName)) {
             final PartyType aParty = aUBLInvoice.getAccountingSupplierParty ().getParty ();
@@ -830,7 +880,8 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
               sBankAccountOwnerName = aParty.getPartyNameAtIndex (0).getNameValue ();
           }
           if (StringHelper.hasNoText (sBankAccountOwnerName))
-            aLogger.error ("Failed to determine the bank account owner name");
+            aTransformationErrorList.addError ("PayeeParty/PartyName/Name",
+                                               "Failed to determine the bank account owner name.");
           aEbiAccount.setBankAccountOwner (sBankAccountOwnerName);
 
           aEbiUBTMethod.getBeneficiaryAccount ().add (aEbiAccount);
@@ -851,12 +902,17 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
       // Address
       if (aUBLDelivery.getDeliveryLocation () != null && aUBLDelivery.getDeliveryLocation ().getAddress () != null) {
         final Ebi40AddressType aEbiAddress = new Ebi40AddressType ();
-        _setAddressData (aUBLDelivery.getDeliveryLocation ().getAddress (), aEbiAddress, "Delivery", aLogger);
+        _setAddressData (aUBLDelivery.getDeliveryLocation ().getAddress (),
+                         aEbiAddress,
+                         "Delivery",
+                         aTransformationErrorList);
 
         if (aUBLDelivery.getDeliveryParty () != null && aUBLDelivery.getDeliveryParty ().hasPartyNameEntries ())
           aEbiAddress.setName (aUBLDelivery.getDeliveryParty ().getPartyNameAtIndex (0).getNameValue ());
+
         if (StringHelper.hasNoText (aEbiAddress.getName ()))
-          aLogger.error ("If a DeliveryLocation/Address is present, a DeliveryParty/PartyName must also be present!");
+          aTransformationErrorList.addError ("Delivery/DeliveryParty",
+                                             "If a Delivery/DeliveryLocation/Address is present, a Delivery/DeliveryParty/PartyName/Name must also be present!");
 
         aEbiDelivery.setAddress (aEbiAddress);
       }
