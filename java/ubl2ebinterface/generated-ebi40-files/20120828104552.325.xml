@@ -2,6 +2,12 @@
 <ns2:Invoice ns2:DocumentType="Invoice" ns2:GeneratingSystem="UBL 2.0 to ebInterface 4.0 converter" ns2:InvoiceCurrency="EUR" xmlns="http://www.w3.org/2000/09/xmldsig#" xmlns:ns2="http://www.ebinterface.at/schema/4p0/" xmlns:ns3="http://www.ebinterface.at/schema/4p0/extensions/sv" xmlns:ns4="http://www.ebinterface.at/schema/4p0/extensions/ext">
   <ns2:InvoiceNumber>B-BS-2287</ns2:InvoiceNumber>
   <ns2:InvoiceDate>2012-04-30</ns2:InvoiceDate>
+  <ns2:Delivery>
+    <ns2:Period>
+      <ns2:FromDate>2012-04-01</ns2:FromDate>
+      <ns2:ToDate>2012-04-30</ns2:ToDate>
+    </ns2:Period>
+  </ns2:Delivery>
   <ns2:Biller>
     <ns2:VATIdentificationNumber>ATU12345678</ns2:VATIdentificationNumber>
     <ns2:InvoiceRecipientsBillerID>11011011</ns2:InvoiceRecipientsBillerID>
