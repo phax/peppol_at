@@ -27,6 +27,7 @@ import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.Part
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyTaxSchemeType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PaymentMeansType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PeriodType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PersonType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.SupplierPartyType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.TaxCategoryType;
@@ -71,6 +72,7 @@ import com.phloc.ebinterface.v40.Ebi40ItemType;
 import com.phloc.ebinterface.v40.Ebi40ListLineItemType;
 import com.phloc.ebinterface.v40.Ebi40OrderReferenceDetailType;
 import com.phloc.ebinterface.v40.Ebi40OrderReferenceType;
+import com.phloc.ebinterface.v40.Ebi40PeriodType;
 import com.phloc.ebinterface.v40.Ebi40ReductionAndSurchargeBaseType;
 import com.phloc.ebinterface.v40.Ebi40ReductionAndSurchargeDetailsType;
 import com.phloc.ebinterface.v40.Ebi40ReductionAndSurchargeListLineItemDetailsType;
@@ -904,10 +906,11 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
     }
 
     // Delivery
+    final Ebi40DeliveryType aEbiDelivery = new Ebi40DeliveryType ();
     if (aUBLInvoice.getDeliveryCount () > 0) {
       final DeliveryType aUBLDelivery = aUBLInvoice.getDeliveryAtIndex (0);
-      final Ebi40DeliveryType aEbiDelivery = new Ebi40DeliveryType ();
 
+      // Delivery data
       if (aUBLDelivery.getActualDeliveryDate () != null)
         aEbiDelivery.setDate (aUBLDelivery.getActualDeliveryDateValue ());
 
@@ -927,11 +930,12 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
         if (StringHelper.hasNoText (aEbiAddress.getName ()))
           if (aUBLInvoice.getAccountingCustomerParty () != null &&
               aUBLInvoice.getAccountingCustomerParty ().getParty () != null &&
-              aUBLInvoice.getAccountingCustomerParty ().getParty ().hasPartyNameEntries ())
+              aUBLInvoice.getAccountingCustomerParty ().getParty ().hasPartyNameEntries ()) {
             aEbiAddress.setName (aUBLInvoice.getAccountingCustomerParty ()
                                             .getParty ()
                                             .getPartyNameAtIndex (0)
                                             .getNameValue ());
+          }
 
         if (StringHelper.hasNoText (aEbiAddress.getName ()))
           aTransformationErrorList.addError ("Delivery/DeliveryParty",
@@ -939,9 +943,24 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
 
         aEbiDelivery.setAddress (aEbiAddress);
       }
-
-      aEbiInvoice.setDelivery (aEbiDelivery);
     }
+
+    if (aEbiDelivery.getDate () == null) {
+      // Check for service period
+      final PeriodType aUBLInvoicePeriod = ContainerHelper.getSafe (aUBLInvoice.getInvoicePeriod (), 0);
+      if (aUBLInvoicePeriod != null) {
+        final Ebi40PeriodType aEbiPeriod = new Ebi40PeriodType ();
+        aEbiPeriod.setFromDate (aUBLInvoicePeriod.getStartDateValue ());
+        aEbiPeriod.setToDate (aUBLInvoicePeriod.getEndDateValue ());
+        aEbiDelivery.setPeriod (aEbiPeriod);
+      }
+    }
+
+    if (m_bStrictERBMode)
+      if (aEbiDelivery.getDate () == null && aEbiDelivery.getPeriod () == null)
+        aTransformationErrorList.addError ("Invoice", "A Delivery/DeliveryDate or an InvoicePeriod must be present!");
+
+    aEbiInvoice.setDelivery (aEbiDelivery);
 
     return aEbiInvoice;
   }
