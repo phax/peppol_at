@@ -311,7 +311,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
     if (aEbiAddress.getAddressIdentifier () == null) {
       // check party identification
       outer: for (final PartyIdentificationType aUBLPartyID : aUBLParty.getPartyIdentification ()) {
-        final String sUBLPartyID = aUBLPartyID.getIDValue ();
+        final String sUBLPartyID = StringHelper.trim (aUBLPartyID.getIDValue ());
         for (final Ebi40AddressIdentifierTypeType eType : Ebi40AddressIdentifierTypeType.values ())
           if (eType.value ().equalsIgnoreCase (aUBLPartyID.getID ().getSchemeID ())) {
             // Add GLN/DUNS number
