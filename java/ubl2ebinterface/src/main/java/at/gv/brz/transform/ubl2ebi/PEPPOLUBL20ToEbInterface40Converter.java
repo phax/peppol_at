@@ -960,7 +960,8 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
       if (aEbiDelivery.getDate () == null && aEbiDelivery.getPeriod () == null)
         aTransformationErrorList.addError ("Invoice", "A Delivery/DeliveryDate or an InvoicePeriod must be present!");
 
-    aEbiInvoice.setDelivery (aEbiDelivery);
+    if (aEbiDelivery.getDate () != null || aEbiDelivery.getPeriod () != null)
+      aEbiInvoice.setDelivery (aEbiDelivery);
 
     return aEbiInvoice;
   }
