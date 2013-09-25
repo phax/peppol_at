@@ -405,7 +405,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
       }
       if (aUBLSupplier.getCustomerAssignedAccountID () != null) {
         // The customer's internal identifier for the supplier.
-        aEbiBiller.setInvoiceRecipientsBillerID (aUBLSupplier.getCustomerAssignedAccountID ().getValue ());
+        aEbiBiller.setInvoiceRecipientsBillerID (aUBLSupplier.getCustomerAssignedAccountIDValue ());
       }
       if (StringHelper.hasNoText (aEbiBiller.getInvoiceRecipientsBillerID ())) {
         if (m_bStrictERBMode) {
