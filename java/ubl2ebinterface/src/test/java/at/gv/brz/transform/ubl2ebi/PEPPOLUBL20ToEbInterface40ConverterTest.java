@@ -62,11 +62,12 @@ public class PEPPOLUBL20ToEbInterface40ConverterTest {
       final ErrorList aErrorList = new ErrorList ();
       final Ebi40InvoiceType aEbInvoice = new PEPPOLUBL20ToEbInterface40Converter (Locale.GERMANY, false).convertToEbInterface (aUBLInvoice,
                                                                                                                                 aErrorList);
-      assertTrue (aRes.getPath () + ": " + aErrorList.toString (), aErrorList.getMostSevereErrorLevel ()
+      assertTrue (aRes.getPath () + ": " + aErrorList.toString (), aErrorList.isEmpty () ||
+                                                                   aErrorList.getMostSevereErrorLevel ()
                                                                              .isLessSevereThan (EErrorLevel.ERROR));
       assertNotNull (aEbInvoice);
 
-      if (aErrorList.getMostSevereErrorLevel ().isMoreOrEqualSevereThan (EErrorLevel.WARN))
+      if (!aErrorList.isEmpty () && aErrorList.getMostSevereErrorLevel ().isMoreOrEqualSevereThan (EErrorLevel.WARN))
         s_aLogger.info ("  " + aErrorList.getAllItems ());
 
       // Convert ebInterface to XML
