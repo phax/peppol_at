@@ -44,15 +44,21 @@ import at.gv.brz.transform.ubl2ebi.helper.SchemedID;
 import at.gv.brz.transform.ubl2ebi.helper.TaxCategoryKey;
 
 import com.phloc.commons.CGlobal;
+import com.phloc.commons.annotations.Translatable;
 import com.phloc.commons.collections.ContainerHelper;
 import com.phloc.commons.equals.EqualsUtils;
 import com.phloc.commons.error.EErrorLevel;
 import com.phloc.commons.locale.country.CountryCache;
 import com.phloc.commons.math.MathHelper;
+import com.phloc.commons.name.IHasDisplayText;
+import com.phloc.commons.name.IHasDisplayTextWithArgs;
 import com.phloc.commons.regex.RegExHelper;
 import com.phloc.commons.state.ETriState;
 import com.phloc.commons.string.StringHelper;
 import com.phloc.commons.string.StringParser;
+import com.phloc.commons.text.ITextProvider;
+import com.phloc.commons.text.impl.TextProvider;
+import com.phloc.commons.text.resolve.DefaultTextResolver;
 import com.phloc.ebinterface.codelist.ETaxCode;
 import com.phloc.ebinterface.v40.Ebi40AccountType;
 import com.phloc.ebinterface.v40.Ebi40AddressIdentifierType;
@@ -97,6 +103,36 @@ import eu.europa.ec.cipa.peppol.identifier.process.PredefinedProcessIdentifierMa
  */
 @Immutable
 public final class PEPPOLUBL20ToEbInterface40Converter {
+  @Translatable
+  public static enum EText implements IHasDisplayText, IHasDisplayTextWithArgs {
+    NO_UBL_VERSION_ID ("Die UBLVersionID fehlt", "No UBLVersionID present."),
+    INVALID_UBL_VERSION_ID ("Die UBLVersionID ''{0}'' ist ungültig. Diese muss den Wert ''{1}'' haben.",
+                            "Invalid UBLVersionID value ''{0}'' present. It must be ''{1}''."),
+    NO_PROFILE_ID ("Die ProfileID fehlt", "No ProfileID present."),
+    INVALID_PROFILE_ID ("Die ProfileID ''{0}'' ist ungültig.", "Invalid ProfileID value ''{0}'' present."),
+    NO_CUSTOMIZATION_ID ("Die CustomizationID fehlt", "No CustomizationID present."),
+    INVALID_CUSTOMIZATION_SCHEME_ID ("Die CustomizationID schemeID ''{0}'' ist ungültig. Diese muss den Wert ''{1}'' haben.",
+                                     "Invalid CustomizationID schemeID value ''{0}'' present. It must be ''{1}''."),
+    INVALID_CUSTOMIZATION_ID ("Die angegebene CustomizationID ''{0}'' ist ungültig! Sie wird vom angegebenen Profil nicht unterstützt.",
+                              "Invalid CustomizationID value ''{0}'' present! It is not supported by the passed profile.");
+
+    private final ITextProvider m_aTP;
+
+    private EText (@Nonnull final String sDE, @Nonnull final String sEN) {
+      m_aTP = TextProvider.create_DE_EN (sDE, sEN);
+    }
+
+    @Nullable
+    public String getDisplayText (@Nonnull final Locale aContentLocale) {
+      return DefaultTextResolver.getText (this, m_aTP, aContentLocale);
+    }
+
+    @Nullable
+    public String getDisplayTextWithArgs (@Nonnull final Locale aContentLocale, @Nullable final Object... aArgs) {
+      return DefaultTextResolver.getTextWithArgs (this, m_aTP, aContentLocale, aArgs);
+    }
+  }
+
   private static final String REGEX_BIC = "[0-9A-Za-z]{8}([0-9A-Za-z]{3})?";
   private static final String SUPPORTED_TAX_SCHEME_SCHEME_ID = "UN/ECE 5153";
   private static final int IBAN_MAX_LENGTH = 34;
@@ -126,28 +162,31 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
    * @param aUBLInvoice
    *        The UBL invoice to check
    */
-  private static void _checkConsistency (@Nonnull final InvoiceType aUBLInvoice,
-                                         @Nonnull final ErrorList aTransformationErrorList) {
+  private void _checkConsistency (@Nonnull final InvoiceType aUBLInvoice,
+                                  @Nonnull final ErrorList aTransformationErrorList) {
     // Check UBLVersionID
     final UBLVersionIDType aUBLVersionID = aUBLInvoice.getUBLVersionID ();
     if (aUBLVersionID == null)
-      aTransformationErrorList.addError ("UBLVersionID", "No UBLVersionID present!");
+      aTransformationErrorList.addError ("UBLVersionID", EText.NO_UBL_VERSION_ID.getDisplayText (m_aDisplayLocale));
     else
       if (!CPeppolUBL.UBL_VERSION.equals (aUBLVersionID.getValue ()))
-        aTransformationErrorList.addError ("UBLVersionID", "Invalid UBLVersionID value '" +
-                                                           aUBLVersionID.getValue () +
-                                                           "' present!");
+        aTransformationErrorList.addError ("UBLVersionID",
+                                           EText.INVALID_UBL_VERSION_ID.getDisplayTextWithArgs (m_aDisplayLocale,
+                                                                                                aUBLVersionID.getValue (),
+                                                                                                CPeppolUBL.UBL_VERSION));
 
     // Check ProfileID
     IPeppolPredefinedProcessIdentifier aProcID = null;
     final ProfileIDType aProfileID = aUBLInvoice.getProfileID ();
     if (aProfileID == null)
-      aTransformationErrorList.addError ("ProfileID", "No ProfileID present!");
+      aTransformationErrorList.addError ("ProfileID", EText.NO_PROFILE_ID.getDisplayText (m_aDisplayLocale));
     else {
       final String sProfileID = StringHelper.trim (aProfileID.getValue ());
       aProcID = PredefinedProcessIdentifierManager.getProcessIdentifierOfID (sProfileID);
       if (aProcID == null)
-        aTransformationErrorList.addError ("ProfileID", "Invalid ProfileID value '" + sProfileID + "' present!");
+        aTransformationErrorList.addError ("ProfileID",
+                                           EText.INVALID_PROFILE_ID.getDisplayTextWithArgs (m_aDisplayLocale,
+                                                                                            sProfileID));
     }
 
     // Check CustomizationID
@@ -155,15 +194,14 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
     if (false) {
       final CustomizationIDType aCustomizationID = aUBLInvoice.getCustomizationID ();
       if (aCustomizationID == null)
-        aTransformationErrorList.addError ("CustomizationID", "No CustomizationID present!");
+        aTransformationErrorList.addError ("CustomizationID",
+                                           EText.NO_CUSTOMIZATION_ID.getDisplayText (m_aDisplayLocale));
       else
         if (!CPeppolUBL.CUSTOMIZATION_SCHEMEID.equals (aCustomizationID.getSchemeID ()))
-          aTransformationErrorList.addError ("CustomizationID",
-                                             "Invalid CustomizationID schemeID '" +
-                                                 aCustomizationID.getSchemeID () +
-                                                 "' present. Must be '" +
-                                                 CPeppolUBL.CUSTOMIZATION_SCHEMEID +
-                                                 "'");
+          aTransformationErrorList.addError ("CustomizationID/schemeID",
+                                             EText.INVALID_CUSTOMIZATION_SCHEME_ID.getDisplayTextWithArgs (m_aDisplayLocale,
+                                                                                                           aCustomizationID.getSchemeID (),
+                                                                                                           CPeppolUBL.CUSTOMIZATION_SCHEMEID));
         else
           if (aProcID != null) {
             final String sCustomizationID = aCustomizationID.getValue ();
@@ -175,9 +213,9 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
                 break;
               }
             if (aMatchingDocID == null)
-              aTransformationErrorList.addError ("CustomizationID", "Invalid CustomizationID value '" +
-                                                                    sCustomizationID +
-                                                                    "' present! It is not supported by the passed profile.");
+              aTransformationErrorList.addError ("CustomizationID",
+                                                 EText.INVALID_CUSTOMIZATION_ID.getDisplayTextWithArgs (m_aDisplayLocale,
+                                                                                                        sCustomizationID));
           }
     }
 
