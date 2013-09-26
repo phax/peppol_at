@@ -384,7 +384,16 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
     final Ebi40InvoiceType aEbiInvoice = new Ebi40InvoiceType ();
     aEbiInvoice.setGeneratingSystem (EBI_GENERATING_SYSTEM);
     aEbiInvoice.setDocumentType (Ebi40DocumentTypeType.INVOICE);
-    aEbiInvoice.setInvoiceCurrency (Ebi40CurrencyType.fromValue (StringHelper.trim (aUBLInvoice.getDocumentCurrencyCodeValue ())));
+
+    final String sUBLCurrencyCode = aUBLInvoice.getDocumentCurrencyCodeValue ();
+    try {
+      aEbiInvoice.setInvoiceCurrency (Ebi40CurrencyType.fromValue (StringHelper.trim (sUBLCurrencyCode)));
+    }
+    catch (final IllegalArgumentException ex) {
+      aTransformationErrorList.addError ("DocumentCurrencyCode", "Illegal currency code '" +
+                                                                 sUBLCurrencyCode +
+                                                                 "' provided!");
+    }
     aEbiInvoice.setInvoiceNumber (aUBLInvoice.getIDValue ());
     aEbiInvoice.setInvoiceDate (aUBLInvoice.getIssueDateValue ());
 
