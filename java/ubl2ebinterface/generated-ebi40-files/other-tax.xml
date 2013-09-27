@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<eb:Invoice eb:DocumentType="Invoice" eb:GeneratingSystem="UBL 2.0 to ebInterface 4.0 converter" eb:InvoiceCurrency="EUR" xmlns="http://www.w3.org/2000/09/xmldsig#" xmlns:eb="http://www.ebinterface.at/schema/4p0/" xmlns:ns3="http://www.ebinterface.at/schema/4p0/extensions/sv" xmlns:ns4="http://www.ebinterface.at/schema/4p0/extensions/ext">
+  <eb:InvoiceNumber>TOSL108</eb:InvoiceNumber>
+  <eb:InvoiceDate>2009-12-15</eb:InvoiceDate>
+  <eb:Delivery>
+    <eb:Date>2009-12-15</eb:Date>
+    <eb:Address>
+      <eb:Name>Bank Account Owner</eb:Name>
+      <eb:Street>Deliverystreet 12</eb:Street>
+      <eb:Town>DeliveryCity</eb:Town>
+      <eb:ZIP>523427</eb:ZIP>
+      <eb:Country eb:CountryCode="BE">Belgien</eb:Country>
+    </eb:Address>
+  </eb:Delivery>
+  <eb:Biller>
+    <eb:VATIdentificationNumber>NO999999999MVA</eb:VATIdentificationNumber>
+    <eb:InvoiceRecipientsBillerID>1234567890</eb:InvoiceRecipientsBillerID>
+    <eb:Address>
+      <eb:AddressIdentifier eb:AddressIdentifierType="GLN">1234567890123</eb:AddressIdentifier>
+      <eb:Name>Salescompany ltd.</eb:Name>
+      <eb:Street>Main street 1</eb:Street>
+      <eb:POBox>5467</eb:POBox>
+      <eb:Town>Big city</eb:Town>
+      <eb:ZIP>54321</eb:ZIP>
+      <eb:Country eb:CountryCode="NO">Norwegen</eb:Country>
+      <eb:Phone>46211230</eb:Phone>
+      <eb:Email>antonio@salescompany.dk</eb:Email>
+      <eb:Contact>Antonio M Salemacher</eb:Contact>
+    </eb:Address>
+  </eb:Biller>
+  <eb:InvoiceRecipient>
+    <eb:VATIdentificationNumber>BE54321</eb:VATIdentificationNumber>
+    <eb:BillersInvoiceRecipientID>000</eb:BillersInvoiceRecipientID>
+    <eb:OrderReference>
+      <eb:OrderID>123</eb:OrderID>
+    </eb:OrderReference>
+    <eb:Address>
+      <eb:AddressIdentifier eb:AddressIdentifierType="GLN">1234567987654</eb:AddressIdentifier>
+      <eb:Name>Buyercompany ltd</eb:Name>
+      <eb:Street>Anystreet 8</eb:Street>
+      <eb:POBox>123</eb:POBox>
+      <eb:Town>Anytown</eb:Town>
+      <eb:ZIP>101</eb:ZIP>
+      <eb:Country eb:CountryCode="BE">Belgien</eb:Country>
+      <eb:Phone>5121230</eb:Phone>
+      <eb:Email>john@buyercompany.eu</eb:Email>
+      <eb:Contact>John X Doe</eb:Contact>
+    </eb:Address>
+  </eb:InvoiceRecipient>
+  <eb:Details>
+    <eb:ItemList>
+      <eb:ListLineItem>
+        <eb:PositionNumber>1</eb:PositionNumber>
+        <eb:Description>Processor: Intel Core 2 Duo SU9400 LV (1.4GHz). RAM: 3MB. Screen
+        1440x900</eb:Description>
+        <eb:Quantity eb:Unit="NAR">1</eb:Quantity>
+        <eb:UnitPrice>1273.0000</eb:UnitPrice>
+        <eb:TaxRate>25</eb:TaxRate>
+        <eb:ReductionAndSurchargeListLineItemDetails>
+          <eb:ReductionListLineItem>
+            <eb:BaseAmount>1273.0000</eb:BaseAmount>
+            <eb:Amount>12</eb:Amount>
+          </eb:ReductionListLineItem>
+          <eb:ReductionListLineItem>
+            <eb:BaseAmount>1261.0000</eb:BaseAmount>
+            <eb:Amount>-10</eb:Amount>
+          </eb:ReductionListLineItem>
+        </eb:ReductionAndSurchargeListLineItemDetails>
+        <eb:InvoiceRecipientsOrderReference>
+          <eb:OrderID>123</eb:OrderID>
+          <eb:OrderPositionNumber>1</eb:OrderPositionNumber>
+        </eb:InvoiceRecipientsOrderReference>
+        <eb:LineItemAmount>1273</eb:LineItemAmount>
+      </eb:ListLineItem>
+      <eb:ListLineItem>
+        <eb:PositionNumber>2</eb:PositionNumber>
+        <eb:Description>Returned &quot;Advanced computing&quot; book</eb:Description>
+        <eb:Quantity eb:Unit="NAR">-1</eb:Quantity>
+        <eb:UnitPrice>3.9600</eb:UnitPrice>
+        <eb:TaxRate>10</eb:TaxRate>
+        <eb:InvoiceRecipientsOrderReference>
+          <eb:OrderID>123</eb:OrderID>
+          <eb:OrderPositionNumber>5</eb:OrderPositionNumber>
+        </eb:InvoiceRecipientsOrderReference>
+        <eb:LineItemAmount>-3.96</eb:LineItemAmount>
+      </eb:ListLineItem>
+      <eb:ListLineItem>
+        <eb:PositionNumber>3</eb:PositionNumber>
+        <eb:Description>&quot;Computing for dummies&quot; book</eb:Description>
+        <eb:Quantity eb:Unit="NAR">2</eb:Quantity>
+        <eb:UnitPrice>2.4800</eb:UnitPrice>
+        <eb:TaxRate>10</eb:TaxRate>
+        <eb:InvoiceRecipientsOrderReference>
+          <eb:OrderID>123</eb:OrderID>
+          <eb:OrderPositionNumber>3</eb:OrderPositionNumber>
+        </eb:InvoiceRecipientsOrderReference>
+        <eb:LineItemAmount>4.96</eb:LineItemAmount>
+      </eb:ListLineItem>
+      <eb:ListLineItem>
+        <eb:PositionNumber>4</eb:PositionNumber>
+        <eb:Description>Returned IBM 5150 desktop</eb:Description>
+        <eb:Quantity eb:Unit="NAR">-1</eb:Quantity>
+        <eb:UnitPrice>25.0000</eb:UnitPrice>
+        <eb:TaxRate>0</eb:TaxRate>
+        <eb:InvoiceRecipientsOrderReference>
+          <eb:OrderID>123</eb:OrderID>
+          <eb:OrderPositionNumber>2</eb:OrderPositionNumber>
+        </eb:InvoiceRecipientsOrderReference>
+        <eb:LineItemAmount>-25</eb:LineItemAmount>
+      </eb:ListLineItem>
+      <eb:ListLineItem>
+        <eb:PositionNumber>5</eb:PositionNumber>
+        <eb:Description>Network cable</eb:Description>
+        <eb:Quantity eb:Unit="MTR">250</eb:Quantity>
+        <eb:UnitPrice>0.7500</eb:UnitPrice>
+        <eb:TaxRate>25</eb:TaxRate>
+        <eb:InvoiceRecipientsOrderReference>
+          <eb:OrderID>123</eb:OrderID>
+          <eb:OrderPositionNumber>4</eb:OrderPositionNumber>
+        </eb:InvoiceRecipientsOrderReference>
+        <eb:LineItemAmount>187.5</eb:LineItemAmount>
+      </eb:ListLineItem>
+    </eb:ItemList>
+  </eb:Details>
+  <eb:ReductionAndSurchargeDetails>
+    <eb:Surcharge>
+      <eb:BaseAmount>1436.5</eb:BaseAmount>
+      <eb:Amount>100</eb:Amount>
+      <eb:TaxRate>25</eb:TaxRate>
+    </eb:Surcharge>
+    <eb:Surcharge>
+      <eb:BaseAmount>1536.5</eb:BaseAmount>
+      <eb:Amount>-100</eb:Amount>
+      <eb:TaxRate>25</eb:TaxRate>
+    </eb:Surcharge>
+  </eb:ReductionAndSurchargeDetails>
+  <eb:Tax>
+    <eb:VAT>
+      <eb:Item>
+        <eb:TaxedAmount>1460.5</eb:TaxedAmount>
+        <eb:TaxRate>25</eb:TaxRate>
+        <eb:Amount>292.1</eb:Amount>
+      </eb:Item>
+      <eb:Item>
+        <eb:TaxedAmount>1</eb:TaxedAmount>
+        <eb:TaxRate>10</eb:TaxRate>
+        <eb:Amount>0.1</eb:Amount>
+      </eb:Item>
+      <eb:Item>
+        <eb:TaxedAmount>-25</eb:TaxedAmount>
+        <eb:TaxRate>0</eb:TaxRate>
+        <eb:Amount>0</eb:Amount>
+      </eb:Item>
+    </eb:VAT>
+    <eb:OtherTax>
+      <eb:Comment>AAL</eb:Comment>
+      <eb:Amount>6.66</eb:Amount>
+    </eb:OtherTax>
+  </eb:Tax>
+  <eb:TotalGrossAmount>729</eb:TotalGrossAmount>
+  <eb:PaymentMethod xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="eb:UniversalBankTransactionType">
+    <eb:BeneficiaryAccount>
+      <eb:BIC>DNBANOKK</eb:BIC>
+      <eb:IBAN>NO9386011117947</eb:IBAN>
+      <eb:BankAccountOwner>Ebeneser Scrooge Inc.</eb:BankAccountOwner>
+    </eb:BeneficiaryAccount>
+  </eb:PaymentMethod>
+  <eb:PaymentConditions>
+    <eb:DueDate>2009-12-31</eb:DueDate>
+    <eb:Discount>
+      <eb:PaymentDate>2010-01-06</eb:PaymentDate>
+      <eb:Percentage>10.00</eb:Percentage>
+    </eb:Discount>
+    <eb:Comment>Penalty percentage 10% from due date</eb:Comment>
+  </eb:PaymentConditions>
+</eb:Invoice>

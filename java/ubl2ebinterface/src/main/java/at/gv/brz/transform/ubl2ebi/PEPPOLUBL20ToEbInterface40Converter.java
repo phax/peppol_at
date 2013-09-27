@@ -83,6 +83,7 @@ import com.phloc.ebinterface.v40.Ebi40ItemType;
 import com.phloc.ebinterface.v40.Ebi40ListLineItemType;
 import com.phloc.ebinterface.v40.Ebi40OrderReferenceDetailType;
 import com.phloc.ebinterface.v40.Ebi40OrderReferenceType;
+import com.phloc.ebinterface.v40.Ebi40OtherTaxType;
 import com.phloc.ebinterface.v40.Ebi40PaymentConditionsType;
 import com.phloc.ebinterface.v40.Ebi40PaymentReferenceType;
 import com.phloc.ebinterface.v40.Ebi40PeriodType;
@@ -100,6 +101,7 @@ import com.phloc.ubl20.codelist.EPaymentMeansCode20;
 import com.phloc.ubl20.codelist.EUnitOfMeasureCode20;
 import com.phloc.validation.error.ErrorList;
 
+import eu.europa.ec.cipa.peppol.codelist.ETaxSchemeID;
 import eu.europa.ec.cipa.peppol.identifier.doctype.IPeppolPredefinedDocumentTypeIdentifier;
 import eu.europa.ec.cipa.peppol.identifier.process.IPeppolPredefinedProcessIdentifier;
 import eu.europa.ec.cipa.peppol.identifier.process.PredefinedProcessIdentifierManager;
@@ -145,6 +147,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter
     SUPPLIER_ASSIGNED_ACCOUNTID_MISSING ("Die ID des Rechnungsempfängers beim Rechnungssteller fehlt. Der Standardwert ''{0}'' wird verwendet.", "Failed to get supplier assigned account ID for customer. Defaulting to ''{0}''."),
     ORDER_REFERENCE_MISSING ("Die Auftragsreferenz fehlt.", "Failed to get order reference ID."),
     ORDER_REFERENCE_TOO_LONG ("Die Auftragsreferenz ''{0}'' ist zu lang und wurde nach {1} Zeichen abgeschnitten.", "Order reference value ''{0}'' is too long and was cut to {1} characters."),
+    UNSUPPORTED_TAX_SCHEME_ID ("Die Steuerschema ID ''{0}'' ist ungültig.", "The tax scheme ID ''{0}'' is invalid."),
     UNSUPPORTED_TAX_SCHEME ("Nicht unterstütztes Steuerschema gefunden: ''{0}'' und ''{1}''.", "Other tax scheme found and ignored: ''{0}'' and ''{1}''."),
     DETAILS_TAX_PERCENTAGE_NOT_FOUND ("Der Steuersatz der Rechnungszeile konnte nicht ermittelt werden. Verwende den Standardwert {0}%.", "Failed to resolve tax percentage for invoice line. Defaulting to {0}%."),
     DETAILS_INVALID_POSITION ("Die Rechnungspositionsnummer ''{0}'' ist nicht numerisch. Es wird der Index {1} verwendet.", "The UBL invoice line ID ''{0}'' is not numeric. Defaulting to index {1}."),
@@ -192,7 +195,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter
   public static final String SUPPORTED_TAX_SCHEME_SCHEME_ID_SUBSET = SUPPORTED_TAX_SCHEME_SCHEME_ID + " Subset";
   public static final int IBAN_MAX_LENGTH = 34;
   public static final String PAYMENT_CHANNEL_CODE_IBAN = "IBAN";
-  public static final String SUPPORTED_TAX_SCHEME_ID = "VAT";
+  public static final ETaxSchemeID SUPPORTED_TAX_SCHEME_ID = ETaxSchemeID.VALUE_ADDED_TAX;
   public static final String EBI_GENERATING_SYSTEM = "UBL 2.0 to ebInterface 4.0 converter";
   public static final int SCALE_PERC = 2;
   public static final int SCALE_PRICE_LINE = 4;
@@ -585,7 +588,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter
       final Ebi40BillerType aEbiBiller = new Ebi40BillerType ();
       // Find the tax scheme that uses VAT
       for (final PartyTaxSchemeType aUBLPartyTaxScheme : aUBLSupplier.getParty ().getPartyTaxScheme ())
-        if (aUBLPartyTaxScheme.getTaxScheme ().getIDValue ().equals (SUPPORTED_TAX_SCHEME_ID))
+        if (SUPPORTED_TAX_SCHEME_ID.getID ().equals (aUBLPartyTaxScheme.getTaxScheme ().getIDValue ()))
         {
           aEbiBiller.setVATIdentificationNumber (StringHelper.trim (aUBLPartyTaxScheme.getCompanyIDValue ()));
           break;
@@ -622,7 +625,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter
       final Ebi40InvoiceRecipientType aEbiRecipient = new Ebi40InvoiceRecipientType ();
       // Find the tax scheme that uses VAT
       for (final PartyTaxSchemeType aUBLPartyTaxScheme : aUBLCustomer.getParty ().getPartyTaxScheme ())
-        if (aUBLPartyTaxScheme.getTaxScheme ().getIDValue ().equals (SUPPORTED_TAX_SCHEME_ID))
+        if (SUPPORTED_TAX_SCHEME_ID.getID ().equals (aUBLPartyTaxScheme.getTaxScheme ().getIDValue ()))
         {
           aEbiRecipient.setVATIdentificationNumber (StringHelper.trim (aUBLPartyTaxScheme.getCompanyIDValue ()));
           break;
@@ -704,7 +707,10 @@ public final class PEPPOLUBL20ToEbInterface40Converter
     final Ebi40TaxType aEbiTax = new Ebi40TaxType ();
     final Ebi40VATType aEbiVAT = new Ebi40VATType ();
     {
+      int nTaxTotalIndex = 0;
       for (final TaxTotalType aUBLTaxTotal : aUBLInvoice.getTaxTotal ())
+      {
+        int nTaxSubtotalIndex = 0;
         for (final TaxSubtotalType aUBLSubtotal : aUBLTaxTotal.getTaxSubtotal ())
         {
           // Tax category is a mandatory element
@@ -727,7 +733,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter
           final String sUBLTaxSchemeSchemeID = StringHelper.trim (aUBLTaxCategory.getTaxScheme ()
                                                                                  .getID ()
                                                                                  .getSchemeID ());
-          final String sUBLTaxSchemeID = StringHelper.trim (aUBLTaxCategory.getTaxScheme ().getID ().getValue ());
+          final String sUBLTaxSchemeID = StringHelper.trim (aUBLTaxCategory.getTaxScheme ().getIDValue ());
 
           final String sUBLTaxCategorySchemeID = StringHelper.trim (aUBLTaxCategory.getID ().getSchemeID ());
           final String sUBLTaxCategoryID = StringHelper.trim (aUBLTaxCategory.getID ().getValue ());
@@ -736,33 +742,66 @@ public final class PEPPOLUBL20ToEbInterface40Converter
                                                        new SchemedID (sUBLTaxCategorySchemeID, sUBLTaxCategoryID)),
                                    aUBLPercentage);
 
-          if (_isSupportedTaxSchemeSchemeID (sUBLTaxSchemeSchemeID) && SUPPORTED_TAX_SCHEME_ID.equals (sUBLTaxSchemeID))
+          if (_isSupportedTaxSchemeSchemeID (sUBLTaxSchemeSchemeID))
           {
-            // add VAT item
-            final Ebi40ItemType aEbiVATItem = new Ebi40ItemType ();
-            // Base amount
-            aEbiVATItem.setTaxedAmount (aUBLSubtotal.getTaxableAmountValue ());
-            // tax rate
-            final Ebi40TaxRateType aEbiVATTaxRate = new Ebi40TaxRateType ();
-            // Optional
-            if (false)
-              aEbiVATTaxRate.setTaxCode (sUBLTaxCategoryID);
-            aEbiVATTaxRate.setValue (aUBLPercentage);
-            aEbiVATItem.setTaxRate (aEbiVATTaxRate);
-            // Tax amount
-            aEbiVATItem.setAmount (aUBLSubtotal.getTaxAmountValue ());
-            // Add to list
-            aEbiVAT.getItem ().add (aEbiVATItem);
+            final ETaxSchemeID eUBLTaxScheme = ETaxSchemeID.getFromIDOrNull (sUBLTaxSchemeID);
+            if (eUBLTaxScheme == null)
+            {
+              aTransformationErrorList.addError ("TaxTotal[" +
+                                                     nTaxTotalIndex +
+                                                     "]/TaxSubtotal[" +
+                                                     nTaxSubtotalIndex +
+                                                     "]/TaxCategory/TaxScheme/ID",
+                                                 EText.UNSUPPORTED_TAX_SCHEME_ID.getDisplayTextWithArgs (m_aDisplayLocale,
+                                                                                                         sUBLTaxSchemeID));
+            }
+            else
+            {
+              if (SUPPORTED_TAX_SCHEME_ID.equals (eUBLTaxScheme))
+              {
+                // add VAT item
+                final Ebi40ItemType aEbiVATItem = new Ebi40ItemType ();
+                // Base amount
+                aEbiVATItem.setTaxedAmount (aUBLSubtotal.getTaxableAmountValue ());
+                // tax rate
+                final Ebi40TaxRateType aEbiVATTaxRate = new Ebi40TaxRateType ();
+                // Optional
+                if (false)
+                  aEbiVATTaxRate.setTaxCode (sUBLTaxCategoryID);
+                aEbiVATTaxRate.setValue (aUBLPercentage);
+                aEbiVATItem.setTaxRate (aEbiVATTaxRate);
+                // Tax amount (mandatory)
+                aEbiVATItem.setAmount (aUBLSubtotal.getTaxAmountValue ());
+                // Add to list
+                aEbiVAT.getItem ().add (aEbiVATItem);
+              }
+              else
+              {
+                // Other TAX
+                final Ebi40OtherTaxType aOtherTax = new Ebi40OtherTaxType ();
+                // As no comment is present, use the scheme ID
+                aOtherTax.setComment (sUBLTaxSchemeID);
+                // Tax amount (mandatory)
+                aOtherTax.setAmount (aUBLSubtotal.getTaxAmountValue ());
+                aEbiTax.getOtherTax ().add (aOtherTax);
+              }
+            }
           }
           else
           {
-            // TODO other tax scheme
-            aTransformationErrorList.addError ("TaxTotal/TaxSubtotal/TaxCategory/",
+            aTransformationErrorList.addError ("TaxTotal[" +
+                                                   nTaxTotalIndex +
+                                                   "]/TaxSubtotal[" +
+                                                   nTaxSubtotalIndex +
+                                                   "]/TaxCategory/",
                                                EText.UNSUPPORTED_TAX_SCHEME.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                                     sUBLTaxSchemeSchemeID,
                                                                                                     sUBLTaxSchemeID));
           }
+          ++nTaxSubtotalIndex;
         }
+        ++nTaxTotalIndex;
+      }
 
       aEbiTax.setVAT (aEbiVAT);
       aEbiInvoice.setTax (aEbiTax);
