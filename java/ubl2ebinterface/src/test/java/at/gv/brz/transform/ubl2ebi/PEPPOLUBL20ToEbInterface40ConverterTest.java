@@ -37,11 +37,13 @@ import eu.europa.ec.cipa.test.TestFiles;
  * 
  * @author PEPPOL.AT, BRZ, Philip Helger
  */
-public class PEPPOLUBL20ToEbInterface40ConverterTest {
+public class PEPPOLUBL20ToEbInterface40ConverterTest
+{
   private static final Logger s_aLogger = LoggerFactory.getLogger (PEPPOLUBL20ToEbInterface40ConverterTest.class);
 
   @Test
-  public void testConvertPEPPOLInvoiceLax () {
+  public void testConvertPEPPOLInvoiceLax ()
+  {
     final List <IReadableResource> aTestFiles = new ArrayList <IReadableResource> ();
     if (false)
       aTestFiles.addAll (TestFiles.getSuccessFiles (ETestFileType.INVOICE));
@@ -50,7 +52,8 @@ public class PEPPOLUBL20ToEbInterface40ConverterTest {
       aTestFiles.add (new FileSystemResource (aFile));
 
     // For all PEPPOL test invoices
-    for (final IReadableResource aRes : aTestFiles) {
+    for (final IReadableResource aRes : aTestFiles)
+    {
       s_aLogger.info (aRes.getPath ());
       assertTrue (aRes.exists ());
 
@@ -60,8 +63,10 @@ public class PEPPOLUBL20ToEbInterface40ConverterTest {
 
       // Convert to ebInterface
       final ErrorList aErrorList = new ErrorList ();
-      final Ebi40InvoiceType aEbInvoice = new PEPPOLUBL20ToEbInterface40Converter (Locale.GERMANY, false).convertToEbInterface (aUBLInvoice,
-                                                                                                                                aErrorList);
+      final Ebi40InvoiceType aEbInvoice = new PEPPOLUBL20ToEbInterface40Converter (Locale.GERMANY,
+                                                                                   Locale.GERMANY,
+                                                                                   false).convertToEbInterface (aUBLInvoice,
+                                                                                                                aErrorList);
       assertTrue (aRes.getPath () + ": " + aErrorList.toString (), aErrorList.isEmpty () ||
                                                                    aErrorList.getMostSevereErrorLevel ()
                                                                              .isLessSevereThan (EErrorLevel.ERROR));
@@ -81,14 +86,16 @@ public class PEPPOLUBL20ToEbInterface40ConverterTest {
   }
 
   @Test
-  public void testConvertPEPPOLInvoiceERB () {
+  public void testConvertPEPPOLInvoiceERB ()
+  {
     final List <IReadableResource> aTestFiles = new ArrayList <IReadableResource> ();
     for (final File aFile : FileSystemIterator.create (new File ("src/test/resources/ubl20"),
                                                        new FilenameFilterEndsWith (".xml")))
       aTestFiles.add (new FileSystemResource (aFile));
 
     // For all PEPPOL test invoices
-    for (final IReadableResource aRes : aTestFiles) {
+    for (final IReadableResource aRes : aTestFiles)
+    {
       s_aLogger.info (aRes.getPath ());
       assertTrue (aRes.exists ());
 
@@ -98,8 +105,8 @@ public class PEPPOLUBL20ToEbInterface40ConverterTest {
 
       // Convert to ebInterface
       final ErrorList aErrorList = new ErrorList ();
-      final Ebi40InvoiceType aEbInvoice = new PEPPOLUBL20ToEbInterface40Converter (Locale.GERMANY, true).convertToEbInterface (aUBLInvoice,
-                                                                                                                               aErrorList);
+      final Ebi40InvoiceType aEbInvoice = new PEPPOLUBL20ToEbInterface40Converter (Locale.GERMANY, Locale.GERMANY, true).convertToEbInterface (aUBLInvoice,
+                                                                                                                                               aErrorList);
       assertTrue (aRes.getPath () + ": " + aErrorList.toString (), aErrorList.getMostSevereErrorLevel ()
                                                                              .isLessSevereThan (EErrorLevel.ERROR));
       assertNotNull (aEbInvoice);

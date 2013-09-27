@@ -10,7 +10,8 @@ import eu.europa.ec.cipa.peppol.codelist.EInvoiceTypeCode;
  * @author philip
  */
 @Immutable
-public final class CPeppolUBL {
+public final class CPeppolUBL
+{
   /** The UBL version to use */
   public static final String UBL_VERSION = "2.0";
 
@@ -20,5 +21,6 @@ public final class CPeppolUBL {
   /** The invoice type code to use */
   public static final String INVOICE_TYPE_CODE = EInvoiceTypeCode.COMMERCIAL_INVOICE.getID ();
 
-  private CPeppolUBL () {}
+  private CPeppolUBL ()
+  {}
 }

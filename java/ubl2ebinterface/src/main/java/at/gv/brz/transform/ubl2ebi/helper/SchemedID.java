@@ -16,11 +16,13 @@ import com.phloc.commons.string.ToStringGenerator;
  * @author philip
  */
 @Immutable
-public final class SchemedID {
+public final class SchemedID
+{
   private final String m_sSchemeID;
   private final String m_sID;
 
-  public SchemedID (@Nullable final String sSchemeID, @Nonnull @Nonempty final String sID) {
+  public SchemedID (@Nullable final String sSchemeID, @Nonnull @Nonempty final String sID)
+  {
     if (StringHelper.hasNoText (sID))
       throw new IllegalArgumentException ("ID");
     m_sSchemeID = sSchemeID;
@@ -28,18 +30,21 @@ public final class SchemedID {
   }
 
   @Nullable
-  public String getSchemeID () {
+  public String getSchemeID ()
+  {
     return m_sSchemeID;
   }
 
   @Nonnull
   @Nonempty
-  public String getID () {
+  public String getID ()
+  {
     return m_sID;
   }
 
   @Override
-  public boolean equals (final Object o) {
+  public boolean equals (final Object o)
+  {
     if (o == this)
       return true;
     if (!(o instanceof SchemedID))
@@ -49,12 +54,14 @@ public final class SchemedID {
   }
 
   @Override
-  public int hashCode () {
+  public int hashCode ()
+  {
     return new HashCodeGenerator (this).append (m_sSchemeID).append (m_sID).getHashCode ();
   }
 
   @Override
-  public String toString () {
+  public String toString ()
+  {
     return new ToStringGenerator (this).appendIfNotNull ("schemeID", m_sSchemeID).append ("ID", m_sID).toString ();
   }
 }

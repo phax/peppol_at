@@ -14,11 +14,13 @@ import com.phloc.commons.string.ToStringGenerator;
  * @author philip
  */
 @Immutable
-public final class TaxCategoryKey {
+public final class TaxCategoryKey
+{
   private final SchemedID m_aTaxCategoryScheme;
   private final SchemedID m_aTaxCategoryID;
 
-  public TaxCategoryKey (@Nonnull final SchemedID aTaxCategoryScheme, @Nonnull final SchemedID aTaxCategoryID) {
+  public TaxCategoryKey (@Nonnull final SchemedID aTaxCategoryScheme, @Nonnull final SchemedID aTaxCategoryID)
+  {
     if (aTaxCategoryScheme == null)
       throw new NullPointerException ("taxCategoryScheme");
     if (aTaxCategoryID == null)
@@ -28,17 +30,20 @@ public final class TaxCategoryKey {
   }
 
   @Nonnull
-  public SchemedID getTaxCategoryScheme () {
+  public SchemedID getTaxCategoryScheme ()
+  {
     return m_aTaxCategoryScheme;
   }
 
   @Nonnull
-  public SchemedID getTaxCategoryID () {
+  public SchemedID getTaxCategoryID ()
+  {
     return m_aTaxCategoryID;
   }
 
   @Override
-  public boolean equals (final Object o) {
+  public boolean equals (final Object o)
+  {
     if (o == this)
       return true;
     if (!(o instanceof TaxCategoryKey))
@@ -48,12 +53,14 @@ public final class TaxCategoryKey {
   }
 
   @Override
-  public int hashCode () {
+  public int hashCode ()
+  {
     return new HashCodeGenerator (this).append (m_aTaxCategoryScheme).append (m_aTaxCategoryID).getHashCode ();
   }
 
   @Override
-  public String toString () {
+  public String toString ()
+  {
     return new ToStringGenerator (this).append ("scheme", m_aTaxCategoryScheme)
                                        .append ("ID", m_aTaxCategoryID)
                                        .toString ();
