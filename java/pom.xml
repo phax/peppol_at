@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>at.peppol.oss</groupId>
   <artifactId>peppol-at-oss-parent-pom</artifactId>
-  <version>3</version>
+  <version>4-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>parent-pom</name>
 
@@ -14,8 +14,8 @@
   
   <!-- SVN location -->
   <scm>
-    <connection>scm:svn:https://joinup.ec.europa.eu/svn/peppol_at/tags/peppol-at-oss-parent-pom-3</connection>
-    <developerConnection>scm:svn:https://joinup.ec.europa.eu/svn/peppol_at/tags/peppol-at-oss-parent-pom-3</developerConnection>
+    <connection>scm:svn:https://joinup.ec.europa.eu/svn/peppol_at/trunk/java</connection>
+    <developerConnection>scm:svn:https://joinup.ec.europa.eu/svn/peppol_at/trunk/java</developerConnection>
   </scm>
   
   <!-- Used licenses -->
