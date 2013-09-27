@@ -37,9 +37,11 @@ import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.TaxS
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.TaxTotalType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CustomizationIDType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DescriptionType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.InstructionNoteType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.InvoiceTypeCodeType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.NameType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.NoteType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PaymentIDType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ProfileIDType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.UBLVersionIDType;
 import oasis.names.specification.ubl.schema.xsd.invoice_2.InvoiceType;
@@ -71,6 +73,7 @@ import com.phloc.ebinterface.v40.Ebi40CountryType;
 import com.phloc.ebinterface.v40.Ebi40CurrencyType;
 import com.phloc.ebinterface.v40.Ebi40DeliveryType;
 import com.phloc.ebinterface.v40.Ebi40DetailsType;
+import com.phloc.ebinterface.v40.Ebi40DirectDebitType;
 import com.phloc.ebinterface.v40.Ebi40DiscountType;
 import com.phloc.ebinterface.v40.Ebi40DocumentTypeType;
 import com.phloc.ebinterface.v40.Ebi40InvoiceRecipientType;
@@ -81,6 +84,7 @@ import com.phloc.ebinterface.v40.Ebi40ListLineItemType;
 import com.phloc.ebinterface.v40.Ebi40OrderReferenceDetailType;
 import com.phloc.ebinterface.v40.Ebi40OrderReferenceType;
 import com.phloc.ebinterface.v40.Ebi40PaymentConditionsType;
+import com.phloc.ebinterface.v40.Ebi40PaymentReferenceType;
 import com.phloc.ebinterface.v40.Ebi40PeriodType;
 import com.phloc.ebinterface.v40.Ebi40ReductionAndSurchargeBaseType;
 import com.phloc.ebinterface.v40.Ebi40ReductionAndSurchargeDetailsType;
@@ -92,6 +96,7 @@ import com.phloc.ebinterface.v40.Ebi40UnitType;
 import com.phloc.ebinterface.v40.Ebi40UniversalBankTransactionType;
 import com.phloc.ebinterface.v40.Ebi40VATType;
 import com.phloc.ebinterface.v40.ObjectFactory;
+import com.phloc.ubl20.codelist.EPaymentMeansCode20;
 import com.phloc.ubl20.codelist.EUnitOfMeasureCode20;
 import com.phloc.validation.error.ErrorList;
 
@@ -135,7 +140,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter
     MISSING_INVOICE_NUMBER ("Es wurde keine Rechnungsnummer angegeben.", "No invoice number was provided."),
     MISSING_INVOICE_DATE ("Es wurde keine Rechnungsdatum angegeben.", "No invoice date was provided."),
     BILLER_VAT_MISSING ("Die UID-Nummer des Rechnungsstellers fehlt. Verwenden Sie 'ATU00000000' für österreichische Rechnungssteller an wenn keine UID-Nummer notwendig ist.", "Failed to get biller VAT identification number. Use 'ATU00000000' for Austrian invoice recipients if no VAT identification number is required."),
-    CUSTOMER_ASSIGNED_ACCOUNTID_MISSING ("Die ID des Rechnungsstellers beim Rechnungsempfänger fehlt.", "Failed to get customer assigned account ID for supplier."),
+    ERB_CUSTOMER_ASSIGNED_ACCOUNTID_MISSING ("Die ID des Rechnungsstellers beim Rechnungsempfänger fehlt.", "Failed to get customer assigned account ID for supplier."),
     SUPPLIER_VAT_MISSING ("Die UID-Nummer des Rechnungsempfängers fehlt. Verwenden Sie 'ATU00000000' für österreichische Empfänger an wenn keine UID-Nummer notwendig ist.", "Failed to get supplier VAT identification number. Use 'ATU00000000' for Austrian invoice recipients if no VAT identification number is required."),
     SUPPLIER_ASSIGNED_ACCOUNTID_MISSING ("Die ID des Rechnungsempfängers beim Rechnungssteller fehlt. Der Standardwert ''{0}'' wird verwendet.", "Failed to get supplier assigned account ID for customer. Defaulting to ''{0}''."),
     ORDER_REFERENCE_MISSING ("Die Auftragsreferenz fehlt.", "Failed to get order reference ID."),
@@ -147,13 +152,19 @@ public final class PEPPOLUBL20ToEbInterface40Converter
     DETAILS_INVALID_QUANTITY ("Die Rechnungszeile hat keine Menge. Verwende den Standardwert ''{0}''.", "The UBL invoice line has no quantity. Defaulting to ''{0}''."),
     VAT_ITEM_MISSING ("Keine einzige Steuersumme gefunden", "No single VAT item found."),
     ALLOWANCE_CHARGE_NO_TAXRATE ("Die Steuerprozentrate für den globalen Zuschlag/Abschlag konnte nicht ermittelt werden.", "Failed to resolve tax rate percentage for global AllowanceCharge."),
+    PAYMENTMEANS_CODE_INVALID ("Der PaymentMeansCode ist ungültig. Für Überweisungen muss {0} verwenden werden und für Lastschriftverfahren {1}.", "The PaymentMeansCode is invalid. For debit transfer use {0} and for direct debit use {1}."),
+    PAYMENT_ID_NOT_NUMERIC ("Die Zahlungsreferenz ''{0}'' ist nicht numerisch und wird ignoriert.", "The payment reference ''{0}'' is not numeric and therefore ignored."),
+    PAYMENT_ID_CHECKSUM_INVALID ("Die Checksumme ''{0}'' der Zahlungsreferenz ist ungültig wird ignoriert.", "The payment reference checksum ''{0}'' is invalid and therefore ignored."),
+    PAYMENT_ID_TOO_LONG ("Die Zahlungsreferenz ''{0}'' ist zu lang und wird ignoriert.", "The payment reference ''{0}'' is too long and therefore ignored."),
     BIC_INVALID ("Der BIC ''{0}'' ist ungültig.", "The BIC ''{0}'' is invalid."),
     IBAN_TOO_LONG ("Der IBAN ''{0}'' ist zu lang. Er wurde nach {1} Zeichen abgeschnitten.", "The IBAN ''{0}'' is too long and was cut to {1} characters."),
+    PAYMENTMEANS_UNSUPPORTED_CHANNELCODE ("Die Zahlungsart with dem ChannelCode ''{0}'' wird ignoriert.", "The payment means with ChannelCode ''{0}'' are ignored."),
+    ERB_NO_PAYMENT_METHOD ("Es muss eine Zahlungsart angegeben werden.", "A payment method must be provided."),
     SETTLEMENT_PERIOD_MISSING ("Für Skontoeinträge muss mindestens ein Endedatum angegeben werden.", "Discount items require a settlement end date."),
     PENALTY_NOT_ALLOWED ("Strafzuschläge werden in ebInterface nicht unterstützt.", "Penalty surcharges are not supported in ebInterface."),
     DISCOUNT_WITHOUT_DUEDATE ("Skontoeinträge können nur angegeben werden, wenn auch ein Zahlungsziel angegeben wurde.", "Discount items can only be provided if a payment due date is present."),
     DELIVERY_WITHOUT_NAME ("Wenn eine Delivery/DeliveryLocation/Address angegeben ist muss auch ein Delivery/DeliveryParty/PartyName/Name angegeben werden.", "If a Delivery/DeliveryLocation/Address is present, a Delivery/DeliveryParty/PartyName/Name must also be present."),
-    NO_DELIVERY_DATE ("Ein Lieferdatum oder ein Leistungszeitraum muss vorhanden sein.", "A Delivery/DeliveryDate or an InvoicePeriod must be present.");
+    ERB_NO_DELIVERY_DATE ("Ein Lieferdatum oder ein Leistungszeitraum muss vorhanden sein.", "A Delivery/DeliveryDate or an InvoicePeriod must be present.");
 
     private final ITextProvider m_aTP;
 
@@ -482,6 +493,16 @@ public final class PEPPOLUBL20ToEbInterface40Converter
            sUBLTaxSchemeSchemeID.equals (SUPPORTED_TAX_SCHEME_SCHEME_ID_SUBSET);
   }
 
+  public static boolean _isValidPaymentReferenceChecksum (@Nullable final String sChecksum)
+  {
+    if (StringHelper.getLength (sChecksum) == 1)
+    {
+      final char c = sChecksum.charAt (0);
+      return (c >= '0' && c <= '9') || c == 'X';
+    }
+    return false;
+  }
+
   @Nullable
   private String _makeAlphaNumIDType (@Nullable final String sText,
                                       @Nonnull final String sContext,
@@ -586,7 +607,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter
         {
           // Mandatory field
           aTransformationErrorList.addError ("AccountingSupplierParty/CustomerAssignedAccountID",
-                                             EText.CUSTOMER_ASSIGNED_ACCOUNTID_MISSING.getDisplayText (m_aDisplayLocale));
+                                             EText.ERB_CUSTOMER_ASSIGNED_ACCOUNTID_MISSING.getDisplayText (m_aDisplayLocale));
         }
       }
       aEbiBiller.setAddress (_convertParty (aUBLSupplier.getParty (),
@@ -1082,77 +1103,211 @@ public final class PEPPOLUBL20ToEbInterface40Converter
       int nPaymentMeansIndex = 0;
       for (final PaymentMeansType aUBLPaymentMeans : aUBLInvoice.getPaymentMeans ())
       {
-        // Is a payment channel code present?
-        if (PAYMENT_CHANNEL_CODE_IBAN.equals (aUBLPaymentMeans.getPaymentChannelCodeValue ()))
+        final String sPaymentMeansCode = StringHelper.trim (aUBLPaymentMeans.getPaymentMeansCodeValue ());
+        final EPaymentMeansCode20 ePaymentMeans = EPaymentMeansCode20.getFromIDOrNull (sPaymentMeansCode);
+        if (ePaymentMeans == EPaymentMeansCode20._31)
         {
-          final Ebi40UniversalBankTransactionType aEbiUBTMethod = new Ebi40UniversalBankTransactionType ();
-          // Beneficiary account
-          final Ebi40AccountType aEbiAccount = new Ebi40AccountType ();
-
-          // BIC
-          final FinancialAccountType aUBLFinancialAccount = aUBLPaymentMeans.getPayeeFinancialAccount ();
-          if (aUBLFinancialAccount.getFinancialInstitutionBranch () != null &&
-              aUBLFinancialAccount.getFinancialInstitutionBranch ().getFinancialInstitution () != null)
+          // Is a payment channel code present?
+          final String sPaymentChannelCode = StringHelper.trim (aUBLPaymentMeans.getPaymentChannelCodeValue ());
+          if (PAYMENT_CHANNEL_CODE_IBAN.equals (sPaymentChannelCode))
           {
-            final String sBIC = StringHelper.trim (aUBLFinancialAccount.getFinancialInstitutionBranch ()
-                                                                       .getFinancialInstitution ()
-                                                                       .getIDValue ());
-            aEbiAccount.setBIC (sBIC);
-            if (!RegExHelper.stringMatchesPattern (REGEX_BIC, sBIC))
+            final Ebi40UniversalBankTransactionType aEbiUBTMethod = new Ebi40UniversalBankTransactionType ();
+
+            // Find payment reference
+            int nPaymentIDIndex = 0;
+            for (final PaymentIDType aUBLPaymentID : aUBLPaymentMeans.getPaymentID ())
             {
-              aTransformationErrorList.addError ("PaymentMeans[" +
-                                                     nPaymentMeansIndex +
-                                                     "]/PayeeFinancialAccount/FinancialInstitutionBranch/FinancialInstitution/ID",
-                                                 EText.BIC_INVALID.getDisplayTextWithArgs (m_aDisplayLocale, sBIC));
-              aEbiAccount.setBIC (null);
+              final String sUBLPaymentID = StringHelper.trim (aUBLPaymentID.getValue ());
+              if (StringHelper.hasText (sUBLPaymentID))
+              {
+                String sPaymentReference = null;
+                String sChecksum = null;
+
+                if (sUBLPaymentID.length () <= 12)
+                {
+                  // Reference without checksum
+                  sPaymentReference = sUBLPaymentID;
+                }
+                else
+                  if (sUBLPaymentID.length () == 13)
+                  {
+                    // Reference and checksum
+                    sPaymentReference = sUBLPaymentID.substring (0, 12);
+                    sChecksum = sUBLPaymentID.substring (12);
+                  }
+
+                if (sPaymentReference != null)
+                {
+                  if (!StringParser.isUnsignedLong (sPaymentReference))
+                  {
+                    aTransformationErrorList.addWarning ("PaymentMeans[" +
+                                                             nPaymentMeansIndex +
+                                                             "]/PaymentID[" +
+                                                             nPaymentIDIndex +
+                                                             "]",
+                                                         EText.PAYMENT_ID_NOT_NUMERIC.getDisplayTextWithArgs (m_aDisplayLocale,
+                                                                                                              sPaymentReference));
+                  }
+                  else
+                  {
+                    // Checksum is optional
+                    if (sChecksum != null && !_isValidPaymentReferenceChecksum (sChecksum))
+                    {
+                      aTransformationErrorList.addWarning ("PaymentMeans[" +
+                                                               nPaymentMeansIndex +
+                                                               "]/PaymentID[" +
+                                                               nPaymentIDIndex +
+                                                               "]",
+                                                           EText.PAYMENT_ID_CHECKSUM_INVALID.getDisplayTextWithArgs (m_aDisplayLocale,
+                                                                                                                     sChecksum));
+                      sChecksum = null;
+                    }
+
+                    final Ebi40PaymentReferenceType aEbiPaymentReference = new Ebi40PaymentReferenceType ();
+                    aEbiPaymentReference.setValue (sPaymentReference);
+                    aEbiPaymentReference.setCheckSum (sChecksum);
+                    aEbiUBTMethod.setPaymentReference (aEbiPaymentReference);
+                  }
+                }
+                else
+                {
+                  aTransformationErrorList.addWarning ("PaymentMeans[" +
+                                                           nPaymentMeansIndex +
+                                                           "]/PaymentID[" +
+                                                           nPaymentIDIndex +
+                                                           "]",
+                                                       EText.PAYMENT_ID_TOO_LONG.getDisplayTextWithArgs (m_aDisplayLocale,
+                                                                                                         sUBLPaymentID));
+                }
+              }
+              ++nPaymentIDIndex;
             }
-          }
 
-          // IBAN
-          final String sIBAN = StringHelper.trim (aUBLPaymentMeans.getPayeeFinancialAccount ().getIDValue ());
-          aEbiAccount.setIBAN (sIBAN);
-          if (StringHelper.getLength (sIBAN) > IBAN_MAX_LENGTH)
-          {
-            aTransformationErrorList.addWarning ("PaymentMeans[" + nPaymentMeansIndex + "]/PayeeFinancialAccount/ID",
-                                                 EText.IBAN_TOO_LONG.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                             sIBAN,
-                                                                                             Integer.valueOf (IBAN_MAX_LENGTH)));
-            aEbiAccount.setIBAN (sIBAN.substring (0, IBAN_MAX_LENGTH));
-          }
+            // Beneficiary account
+            final Ebi40AccountType aEbiAccount = new Ebi40AccountType ();
 
-          // Bank Account Owner - no field present - check PayeePart or
-          // SupplierPartyName
-          String sBankAccountOwnerName = null;
-          if (aUBLInvoice.getPayeeParty () != null)
-            for (final PartyNameType aPartyName : aUBLInvoice.getPayeeParty ().getPartyName ())
+            // BIC
+            final FinancialAccountType aUBLFinancialAccount = aUBLPaymentMeans.getPayeeFinancialAccount ();
+            if (aUBLFinancialAccount.getFinancialInstitutionBranch () != null &&
+                aUBLFinancialAccount.getFinancialInstitutionBranch ().getFinancialInstitution () != null)
             {
-              sBankAccountOwnerName = StringHelper.trim (aPartyName.getNameValue ());
-              if (StringHelper.hasText (sBankAccountOwnerName))
-                break;
+              final String sBIC = StringHelper.trim (aUBLFinancialAccount.getFinancialInstitutionBranch ()
+                                                                         .getFinancialInstitution ()
+                                                                         .getIDValue ());
+              aEbiAccount.setBIC (sBIC);
+              if (!RegExHelper.stringMatchesPattern (REGEX_BIC, sBIC))
+              {
+                aTransformationErrorList.addError ("PaymentMeans[" +
+                                                       nPaymentMeansIndex +
+                                                       "]/PayeeFinancialAccount/FinancialInstitutionBranch/FinancialInstitution/ID",
+                                                   EText.BIC_INVALID.getDisplayTextWithArgs (m_aDisplayLocale, sBIC));
+                aEbiAccount.setBIC (null);
+              }
             }
-          if (StringHelper.hasNoText (sBankAccountOwnerName))
-          {
-            final PartyType aSupplierParty = aUBLInvoice.getAccountingSupplierParty ().getParty ();
-            if (aSupplierParty != null)
-              for (final PartyNameType aPartyName : aSupplierParty.getPartyName ())
+
+            // IBAN
+            final String sIBAN = StringHelper.trim (aUBLPaymentMeans.getPayeeFinancialAccount ().getIDValue ());
+            aEbiAccount.setIBAN (sIBAN);
+            if (StringHelper.getLength (sIBAN) > IBAN_MAX_LENGTH)
+            {
+              aTransformationErrorList.addWarning ("PaymentMeans[" + nPaymentMeansIndex + "]/PayeeFinancialAccount/ID",
+                                                   EText.IBAN_TOO_LONG.getDisplayTextWithArgs (m_aDisplayLocale,
+                                                                                               sIBAN,
+                                                                                               Integer.valueOf (IBAN_MAX_LENGTH)));
+              aEbiAccount.setIBAN (sIBAN.substring (0, IBAN_MAX_LENGTH));
+            }
+
+            // Bank Account Owner - no field present - check PayeePart or
+            // SupplierPartyName
+            String sBankAccountOwnerName = null;
+            if (aUBLInvoice.getPayeeParty () != null)
+              for (final PartyNameType aPartyName : aUBLInvoice.getPayeeParty ().getPartyName ())
               {
                 sBankAccountOwnerName = StringHelper.trim (aPartyName.getNameValue ());
                 if (StringHelper.hasText (sBankAccountOwnerName))
                   break;
               }
+            if (StringHelper.hasNoText (sBankAccountOwnerName))
+            {
+              final PartyType aSupplierParty = aUBLInvoice.getAccountingSupplierParty ().getParty ();
+              if (aSupplierParty != null)
+                for (final PartyNameType aPartyName : aSupplierParty.getPartyName ())
+                {
+                  sBankAccountOwnerName = StringHelper.trim (aPartyName.getNameValue ());
+                  if (StringHelper.hasText (sBankAccountOwnerName))
+                    break;
+                }
+            }
+            aEbiAccount.setBankAccountOwner (sBankAccountOwnerName);
+
+            // Comments
+            if (aUBLPaymentMeans.hasInstructionNoteEntries ())
+            {
+              final List <String> aNotes = new ArrayList <String> ();
+              for (final InstructionNoteType aUBLNote : aUBLPaymentMeans.getInstructionNote ())
+              {
+                final String sNote = StringHelper.trim (aUBLNote.getValue ());
+                if (StringHelper.hasText (sNote))
+                  aNotes.add (sNote);
+              }
+              if (!aNotes.isEmpty ())
+                aEbiUBTMethod.setComment (StringHelper.getImploded ('\n', aNotes));
+            }
+
+            aEbiUBTMethod.getBeneficiaryAccount ().add (aEbiAccount);
+            aEbiInvoice.setPaymentMethod (aEbiUBTMethod);
+
+            // Set due date (optional)
+            aEbiPaymentConditions.setDueDate (aUBLPaymentMeans.getPaymentDueDateValue ());
+
+            break;
           }
-          aEbiAccount.setBankAccountOwner (sBankAccountOwnerName);
 
-          aEbiUBTMethod.getBeneficiaryAccount ().add (aEbiAccount);
-          aEbiInvoice.setPaymentMethod (aEbiUBTMethod);
-
-          // Set due date (optional)
-          aEbiPaymentConditions.setDueDate (aUBLPaymentMeans.getPaymentDueDateValue ());
-
-          break;
+          aTransformationErrorList.addWarning ("PaymentMeans[" + nPaymentMeansIndex + "]",
+                                               EText.PAYMENTMEANS_UNSUPPORTED_CHANNELCODE.getDisplayTextWithArgs (m_aDisplayLocale,
+                                                                                                                  sPaymentChannelCode));
         }
+        else
+          if (ePaymentMeans == EPaymentMeansCode20._49)
+          {
+            final Ebi40DirectDebitType aEbiDirectDebit = new Ebi40DirectDebitType ();
+
+            if (aUBLPaymentMeans.hasInstructionNoteEntries ())
+            {
+              final List <String> aNotes = new ArrayList <String> ();
+              for (final InstructionNoteType aUBLNote : aUBLPaymentMeans.getInstructionNote ())
+              {
+                final String sNote = StringHelper.trim (aUBLNote.getValue ());
+                if (StringHelper.hasText (sNote))
+                  aNotes.add (sNote);
+              }
+              if (!aNotes.isEmpty ())
+                aEbiDirectDebit.setComment (StringHelper.getImploded ('\n', aNotes));
+            }
+
+            aEbiInvoice.setPaymentMethod (aEbiDirectDebit);
+
+            // Set due date (optional)
+            aEbiPaymentConditions.setDueDate (aUBLPaymentMeans.getPaymentDueDateValue ());
+
+            break;
+          }
+          else
+          {
+            aTransformationErrorList.addError ("PaymentMeans[" + nPaymentMeansIndex + "]",
+                                               EText.PAYMENTMEANS_CODE_INVALID.getDisplayTextWithArgs (m_aDisplayLocale,
+                                                                                                       EPaymentMeansCode20._31.getID (),
+                                                                                                       EPaymentMeansCode20._49.getID ()));
+          }
+
+        ++nPaymentMeansIndex;
       }
-      ++nPaymentMeansIndex;
+    }
+
+    if (m_bStrictERBMode)
+    {
+      if (aEbiInvoice.getPaymentMethod () == null)
+        aTransformationErrorList.addError ("Invoice", EText.ERB_NO_PAYMENT_METHOD.getDisplayText (m_aDisplayLocale));
     }
 
     // Payment terms
@@ -1287,7 +1442,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter
     if (m_bStrictERBMode)
     {
       if (aEbiDelivery.getDate () == null && aEbiDelivery.getPeriod () == null)
-        aTransformationErrorList.addError ("Invoice", EText.NO_DELIVERY_DATE.getDisplayText (m_aDisplayLocale));
+        aTransformationErrorList.addError ("Invoice", EText.ERB_NO_DELIVERY_DATE.getDisplayText (m_aDisplayLocale));
     }
 
     if (aEbiDelivery.getDate () != null || aEbiDelivery.getPeriod () != null)

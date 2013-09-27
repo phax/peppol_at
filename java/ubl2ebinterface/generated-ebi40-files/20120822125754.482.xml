@@ -154,4 +154,8 @@
     </ns2:VAT>
   </ns2:Tax>
   <ns2:TotalGrossAmount>729</ns2:TotalGrossAmount>
+  <ns2:PaymentMethod xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="ns2:DirectDebitType" />
+  <ns2:PaymentConditions>
+    <ns2:DueDate>2009-12-31</ns2:DueDate>
+  </ns2:PaymentConditions>
 </ns2:Invoice>
