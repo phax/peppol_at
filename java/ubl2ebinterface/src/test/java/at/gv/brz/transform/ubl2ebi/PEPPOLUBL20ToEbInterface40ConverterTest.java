@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import javax.annotation.Nonnull;
+import javax.xml.bind.Marshaller;
+
 import oasis.names.specification.ubl.schema.xsd.invoice_2.InvoiceType;
 
 import org.junit.Test;
@@ -23,11 +26,15 @@ import com.phloc.commons.io.file.filter.FilenameFilterEndsWith;
 import com.phloc.commons.io.file.iterate.FileSystemIterator;
 import com.phloc.commons.io.file.iterate.FileSystemRecursiveIterator;
 import com.phloc.commons.io.resource.FileSystemResource;
+import com.phloc.commons.jaxb.JAXBMarshallerUtils;
+import com.phloc.commons.xml.CXML;
 import com.phloc.commons.xml.serialize.XMLWriter;
+import com.phloc.ebinterface.CEbInterface;
 import com.phloc.ebinterface.EbInterface40Marshaller;
 import com.phloc.ebinterface.v40.Ebi40InvoiceType;
 import com.phloc.ubl.UBL20Reader;
 import com.phloc.validation.error.ErrorList;
+import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
 
 import eu.europa.ec.cipa.test.ETestFileType;
 import eu.europa.ec.cipa.test.TestFiles;
@@ -39,6 +46,26 @@ import eu.europa.ec.cipa.test.TestFiles;
  */
 public class PEPPOLUBL20ToEbInterface40ConverterTest
 {
+  public static class EbiNamespacePrefixMapper extends NamespacePrefixMapper
+  {
+    @Override
+    public String getPreferredPrefix (final String sNamespaceUri, final String sSuggestion, final boolean requirePrefix)
+    {
+      // XSI prefix
+      if (sNamespaceUri.equals (CXML.XML_NS_XSI))
+        return "xsi";
+
+      // XS prefix
+      if (sNamespaceUri.equals (CXML.XML_NS_XSD))
+        return "xs";
+
+      // ebInterface specific prefixes
+      if (sNamespaceUri.equals (CEbInterface.EBINTERFACE_40_NS))
+        return "eb";
+      return sSuggestion;
+    }
+  }
+
   private static final Logger s_aLogger = LoggerFactory.getLogger (PEPPOLUBL20ToEbInterface40ConverterTest.class);
 
   @Test
@@ -76,7 +103,14 @@ public class PEPPOLUBL20ToEbInterface40ConverterTest
         s_aLogger.info ("  " + aErrorList.getAllItems ());
 
       // Convert ebInterface to XML
-      final Document aDocEb = new EbInterface40Marshaller ().write (aEbInvoice);
+      final Document aDocEb = new EbInterface40Marshaller ()
+      {
+        @Override
+        protected void customizeMarshaller (@Nonnull final Marshaller aMarshaller)
+        {
+          JAXBMarshallerUtils.setSunNamespacePrefixMapper (aMarshaller, new EbiNamespacePrefixMapper ());
+        }
+      }.write (aEbInvoice);
       assertNotNull (aDocEb);
 
       XMLWriter.writeToStream (aDocEb,
@@ -115,7 +149,14 @@ public class PEPPOLUBL20ToEbInterface40ConverterTest
         s_aLogger.info ("  " + aErrorList.getAllItems ());
 
       // Convert ebInterface to XML
-      final Document aDocEb = new EbInterface40Marshaller ().write (aEbInvoice);
+      final Document aDocEb = new EbInterface40Marshaller ()
+      {
+        @Override
+        protected void customizeMarshaller (@Nonnull final Marshaller aMarshaller)
+        {
+          JAXBMarshallerUtils.setSunNamespacePrefixMapper (aMarshaller, new EbiNamespacePrefixMapper ());
+        }
+      }.write (aEbInvoice);
       assertNotNull (aDocEb);
 
       XMLWriter.writeToStream (aDocEb,
