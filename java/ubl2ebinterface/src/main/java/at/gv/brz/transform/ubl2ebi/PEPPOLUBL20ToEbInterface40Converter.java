@@ -3,7 +3,9 @@ package at.gv.brz.transform.ubl2ebi;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -37,6 +39,7 @@ import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Customiz
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DescriptionType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.InvoiceTypeCodeType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.NameType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.NoteType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ProfileIDType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.UBLVersionIDType;
 import oasis.names.specification.ubl.schema.xsd.invoice_2.InvoiceType;
@@ -68,6 +71,7 @@ import com.phloc.ebinterface.v40.Ebi40CountryType;
 import com.phloc.ebinterface.v40.Ebi40CurrencyType;
 import com.phloc.ebinterface.v40.Ebi40DeliveryType;
 import com.phloc.ebinterface.v40.Ebi40DetailsType;
+import com.phloc.ebinterface.v40.Ebi40DiscountType;
 import com.phloc.ebinterface.v40.Ebi40DocumentTypeType;
 import com.phloc.ebinterface.v40.Ebi40InvoiceRecipientType;
 import com.phloc.ebinterface.v40.Ebi40InvoiceType;
@@ -143,6 +147,8 @@ public final class PEPPOLUBL20ToEbInterface40Converter
     ALLOWANCE_CHARGE_NO_TAXRATE ("Die Steuerprozentrate für den globalen Zuschlag/Abschlag konnte nicht ermittelt werden.", "Failed to resolve tax rate percentage for global AllowanceCharge."),
     BIC_INVALID ("Der BIC ''{0}'' ist ungültig.", "The BIC ''{0}'' is invalid."),
     IBAN_TOO_LONG ("Der IBAN ''{0}'' ist zu lang. Er wurde nach {1} Zeichen abgeschnitten.", "The IBAN ''{0}'' is too long and was cut to {1} characters."),
+    SETTLEMENT_PERIOD_MISSING ("Für Skontoeinträge muss mindestens ein Endedatum angegeben werden.", "Discount items require a settlement end date."),
+    PENALTY_NOT_ALLOWED ("Strafzuschläge werden in ebInterface nicht unterstützt.", "Penalty surcharges are not supported in ebInterface."),
     DISCOUNT_WITHOUT_DUEDATE ("Skontoeinträge können nur angegeben werden, wenn auch ein Zahlungsziel angegeben wurde.", "Discount items can only be provided if a payment due date is present."),
     DELIVERY_WITHOUT_NAME ("Wenn eine Delivery/DeliveryLocation/Address angegeben ist muss auch ein Delivery/DeliveryParty/PartyName/Name angegeben werden.", "If a Delivery/DeliveryLocation/Address is present, a Delivery/DeliveryParty/PartyName/Name must also be present."),
     NO_DELIVERY_DATE ("Ein Lieferdatum oder ein Leistungszeitraum muss vorhanden sein.", "A Delivery/DeliveryDate or an InvoicePeriod must be present.");
@@ -1136,11 +1142,45 @@ public final class PEPPOLUBL20ToEbInterface40Converter
 
     // Payment terms
     {
+      final List <String> aPaymentConditionsNotes = new ArrayList <String> ();
       int nPaymentTermsIndex = 0;
       for (final PaymentTermsType aUBLPaymentTerms : aUBLInvoice.getPaymentTerms ())
       {
+        if (aUBLPaymentTerms.getSettlementDiscountPercent () != null)
+        {
+          if (aUBLPaymentTerms.getSettlementPeriod () == null ||
+              aUBLPaymentTerms.getSettlementPeriod ().getEndDate () == null)
+          {
+            aTransformationErrorList.addWarning ("PaymentTerms[" + nPaymentTermsIndex + "]/SettlementPeriod",
+                                                 EText.SETTLEMENT_PERIOD_MISSING.getDisplayText (m_aDisplayLocale));
+          }
+          else
+          {
+            // Add notes
+            for (final NoteType aUBLNote : aUBLPaymentTerms.getNote ())
+            {
+              final String sUBLNote = StringHelper.trim (aUBLNote.getValue ());
+              if (StringHelper.hasText (sUBLNote))
+                aPaymentConditionsNotes.add (sUBLNote);
+            }
+
+            final Ebi40DiscountType aEbiDiscount = new Ebi40DiscountType ();
+            aEbiDiscount.setPaymentDate (aUBLPaymentTerms.getSettlementPeriod ().getEndDateValue ());
+            aEbiDiscount.setPercentage (aUBLPaymentTerms.getSettlementDiscountPercentValue ());
+            aEbiPaymentConditions.getDiscount ().add (aEbiDiscount);
+          }
+        }
+        else
+        {
+          aTransformationErrorList.addWarning ("PaymentTerms[" + nPaymentTermsIndex + "]",
+                                               EText.PENALTY_NOT_ALLOWED.getDisplayText (m_aDisplayLocale));
+        }
+
         ++nPaymentTermsIndex;
       }
+
+      if (!aPaymentConditionsNotes.isEmpty ())
+        aEbiPaymentConditions.setComment (StringHelper.getImploded ('\n', aPaymentConditionsNotes));
     }
 
     if (aEbiPaymentConditions.getDueDate () == null)
