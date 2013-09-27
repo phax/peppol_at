@@ -132,6 +132,8 @@ public final class PEPPOLUBL20ToEbInterface40Converter
     PARTY_UNSUPPORTED_ADDRESS_IDENTIFIER ("Ignoriere die ID ''{0}'' des Typs ''{1}''.", "Ignoring identification ''{0}'' of type ''{1}''."),
     ALPHANUM_ID_TYPE_CHANGE ("''{0}'' ist ein ungültiger Typ und wurde auf ''{1}'' geändert.", "''{0}'' is an invalid value and was changed to ''{1}''."),
     INVALID_CURRENCY_CODE ("Der angegebene Währungscode ''{0}'' ist ungültig.", "Invalid currency code ''{0}'' provided."),
+    MISSING_INVOICE_NUMBER ("Es wurde keine Rechnungsnummer angegeben.", "No invoice number was provided."),
+    MISSING_INVOICE_DATE ("Es wurde keine Rechnungsdatum angegeben.", "No invoice date was provided."),
     BILLER_VAT_MISSING ("Die UID-Nummer des Rechnungsstellers fehlt. Verwenden Sie 'ATU00000000' für österreichische Rechnungssteller an wenn keine UID-Nummer notwendig ist.", "Failed to get biller VAT identification number. Use 'ATU00000000' for Austrian invoice recipients if no VAT identification number is required."),
     CUSTOMER_ASSIGNED_ACCOUNTID_MISSING ("Die ID des Rechnungsstellers beim Rechnungsempfänger fehlt.", "Failed to get customer assigned account ID for supplier."),
     SUPPLIER_VAT_MISSING ("Die UID-Nummer des Rechnungsempfängers fehlt. Verwenden Sie 'ATU00000000' für österreichische Empfänger an wenn keine UID-Nummer notwendig ist.", "Failed to get supplier VAT identification number. Use 'ATU00000000' for Austrian invoice recipients if no VAT identification number is required."),
@@ -528,6 +530,11 @@ public final class PEPPOLUBL20ToEbInterface40Converter
     aEbiInvoice.setGeneratingSystem (EBI_GENERATING_SYSTEM);
     aEbiInvoice.setDocumentType (Ebi40DocumentTypeType.INVOICE);
 
+    // Cannot set the language, because the 3letter code is expected but we only
+    // have the 2letter code!
+    if (false)
+      aEbiInvoice.setLanguage (m_aContentLocale.getLanguage ());
+
     final String sUBLCurrencyCode = StringHelper.trim (aUBLInvoice.getDocumentCurrencyCodeValue ());
     try
     {
@@ -539,9 +546,17 @@ public final class PEPPOLUBL20ToEbInterface40Converter
                                          EText.INVALID_CURRENCY_CODE.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                              sUBLCurrencyCode));
     }
-    aEbiInvoice.setInvoiceNumber (StringHelper.trim (aUBLInvoice.getIDValue ()));
+
+    // Invoice Number
+    final String sInvoiceNumber = StringHelper.trim (aUBLInvoice.getIDValue ());
+    if (StringHelper.hasNoText (sInvoiceNumber))
+      aTransformationErrorList.addError ("ID", EText.MISSING_INVOICE_NUMBER.getDisplayText (m_aDisplayLocale));
+    aEbiInvoice.setInvoiceNumber (sInvoiceNumber);
+
     // Ignore the time!
     aEbiInvoice.setInvoiceDate (aUBLInvoice.getIssueDateValue ());
+    if (aEbiInvoice.getInvoiceDate () == null)
+      aTransformationErrorList.addError ("IssueDate", EText.MISSING_INVOICE_DATE.getDisplayText (m_aDisplayLocale));
 
     // Biller/Supplier (creator of the invoice)
     {
@@ -1167,6 +1182,8 @@ public final class PEPPOLUBL20ToEbInterface40Converter
             final Ebi40DiscountType aEbiDiscount = new Ebi40DiscountType ();
             aEbiDiscount.setPaymentDate (aUBLPaymentTerms.getSettlementPeriod ().getEndDateValue ());
             aEbiDiscount.setPercentage (aUBLPaymentTerms.getSettlementDiscountPercentValue ());
+            // Optional amount value
+            aEbiDiscount.setAmount (aUBLPaymentTerms.getAmountValue ());
             aEbiPaymentConditions.getDiscount ().add (aEbiDiscount);
           }
         }
