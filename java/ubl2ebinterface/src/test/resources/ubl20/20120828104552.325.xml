@@ -83,6 +83,7 @@
   </cac:AccountingCustomerParty>
   <cac:PaymentMeans>
     <cbc:PaymentMeansCode>31</cbc:PaymentMeansCode>
+    <cbc:PaymentDueDate>2009-12-31</cbc:PaymentDueDate>
     <cbc:PaymentChannelCode>IBAN</cbc:PaymentChannelCode>
     <cac:PayeeFinancialAccount>
       <cbc:ID schemeID="IBAN">AT89 1111 2222 3333 0000</cbc:ID>

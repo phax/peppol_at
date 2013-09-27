@@ -68,4 +68,7 @@
       <ns2:BankAccountOwner>42virtual Business Services GmbH</ns2:BankAccountOwner>
     </ns2:BeneficiaryAccount>
   </ns2:PaymentMethod>
+  <ns2:PaymentConditions>
+    <ns2:DueDate>2009-12-31</ns2:DueDate>
+  </ns2:PaymentConditions>
 </ns2:Invoice>

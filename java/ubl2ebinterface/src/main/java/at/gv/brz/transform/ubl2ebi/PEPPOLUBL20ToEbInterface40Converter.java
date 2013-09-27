@@ -26,6 +26,7 @@ import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.Part
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyTaxSchemeType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PaymentMeansType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PaymentTermsType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PeriodType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PersonType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.SupplierPartyType;
@@ -75,6 +76,7 @@ import com.phloc.ebinterface.v40.Ebi40ItemType;
 import com.phloc.ebinterface.v40.Ebi40ListLineItemType;
 import com.phloc.ebinterface.v40.Ebi40OrderReferenceDetailType;
 import com.phloc.ebinterface.v40.Ebi40OrderReferenceType;
+import com.phloc.ebinterface.v40.Ebi40PaymentConditionsType;
 import com.phloc.ebinterface.v40.Ebi40PeriodType;
 import com.phloc.ebinterface.v40.Ebi40ReductionAndSurchargeBaseType;
 import com.phloc.ebinterface.v40.Ebi40ReductionAndSurchargeDetailsType;
@@ -141,6 +143,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter
     ALLOWANCE_CHARGE_NO_TAXRATE ("Die Steuerprozentrate für den globalen Zuschlag/Abschlag konnte nicht ermittelt werden.", "Failed to resolve tax rate percentage for global AllowanceCharge."),
     BIC_INVALID ("Der BIC ''{0}'' ist ungültig.", "The BIC ''{0}'' is invalid."),
     IBAN_TOO_LONG ("Der IBAN ''{0}'' ist zu lang. Er wurde nach {1} Zeichen abgeschnitten.", "The IBAN ''{0}'' is too long and was cut to {1} characters."),
+    DISCOUNT_WITHOUT_DUEDATE ("Skontoeinträge können nur angegeben werden, wenn auch ein Zahlungsziel angegeben wurde.", "Discount items can only be provided if a payment due date is present."),
     DELIVERY_WITHOUT_NAME ("Wenn eine Delivery/DeliveryLocation/Address angegeben ist muss auch ein Delivery/DeliveryParty/PartyName/Name angegeben werden.", "If a Delivery/DeliveryLocation/Address is present, a Delivery/DeliveryParty/PartyName/Name must also be present."),
     NO_DELIVERY_DATE ("Ein Lieferdatum oder ein Leistungszeitraum muss vorhanden sein.", "A Delivery/DeliveryDate or an InvoicePeriod must be present.");
 
@@ -1053,6 +1056,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter
     aEbiInvoice.setTotalGrossAmount (aUBLInvoice.getLegalMonetaryTotal ().getPayableAmountValue ());
 
     // Payment method
+    final Ebi40PaymentConditionsType aEbiPaymentConditions = new Ebi40PaymentConditionsType ();
     {
       int nPaymentMeansIndex = 0;
       for (final PaymentMeansType aUBLPaymentMeans : aUBLInvoice.getPaymentMeans ())
@@ -1120,10 +1124,36 @@ public final class PEPPOLUBL20ToEbInterface40Converter
 
           aEbiUBTMethod.getBeneficiaryAccount ().add (aEbiAccount);
           aEbiInvoice.setPaymentMethod (aEbiUBTMethod);
+
+          // Set due date (optional)
+          aEbiPaymentConditions.setDueDate (aUBLPaymentMeans.getPaymentDueDateValue ());
+
           break;
         }
       }
       ++nPaymentMeansIndex;
+    }
+
+    // Payment terms
+    {
+      int nPaymentTermsIndex = 0;
+      for (final PaymentTermsType aUBLPaymentTerms : aUBLInvoice.getPaymentTerms ())
+      {
+        ++nPaymentTermsIndex;
+      }
+    }
+
+    if (aEbiPaymentConditions.getDueDate () == null)
+    {
+      // ebInterface requires due date
+      if (aEbiPaymentConditions.hasDiscountEntries ())
+        aTransformationErrorList.addError ("PaymentMeans/PaymentDueDate",
+                                           EText.DISCOUNT_WITHOUT_DUEDATE.getDisplayTextWithArgs (m_aDisplayLocale));
+    }
+    else
+    {
+      // Independent if discounts are present or not
+      aEbiInvoice.setPaymentConditions (aEbiPaymentConditions);
     }
 
     // Delivery
@@ -1149,9 +1179,9 @@ public final class PEPPOLUBL20ToEbInterface40Converter
             // Check delivery party
             String sAddressName = null;
             if (aUBLDelivery.getDeliveryParty () != null)
-              for (final PartyNameType aPartyName : aUBLDelivery.getDeliveryParty ().getPartyName ())
+              for (final PartyNameType aUBLPartyName : aUBLDelivery.getDeliveryParty ().getPartyName ())
               {
-                sAddressName = StringHelper.trim (aPartyName.getNameValue ());
+                sAddressName = StringHelper.trim (aUBLPartyName.getNameValue ());
                 if (StringHelper.hasText (sAddressName))
                   break;
               }
@@ -1161,11 +1191,11 @@ public final class PEPPOLUBL20ToEbInterface40Converter
                 aUBLInvoice.getAccountingCustomerParty () != null &&
                 aUBLInvoice.getAccountingCustomerParty ().getParty () != null)
             {
-              for (final PartyNameType aPartyName : aUBLInvoice.getAccountingCustomerParty ()
-                                                               .getParty ()
-                                                               .getPartyName ())
+              for (final PartyNameType aUBLPartyName : aUBLInvoice.getAccountingCustomerParty ()
+                                                                  .getParty ()
+                                                                  .getPartyName ())
               {
-                sAddressName = StringHelper.trim (aPartyName.getNameValue ());
+                sAddressName = StringHelper.trim (aUBLPartyName.getNameValue ());
                 if (StringHelper.hasText (sAddressName))
                   break;
               }
