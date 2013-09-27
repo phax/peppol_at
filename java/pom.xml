@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>at.peppol.oss</groupId>
   <artifactId>peppol-at-oss-parent-pom</artifactId>
-  <version>4-SNAPSHOT</version>
+  <version>4</version>
   <packaging>pom</packaging>
   <name>parent-pom</name>
 
@@ -44,7 +44,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <metro.new.version>2.2.2-1</metro.new.version>
-    <slf4j.version>1.7.2</slf4j.version>
+    <slf4j.version>1.7.5</slf4j.version>
   </properties>
 
   <!-- Who are we? -->
@@ -118,7 +118,7 @@
       <dependency>
         <groupId>javax.xml.bind</groupId>
         <artifactId>jaxb-api</artifactId>
-        <version>2.2.5</version>
+        <version>2.2.7</version>
         <exclusions>
           <!-- Exclude stuff already contained in Runtime of Java 1.6 -->
           <exclusion>
