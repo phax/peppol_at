@@ -664,7 +664,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
     {
       final Ebi40DetailsType aEbiDetails = new Ebi40DetailsType ();
       final Ebi40ItemListType aEbiItemList = new Ebi40ItemListType ();
-      int nInvoiceLineIndex = 1;
+      int nInvoiceLineIndex = 0;
       for (final InvoiceLineType aUBLInvoiceLine : aUBLInvoice.getInvoiceLine ()) {
         // Try to resolve tax category
         TaxCategoryType aUBLTaxCategory = ContainerHelper.getSafe (aUBLInvoiceLine.getItem ()
@@ -706,7 +706,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
         }
         if (aUBLPercent == null) {
           aUBLPercent = BigDecimal.ZERO;
-          aTransformationErrorList.addWarning ("TaxTotal/TaxSubtotal/TaxCategory",
+          aTransformationErrorList.addWarning ("InvoiceLine[" + nInvoiceLineIndex + "]/Item/ClassifiedTaxCategory",
                                                EText.DETAILS_TAX_PERCENTAGE_NOT_FOUND.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                                               aUBLPercent));
         }
@@ -717,8 +717,8 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
         // Invoice line number
         BigInteger aUBLPositionNumber = StringParser.parseBigInteger (aUBLInvoiceLine.getIDValue ());
         if (aUBLPositionNumber == null) {
-          aUBLPositionNumber = BigInteger.valueOf (nInvoiceLineIndex);
-          aTransformationErrorList.addWarning ("InvoiceLine/ID",
+          aUBLPositionNumber = BigInteger.valueOf (nInvoiceLineIndex + 1);
+          aTransformationErrorList.addWarning ("InvoiceLine[" + nInvoiceLineIndex + "]/ID",
                                                EText.DETAILS_INVALID_POSITION.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                                       aUBLInvoiceLine.getIDValue (),
                                                                                                       aUBLPositionNumber));
@@ -746,13 +746,13 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
         if (aEbiQuantity.getUnit () == null) {
           // ebInterface requires a quantity!
           aEbiQuantity.setUnit (EUnitOfMeasureCode20.C62.getID ());
-          aTransformationErrorList.addWarning ("InvoiceLine/InvoicedQuantity/UnitCode",
+          aTransformationErrorList.addWarning ("InvoiceLine[" + nInvoiceLineIndex + "]/InvoicedQuantity/UnitCode",
                                                EText.DETAILS_INVALID_UNIT.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                                   aEbiQuantity.getUnit ()));
         }
         if (aEbiQuantity.getValue () == null) {
           aEbiQuantity.setValue (BigDecimal.ONE);
-          aTransformationErrorList.addWarning ("InvoiceLine/InvoicedQuantity",
+          aTransformationErrorList.addWarning ("InvoiceLine[" + nInvoiceLineIndex + "]/InvoicedQuantity",
                                                EText.DETAILS_INVALID_QUANTITY.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                                       aEbiQuantity.getValue ()));
         }
@@ -891,6 +891,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
       // ebInterface can handle only Reduction or only Surcharge
       ETriState eSurcharge = ETriState.UNDEFINED;
 
+      int nAllowanceChargeIndex = 0;
       for (final AllowanceChargeType aUBLAllowanceCharge : aUBLInvoice.getAllowanceCharge ()) {
         final boolean bItemIsSurcharge = aUBLAllowanceCharge.getChargeIndicator ().isValue ();
         if (eSurcharge.isUndefined ())
@@ -918,7 +919,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
             break;
           }
         if (aEbiTaxRate == null) {
-          aTransformationErrorList.addError ("Invoice/AllowanceCharge",
+          aTransformationErrorList.addError ("Invoice/AllowanceCharge[" + nAllowanceChargeIndex + "]",
                                              EText.ALLOWANCE_CHARGE_NO_TAXRATE.getDisplayText (m_aDisplayLocale));
           if (false) {
             aEbiTaxRate = new Ebi40TaxRateType ();
@@ -942,6 +943,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
           // Update base amount with this item
           aEbiBaseAmount = aEbiBaseAmount.subtract (aUBLAllowanceCharge.getAmountValue ());
         }
+        ++nAllowanceChargeIndex;
       }
       aEbiInvoice.setReductionAndSurchargeDetails (aEbiRS);
     }
@@ -951,6 +953,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
 
     // Payment method
     {
+      int nPaymentMeansIndex = 0;
       for (final PaymentMeansType aUBLPaymentMeans : aUBLInvoice.getPaymentMeans ()) {
         // Is a payment channel code present?
         if (PAYMENT_CHANNEL_CODE_IBAN.equals (aUBLPaymentMeans.getPaymentChannelCodeValue ())) {
@@ -966,7 +969,9 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
                                                                        .getFinancialInstitution ()
                                                                        .getIDValue ()));
             if (!RegExHelper.stringMatchesPattern (REGEX_BIC, aEbiAccount.getBIC ())) {
-              aTransformationErrorList.addError ("PaymentMeans/PayeeFinancialAccount/FinancialInstitutionBranch/FinancialInstitution/ID",
+              aTransformationErrorList.addError ("PaymentMeans[" +
+                                                     nPaymentMeansIndex +
+                                                     "]/PayeeFinancialAccount/FinancialInstitutionBranch/FinancialInstitution/ID",
                                                  EText.BIC_INVALID.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                            aEbiAccount.getBIC ()));
               aEbiAccount.setBIC (null);
@@ -976,7 +981,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
           // IBAN
           aEbiAccount.setIBAN (StringHelper.trim (aUBLPaymentMeans.getPayeeFinancialAccount ().getIDValue ()));
           if (StringHelper.getLength (aEbiAccount.getIBAN ()) > IBAN_MAX_LENGTH) {
-            aTransformationErrorList.addWarning ("PaymentMeans/PayeeFinancialAccount/ID",
+            aTransformationErrorList.addWarning ("PaymentMeans[" + nPaymentMeansIndex + "]/PayeeFinancialAccount/ID",
                                                  EText.IBAN_TOO_LONG.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                              aEbiAccount.getIBAN (),
                                                                                              Integer.valueOf (IBAN_MAX_LENGTH)));
@@ -1000,63 +1005,69 @@ public final class PEPPOLUBL20ToEbInterface40Converter {
           aEbiInvoice.setPaymentMethod (aEbiUBTMethod);
           break;
         }
+        ++nPaymentMeansIndex;
       }
     }
 
     // Delivery
     final Ebi40DeliveryType aEbiDelivery = new Ebi40DeliveryType ();
-    if (aUBLInvoice.getDeliveryCount () > 0) {
-      final DeliveryType aUBLDelivery = aUBLInvoice.getDeliveryAtIndex (0);
+    {
+      int nDeliveryIndex = 0;
+      for (final DeliveryType aUBLDelivery : aUBLInvoice.getDelivery ()) {
+        if (aUBLDelivery.getActualDeliveryDate () != null) {
+          // Use the first delivery with a delivery date
+          aEbiDelivery.setDate (aUBLDelivery.getActualDeliveryDateValue ());
 
-      // Delivery data
-      if (aUBLDelivery.getActualDeliveryDate () != null)
-        aEbiDelivery.setDate (aUBLDelivery.getActualDeliveryDateValue ());
+          // Address
+          if (aUBLDelivery.getDeliveryLocation () != null && aUBLDelivery.getDeliveryLocation ().getAddress () != null) {
+            final Ebi40AddressType aEbiAddress = new Ebi40AddressType ();
+            _setAddressData (aUBLDelivery.getDeliveryLocation ().getAddress (),
+                             aEbiAddress,
+                             "Delivery",
+                             aTransformationErrorList);
 
-      // Address
-      if (aUBLDelivery.getDeliveryLocation () != null && aUBLDelivery.getDeliveryLocation ().getAddress () != null) {
-        final Ebi40AddressType aEbiAddress = new Ebi40AddressType ();
-        _setAddressData (aUBLDelivery.getDeliveryLocation ().getAddress (),
-                         aEbiAddress,
-                         "Delivery",
-                         aTransformationErrorList);
+            // Check delivery party
+            if (aUBLDelivery.getDeliveryParty () != null && aUBLDelivery.getDeliveryParty ().hasPartyNameEntries ())
+              aEbiAddress.setName (aUBLDelivery.getDeliveryParty ().getPartyNameAtIndex (0).getNameValue ());
 
-        // Check delivery party
-        if (aUBLDelivery.getDeliveryParty () != null && aUBLDelivery.getDeliveryParty ().hasPartyNameEntries ())
-          aEbiAddress.setName (aUBLDelivery.getDeliveryParty ().getPartyNameAtIndex (0).getNameValue ());
+            // As fallback use accounting customer party
+            if (StringHelper.hasNoText (aEbiAddress.getName ()))
+              if (aUBLInvoice.getAccountingCustomerParty () != null &&
+                  aUBLInvoice.getAccountingCustomerParty ().getParty () != null &&
+                  aUBLInvoice.getAccountingCustomerParty ().getParty ().hasPartyNameEntries ()) {
+                aEbiAddress.setName (aUBLInvoice.getAccountingCustomerParty ()
+                                                .getParty ()
+                                                .getPartyNameAtIndex (0)
+                                                .getNameValue ());
+              }
 
-        // As fallback use accounting customer party
-        if (StringHelper.hasNoText (aEbiAddress.getName ()))
-          if (aUBLInvoice.getAccountingCustomerParty () != null &&
-              aUBLInvoice.getAccountingCustomerParty ().getParty () != null &&
-              aUBLInvoice.getAccountingCustomerParty ().getParty ().hasPartyNameEntries ()) {
-            aEbiAddress.setName (aUBLInvoice.getAccountingCustomerParty ()
-                                            .getParty ()
-                                            .getPartyNameAtIndex (0)
-                                            .getNameValue ());
+            if (StringHelper.hasNoText (aEbiAddress.getName ()))
+              aTransformationErrorList.addError ("Delivery[" + nDeliveryIndex + "]/DeliveryParty",
+                                                 EText.DELIVERY_WITHOUT_NAME.getDisplayText (m_aDisplayLocale));
+
+            aEbiDelivery.setAddress (aEbiAddress);
           }
+          break;
+        }
+        ++nDeliveryIndex;
+      }
 
-        if (StringHelper.hasNoText (aEbiAddress.getName ()))
-          aTransformationErrorList.addError ("Delivery/DeliveryParty",
-                                             EText.DELIVERY_WITHOUT_NAME.getDisplayText (m_aDisplayLocale));
-
-        aEbiDelivery.setAddress (aEbiAddress);
+      if (aEbiDelivery.getDate () == null) {
+        // No delivery date is present - check for service period
+        final PeriodType aUBLInvoicePeriod = ContainerHelper.getSafe (aUBLInvoice.getInvoicePeriod (), 0);
+        if (aUBLInvoicePeriod != null) {
+          final Ebi40PeriodType aEbiPeriod = new Ebi40PeriodType ();
+          aEbiPeriod.setFromDate (aUBLInvoicePeriod.getStartDateValue ());
+          aEbiPeriod.setToDate (aUBLInvoicePeriod.getEndDateValue ());
+          aEbiDelivery.setPeriod (aEbiPeriod);
+        }
       }
     }
 
-    if (aEbiDelivery.getDate () == null) {
-      // Check for service period
-      final PeriodType aUBLInvoicePeriod = ContainerHelper.getSafe (aUBLInvoice.getInvoicePeriod (), 0);
-      if (aUBLInvoicePeriod != null) {
-        final Ebi40PeriodType aEbiPeriod = new Ebi40PeriodType ();
-        aEbiPeriod.setFromDate (aUBLInvoicePeriod.getStartDateValue ());
-        aEbiPeriod.setToDate (aUBLInvoicePeriod.getEndDateValue ());
-        aEbiDelivery.setPeriod (aEbiPeriod);
-      }
-    }
-
-    if (m_bStrictERBMode)
+    if (m_bStrictERBMode) {
       if (aEbiDelivery.getDate () == null && aEbiDelivery.getPeriod () == null)
         aTransformationErrorList.addError ("Invoice", EText.NO_DELIVERY_DATE.getDisplayText (m_aDisplayLocale));
+    }
 
     if (aEbiDelivery.getDate () != null || aEbiDelivery.getPeriod () != null)
       aEbiInvoice.setDelivery (aEbiDelivery);
