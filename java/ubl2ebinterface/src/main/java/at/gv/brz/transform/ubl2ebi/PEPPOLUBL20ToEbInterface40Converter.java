@@ -148,6 +148,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter
     ORDER_REFERENCE_MISSING ("Die Auftragsreferenz fehlt.", "Failed to get order reference ID."),
     ORDER_REFERENCE_TOO_LONG ("Die Auftragsreferenz ''{0}'' ist zu lang und wurde nach {1} Zeichen abgeschnitten.", "Order reference value ''{0}'' is too long and was cut to {1} characters."),
     UNSUPPORTED_TAX_SCHEME_ID ("Die Steuerschema ID ''{0}'' ist ungültig.", "The tax scheme ID ''{0}'' is invalid."),
+    TAX_PERCENT_MISSING ("Es konnte kein Steuersatz für diese Steuerkategorie ermittelt werden.", "No tax percentage could be determined for this tax category."),
     UNSUPPORTED_TAX_SCHEME ("Nicht unterstütztes Steuerschema gefunden: ''{0}'' und ''{1}''.", "Other tax scheme found and ignored: ''{0}'' and ''{1}''."),
     DETAILS_TAX_PERCENTAGE_NOT_FOUND ("Der Steuersatz der Rechnungszeile konnte nicht ermittelt werden. Verwende den Standardwert {0}%.", "Failed to resolve tax percentage for invoice line. Defaulting to {0}%."),
     DETAILS_INVALID_POSITION ("Die Rechnungspositionsnummer ''{0}'' ist nicht numerisch. Es wird der Index {1} verwendet.", "The UBL invoice line ID ''{0}'' is not numeric. Defaulting to index {1}."),
@@ -759,21 +760,33 @@ public final class PEPPOLUBL20ToEbInterface40Converter
             {
               if (SUPPORTED_TAX_SCHEME_ID.equals (eUBLTaxScheme))
               {
-                // add VAT item
-                final Ebi40ItemType aEbiVATItem = new Ebi40ItemType ();
-                // Base amount
-                aEbiVATItem.setTaxedAmount (aUBLSubtotal.getTaxableAmountValue ());
-                // tax rate
-                final Ebi40TaxRateType aEbiVATTaxRate = new Ebi40TaxRateType ();
-                // Optional
-                if (false)
-                  aEbiVATTaxRate.setTaxCode (sUBLTaxCategoryID);
-                aEbiVATTaxRate.setValue (aUBLPercentage);
-                aEbiVATItem.setTaxRate (aEbiVATTaxRate);
-                // Tax amount (mandatory)
-                aEbiVATItem.setAmount (aUBLSubtotal.getTaxAmountValue ());
-                // Add to list
-                aEbiVAT.getItem ().add (aEbiVATItem);
+                if (aUBLPercentage == null)
+                {
+                  aTransformationErrorList.addError ("TaxTotal[" +
+                                                         nTaxTotalIndex +
+                                                         "]/TaxSubtotal[" +
+                                                         nTaxSubtotalIndex +
+                                                         "]/TaxCategory/Percent",
+                                                     EText.TAX_PERCENT_MISSING.getDisplayTextWithArgs (m_aDisplayLocale));
+                }
+                else
+                {
+                  // add VAT item
+                  final Ebi40ItemType aEbiVATItem = new Ebi40ItemType ();
+                  // Base amount
+                  aEbiVATItem.setTaxedAmount (aUBLSubtotal.getTaxableAmountValue ());
+                  // tax rate
+                  final Ebi40TaxRateType aEbiVATTaxRate = new Ebi40TaxRateType ();
+                  // Optional
+                  if (false)
+                    aEbiVATTaxRate.setTaxCode (sUBLTaxCategoryID);
+                  aEbiVATTaxRate.setValue (aUBLPercentage);
+                  aEbiVATItem.setTaxRate (aEbiVATTaxRate);
+                  // Tax amount (mandatory)
+                  aEbiVATItem.setAmount (aUBLSubtotal.getTaxAmountValue ());
+                  // Add to list
+                  aEbiVAT.getItem ().add (aEbiVATItem);
+                }
               }
               else
               {
@@ -1133,6 +1146,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter
         ++nAllowanceChargeIndex;
       }
     }
+
     // Total gross amount
     aEbiInvoice.setTotalGrossAmount (aUBLInvoice.getLegalMonetaryTotal ().getPayableAmountValue ());
 
