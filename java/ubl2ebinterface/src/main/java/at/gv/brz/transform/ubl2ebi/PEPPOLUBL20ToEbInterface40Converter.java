@@ -725,9 +725,21 @@ public final class PEPPOLUBL20ToEbInterface40Converter
             final BigDecimal aUBLTaxAmount = aUBLSubtotal.getTaxAmountValue ();
             final BigDecimal aUBLTaxableAmount = aUBLSubtotal.getTaxableAmountValue ();
             if (aUBLTaxAmount != null && aUBLTaxableAmount != null)
+            {
+              // Calculate percentage
               aUBLPercentage = aUBLTaxAmount.multiply (CGlobal.BIGDEC_100).divide (aUBLTaxableAmount,
                                                                                    SCALE_PERC,
                                                                                    ROUNDING_MODE);
+            }
+          }
+
+          BigDecimal aUBLTaxableAmount = aUBLSubtotal.getTaxableAmountValue ();
+          if (aUBLTaxableAmount == null && aUBLPercentage != null)
+          {
+            // Calculate (inexact) subtotal
+            aUBLTaxableAmount = aUBLSubtotal.getTaxAmountValue ()
+                                            .multiply (CGlobal.BIGDEC_100)
+                                            .divide (aUBLPercentage, SCALE_PRICE_LINE, ROUNDING_MODE);
           }
 
           // Save item and put in map
@@ -774,7 +786,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter
                   // add VAT item
                   final Ebi40ItemType aEbiVATItem = new Ebi40ItemType ();
                   // Base amount
-                  aEbiVATItem.setTaxedAmount (aUBLSubtotal.getTaxableAmountValue ());
+                  aEbiVATItem.setTaxedAmount (aUBLTaxableAmount);
                   // tax rate
                   final Ebi40TaxRateType aEbiVATTaxRate = new Ebi40TaxRateType ();
                   // Optional
