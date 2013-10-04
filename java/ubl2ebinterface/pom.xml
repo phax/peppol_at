@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
-    <groupId>at.peppol.oss</groupId>
-    <artifactId>peppol-at-oss-parent-pom</artifactId>
-    <version>4</version>
+    <groupId>com.phloc</groupId>
+    <artifactId>parent-pom</artifactId>
+    <version>22.6</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>ubl2ebinterface</artifactId>
@@ -14,6 +14,37 @@
     <developerConnection>scm:svn:https://joinup.ec.europa.eu/svn/peppol_at/trunk/java/ubl2ebinterface</developerConnection>
     <connection>scm:svn:https://joinup.ec.europa.eu/svn/peppol_at/trunk/java/ubl2ebinterface</connection>
   </scm>
+
+  <!-- Who are we in detail -->
+  <developers>
+    <developer>
+      <id>phax</id>
+      <name>Philip Helger</name>
+      <organization>Austrian Federal Computing Center/Bundesrechenzentrum</organization>
+    </developer>
+  </developers>
+  
+  <!-- Used licenses -->
+  <licenses>
+    <license>
+      <name>Mozilla Public License 1.1</name>
+      <url>http://www.mozilla.org/MPL/</url>
+      <distribution>repo</distribution>
+    </license>
+    <license>
+      <name>EUPL 1.1</name>
+      <url>http://joinup.ec.europa.eu/software/page/eupl/licence-eupl</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  
+  <!-- Where to deploy binaries -->
+  <distributionManagement>
+    <repository>
+      <id>repo.phloc.public</id>
+      <url>sftp://www.phloc.com/var/www/html-repo/maven2</url>
+    </repository>
+  </distributionManagement>
 
   <repositories>
     <repository>
