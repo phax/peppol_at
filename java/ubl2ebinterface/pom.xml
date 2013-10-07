@@ -6,6 +6,7 @@
     <version>22.6</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
+  <groupId>at.peppol.oss</groupId>
   <artifactId>ubl2ebinterface</artifactId>
   <version>1.4.6-SNAPSHOT</version>
   <name>ubl2ebinterface</name>
