@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<translationitems count="50">
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.ADDRESS_INVALID_COUNTRY">
+    <de>Der angegebene Ländercode &#39;&#39;{0}&#39;&#39; ist ungültig.</de>
+    <en>The provided country code &#39;&#39;{0}&#39;&#39; is invalid.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.ADDRESS_NO_CITY">
+    <de>In der Adresse fehlt der Name der Stadt.</de>
+    <en>Address is missing a city name.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.ADDRESS_NO_COUNTRY">
+    <de>In der Adresse fehlt der Name des Landes.</de>
+    <en>Address is missing a country.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.ADDRESS_NO_STREET">
+    <de>In der Adresse fehlt die Straße.</de>
+    <en>Address is missing a street name.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.ADDRESS_NO_ZIPCODE">
+    <de>In der Adresse fehlt die PLZ.</de>
+    <en>Address is missing a ZIP code.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.ALLOWANCE_CHARGE_NO_TAXRATE">
+    <de>Die Steuerprozentrate für den globalen Zuschlag/Abschlag konnte nicht ermittelt werden.</de>
+    <en>Failed to resolve tax rate percentage for global AllowanceCharge.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.ALPHANUM_ID_TYPE_CHANGE">
+    <de>&#39;&#39;{0}&#39;&#39; ist ein ungültiger Typ und wurde auf &#39;&#39;{1}&#39;&#39; geändert.</de>
+    <en>&#39;&#39;{0}&#39;&#39; is an invalid value and was changed to &#39;&#39;{1}&#39;&#39;.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.BIC_INVALID">
+    <de>Der BIC &#39;&#39;{0}&#39;&#39; ist ungültig.</de>
+    <en>The BIC &#39;&#39;{0}&#39;&#39; is invalid.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.BILLER_VAT_MISSING">
+    <de>Die UID-Nummer des Rechnungsstellers fehlt. Verwenden Sie &#39;ATU00000000&#39; für österreichische Rechnungssteller an wenn keine UID-Nummer notwendig ist.</de>
+    <en>Failed to get biller VAT identification number. Use &#39;ATU00000000&#39; for Austrian invoice recipients if no VAT identification number is required.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.DELIVERY_WITHOUT_NAME">
+    <de>Wenn eine Delivery/DeliveryLocation/Address angegeben ist muss auch ein Delivery/DeliveryParty/PartyName/Name angegeben werden.</de>
+    <en>If a Delivery/DeliveryLocation/Address is present, a Delivery/DeliveryParty/PartyName/Name must also be present.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.DETAILS_INVALID_POSITION">
+    <de>Die Rechnungspositionsnummer &#39;&#39;{0}&#39;&#39; ist nicht numerisch. Es wird der Index {1} verwendet.</de>
+    <en>The UBL invoice line ID &#39;&#39;{0}&#39;&#39; is not numeric. Defaulting to index {1}.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.DETAILS_INVALID_QUANTITY">
+    <de>Die Rechnungszeile hat keine Menge. Verwende den Standardwert &#39;&#39;{0}&#39;&#39;.</de>
+    <en>The UBL invoice line has no quantity. Defaulting to &#39;&#39;{0}&#39;&#39;.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.DETAILS_INVALID_UNIT">
+    <de>Die Rechnungszeile hat keine Mengeneinheit. Verwende den Standardwert &#39;&#39;{0}&#39;&#39;.</de>
+    <en>The UBL invoice line has no unit of measure. Defaulting to &#39;&#39;{0}&#39;&#39;.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.DETAILS_TAX_PERCENTAGE_NOT_FOUND">
+    <de>Der Steuersatz der Rechnungszeile konnte nicht ermittelt werden. Verwende den Standardwert {0}%.</de>
+    <en>Failed to resolve tax percentage for invoice line. Defaulting to {0}%.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.DISCOUNT_WITHOUT_DUEDATE">
+    <de>Skontoeinträge können nur angegeben werden, wenn auch ein Zahlungsziel angegeben wurde.</de>
+    <en>Discount items can only be provided if a payment due date is present.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.ERB_CUSTOMER_ASSIGNED_ACCOUNTID_MISSING">
+    <de>Die ID des Rechnungsstellers beim Rechnungsempfänger fehlt.</de>
+    <en>Failed to get customer assigned account ID for supplier.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.ERB_NO_DELIVERY_DATE">
+    <de>Ein Lieferdatum oder ein Leistungszeitraum muss vorhanden sein.</de>
+    <en>A Delivery/DeliveryDate or an InvoicePeriod must be present.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.ERB_NO_PAYMENT_METHOD">
+    <de>Es muss eine Zahlungsart angegeben werden.</de>
+    <en>A payment method must be provided.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.IBAN_TOO_LONG">
+    <de>Der IBAN &#39;&#39;{0}&#39;&#39; ist zu lang. Er wurde nach {1} Zeichen abgeschnitten.</de>
+    <en>The IBAN &#39;&#39;{0}&#39;&#39; is too long and was cut to {1} characters.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.INVALID_CURRENCY_CODE">
+    <de>Der angegebene Währungscode &#39;&#39;{0}&#39;&#39; ist ungültig.</de>
+    <en>Invalid currency code &#39;&#39;{0}&#39;&#39; provided.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.INVALID_CUSTOMIZATION_ID">
+    <de>Die angegebene CustomizationID &#39;&#39;{0}&#39;&#39; ist ungültig. Sie wird vom angegebenen Profil nicht unterstützt.</de>
+    <en>Invalid CustomizationID value &#39;&#39;{0}&#39;&#39; present. It is not supported by the passed profile.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.INVALID_CUSTOMIZATION_SCHEME_ID">
+    <de>Die CustomizationID schemeID &#39;&#39;{0}&#39;&#39; ist ungültig. Diese muss den Wert &#39;&#39;{1}&#39;&#39; haben.</de>
+    <en>Invalid CustomizationID schemeID value &#39;&#39;{0}&#39;&#39; present. It must be &#39;&#39;{1}&#39;&#39;.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.INVALID_INVOICE_TYPECODE">
+    <de>Der InvoiceTypeCode &#39;&#39;{0}&#39;&#39; ist ungültig. Dieser muss den Wert &#39;&#39;{1}&#39;&#39; haben.</de>
+    <en>Invalid InvoiceTypeCode value &#39;&#39;{0}&#39;&#39; present. It must be &#39;&#39;{1}&#39;&#39;.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.INVALID_PROFILE_ID">
+    <de>Die ProfileID &#39;&#39;{0}&#39;&#39; ist ungültig.</de>
+    <en>Invalid ProfileID value &#39;&#39;{0}&#39;&#39; present.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.INVALID_UBL_VERSION_ID">
+    <de>Die UBLVersionID &#39;&#39;{0}&#39;&#39; ist ungültig. Diese muss den Wert &#39;&#39;{1}&#39;&#39; haben.</de>
+    <en>Invalid UBLVersionID value &#39;&#39;{0}&#39;&#39; present. It must be &#39;&#39;{1}&#39;&#39;.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.MISSING_INVOICE_DATE">
+    <de>Es wurde keine Rechnungsdatum angegeben.</de>
+    <en>No invoice date was provided.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.MISSING_INVOICE_NUMBER">
+    <de>Es wurde keine Rechnungsnummer angegeben.</de>
+    <en>No invoice number was provided.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.MULTIPLE_PARTIES">
+    <de>Es sind mehrere Partynamen vorhanden - nur der erste wird verwendet.</de>
+    <en>Multiple party names present - only the first one is used.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.NO_CUSTOMIZATION_ID">
+    <de>Die CustomizationID fehlt</de>
+    <en>No CustomizationID present.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.NO_INVOICE_TYPECODE">
+    <de>Der InvoiceTypeCode fehlt. Es wird der Wert &#39;&#39;{0}&#39;&#39; erwartet.</de>
+    <en>No InvoiceTypeCode present. It must be &#39;&#39;{0}&#39;&#39;.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.NO_PROFILE_ID">
+    <de>Die ProfileID fehlt</de>
+    <en>No ProfileID present.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.NO_UBL_VERSION_ID">
+    <de>Die UBLVersionID fehlt. Es wird der Wert &#39;&#39;{0}&#39;&#39; erwartet.</de>
+    <en>No UBLVersionID present. It must be &#39;&#39;{0}&#39;&#39;.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.ORDER_REFERENCE_MISSING">
+    <de>Die Auftragsreferenz fehlt.</de>
+    <en>Failed to get order reference ID.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.ORDER_REFERENCE_TOO_LONG">
+    <de>Die Auftragsreferenz &#39;&#39;{0}&#39;&#39; ist zu lang und wurde nach {1} Zeichen abgeschnitten.</de>
+    <en>Order reference value &#39;&#39;{0}&#39;&#39; is too long and was cut to {1} characters.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.PARTY_NO_NAME">
+    <de>Der Name der Party fehlt.</de>
+    <en>Party name is missing.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.PARTY_UNSUPPORTED_ADDRESS_IDENTIFIER">
+    <de>Ignoriere die ID &#39;&#39;{0}&#39;&#39; des Typs &#39;&#39;{1}&#39;&#39;.</de>
+    <en>Ignoring identification &#39;&#39;{0}&#39;&#39; of type &#39;&#39;{1}&#39;&#39;.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.PARTY_UNSUPPORTED_ENDPOINT">
+    <de>Ignoriere den Enpunkt &#39;&#39;{0}&#39;&#39; des Typs &#39;&#39;{1}&#39;&#39;.</de>
+    <en>Ignoring endpoint ID &#39;&#39;{0}&#39;&#39; of type &#39;&#39;{1}&#39;&#39;.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.PAYMENTMEANS_CODE_INVALID">
+    <de>Der PaymentMeansCode ist ungültig. Für Überweisungen muss {0} verwenden werden und für Lastschriftverfahren {1}.</de>
+    <en>The PaymentMeansCode is invalid. For debit transfer use {0} and for direct debit use {1}.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.PAYMENTMEANS_UNSUPPORTED_CHANNELCODE">
+    <de>Die Zahlungsart with dem ChannelCode &#39;&#39;{0}&#39;&#39; wird ignoriert.</de>
+    <en>The payment means with ChannelCode &#39;&#39;{0}&#39;&#39; are ignored.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.PAYMENT_ID_CHECKSUM_INVALID">
+    <de>Die Checksumme &#39;&#39;{0}&#39;&#39; der Zahlungsreferenz ist ungültig wird ignoriert.</de>
+    <en>The payment reference checksum &#39;&#39;{0}&#39;&#39; is invalid and therefore ignored.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.PAYMENT_ID_NOT_NUMERIC">
+    <de>Die Zahlungsreferenz &#39;&#39;{0}&#39;&#39; ist nicht numerisch und wird ignoriert.</de>
+    <en>The payment reference &#39;&#39;{0}&#39;&#39; is not numeric and therefore ignored.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.PAYMENT_ID_TOO_LONG">
+    <de>Die Zahlungsreferenz &#39;&#39;{0}&#39;&#39; ist zu lang und wird ignoriert.</de>
+    <en>The payment reference &#39;&#39;{0}&#39;&#39; is too long and therefore ignored.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.PENALTY_NOT_ALLOWED">
+    <de>Strafzuschläge werden in ebInterface nicht unterstützt.</de>
+    <en>Penalty surcharges are not supported in ebInterface.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.SETTLEMENT_PERIOD_MISSING">
+    <de>Für Skontoeinträge muss mindestens ein Endedatum angegeben werden.</de>
+    <en>Discount items require a settlement end date.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.SUPPLIER_ASSIGNED_ACCOUNTID_MISSING">
+    <de>Die ID des Rechnungsempfängers beim Rechnungssteller fehlt. Der Standardwert &#39;&#39;{0}&#39;&#39; wird verwendet.</de>
+    <en>Failed to get supplier assigned account ID for customer. Defaulting to &#39;&#39;{0}&#39;&#39;.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.SUPPLIER_VAT_MISSING">
+    <de>Die UID-Nummer des Rechnungsempfängers fehlt. Verwenden Sie &#39;ATU00000000&#39; für österreichische Empfänger an wenn keine UID-Nummer notwendig ist.</de>
+    <en>Failed to get supplier VAT identification number. Use &#39;ATU00000000&#39; for Austrian invoice recipients if no VAT identification number is required.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.TAX_PERCENT_MISSING">
+    <de>Es konnte kein Steuersatz für diese Steuerkategorie ermittelt werden.</de>
+    <en>No tax percentage could be determined for this tax category.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.UNSUPPORTED_TAX_SCHEME">
+    <de>Nicht unterstütztes Steuerschema gefunden: &#39;&#39;{0}&#39;&#39; und &#39;&#39;{1}&#39;&#39;.</de>
+    <en>Other tax scheme found and ignored: &#39;&#39;{0}&#39;&#39; and &#39;&#39;{1}&#39;&#39;.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.UNSUPPORTED_TAX_SCHEME_ID">
+    <de>Die Steuerschema ID &#39;&#39;{0}&#39;&#39; ist ungültig.</de>
+    <en>The tax scheme ID &#39;&#39;{0}&#39;&#39; is invalid.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.PEPPOLUBL20ToEbInterface40Converter$EText.VAT_ITEM_MISSING">
+    <de>Keine einzige Steuersumme gefunden</de>
+    <en>No single VAT item found.</en>
+  </item>
+</translationitems>
