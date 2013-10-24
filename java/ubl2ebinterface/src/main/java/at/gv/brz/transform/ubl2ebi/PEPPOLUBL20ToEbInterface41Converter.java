@@ -947,6 +947,14 @@ public final class PEPPOLUBL20ToEbInterface41Converter extends AbstractPEPPOLUBL
       }
     }
 
+    // PrepaidAmount is not supported!
+    if (aUBLInvoice.getLegalMonetaryTotal ().getPrepaidAmount () != null &&
+        !MathHelper.isEqualToZero (aUBLInvoice.getLegalMonetaryTotal ().getPrepaidAmountValue ()))
+    {
+      aTransformationErrorList.addError ("Invoice/LegalMonetaryTotal/PrepaidAmount",
+                                         EText.PREPAID_NOT_SUPPORTED.getDisplayText (m_aDisplayLocale));
+    }
+
     // Total gross amount
     aEbiInvoice.setTotalGrossAmount (aUBLInvoice.getLegalMonetaryTotal ().getTaxInclusiveAmountValue ());
     // Payable amount

@@ -105,7 +105,8 @@ public abstract class AbstractPEPPOLUBL20ToEbInterfaceConverter
     PENALTY_NOT_ALLOWED ("Strafzuschläge werden in ebInterface nicht unterstützt.", "Penalty surcharges are not supported in ebInterface."),
     DISCOUNT_WITHOUT_DUEDATE ("Skontoeinträge können nur angegeben werden, wenn auch ein Zahlungsziel angegeben wurde.", "Discount items can only be provided if a payment due date is present."),
     DELIVERY_WITHOUT_NAME ("Wenn eine Delivery/DeliveryLocation/Address angegeben ist muss auch ein Delivery/DeliveryParty/PartyName/Name angegeben werden.", "If a Delivery/DeliveryLocation/Address is present, a Delivery/DeliveryParty/PartyName/Name must also be present."),
-    ERB_NO_DELIVERY_DATE ("Ein Lieferdatum oder ein Leistungszeitraum muss vorhanden sein.", "A Delivery/DeliveryDate or an InvoicePeriod must be present.");
+    ERB_NO_DELIVERY_DATE ("Ein Lieferdatum oder ein Leistungszeitraum muss vorhanden sein.", "A Delivery/DeliveryDate or an InvoicePeriod must be present."),
+    PREPAID_NOT_SUPPORTED ("Das Element <PrepaidAmount> wird nicht unterstützt.", "The <PrepaidAmount> element is not supported!");
 
     private final ITextProvider m_aTP;
 
