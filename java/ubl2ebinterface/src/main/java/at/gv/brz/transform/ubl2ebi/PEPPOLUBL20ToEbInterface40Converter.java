@@ -573,8 +573,6 @@ public final class PEPPOLUBL20ToEbInterface40Converter
 
     // Cannot set the language, because the 3letter code is expected but we only
     // have the 2letter code!
-    if (false)
-      aEbiInvoice.setLanguage (m_aContentLocale.getLanguage ());
 
     final String sUBLCurrencyCode = StringHelper.trim (aUBLInvoice.getDocumentCurrencyCodeValue ());
     try
