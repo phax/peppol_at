@@ -790,7 +790,19 @@ public final class PEPPOLUBL20ToEbInterface41Converter extends AbstractPEPPOLUBL
             aEbiOrderRefDetail.setOrderID (sUBLLineOrderReferenceID);
 
             // Order position number
-            aEbiOrderRefDetail.setOrderPositionNumber (StringHelper.trim (aUBLOrderLineReference.getLineIDValue ()));
+            final String sOrderPosNumber = StringHelper.trim (aUBLOrderLineReference.getLineIDValue ());
+            if (sOrderPosNumber != null)
+            {
+              if (sOrderPosNumber.length () == 0)
+              {
+                aTransformationErrorList.addError ("InvoiceLine[" + nInvoiceLineIndex + "]/OrderLineReference/LineID",
+                                                   EText.ORDERLINE_REF_ID_EMPTY.getDisplayText (m_aDisplayLocale));
+              }
+              else
+              {
+                aEbiOrderRefDetail.setOrderPositionNumber (sOrderPosNumber);
+              }
+            }
             aEbiListLineItem.setInvoiceRecipientsOrderReference (aEbiOrderRefDetail);
             break;
           }
