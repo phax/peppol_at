@@ -651,10 +651,13 @@ public final class PEPPOLUBL20ToEbInterface40Converter extends AbstractPEPPOLUBL
           outer: for (final TaxTotalType aUBLTaxTotal : aUBLInvoiceLine.getTaxTotal ())
             for (final TaxSubtotalType aUBLTaxSubTotal : aUBLTaxTotal.getTaxSubtotal ())
             {
-              aUBLTaxCategory = aUBLTaxSubTotal.getTaxCategory ();
-              if (aUBLTaxCategory != null)
+              // Only handle VAT items
+              if (SUPPORTED_TAX_SCHEME_ID.getID ().equals (aUBLTaxSubTotal.getTaxCategory ()
+                                                                          .getTaxScheme ()
+                                                                          .getIDValue ()))
               {
                 // We found one -> just use it
+                aUBLTaxCategory = aUBLTaxSubTotal.getTaxCategory ();
                 break outer;
               }
             }
