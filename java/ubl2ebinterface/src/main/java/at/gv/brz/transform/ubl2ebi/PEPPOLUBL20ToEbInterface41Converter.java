@@ -948,7 +948,9 @@ public final class PEPPOLUBL20ToEbInterface41Converter extends AbstractPEPPOLUBL
     }
 
     // Total gross amount
-    aEbiInvoice.setTotalGrossAmount (aUBLInvoice.getLegalMonetaryTotal ().getPayableAmountValue ());
+    aEbiInvoice.setTotalGrossAmount (aUBLInvoice.getLegalMonetaryTotal ().getTaxInclusiveAmountValue ());
+    // Payable amount
+    aEbiInvoice.setPayableAmount (aUBLInvoice.getLegalMonetaryTotal ().getPayableAmountValue ());
 
     // Payment method
     final Ebi41PaymentMethodType aEbiPaymentMethod = new Ebi41PaymentMethodType ();
