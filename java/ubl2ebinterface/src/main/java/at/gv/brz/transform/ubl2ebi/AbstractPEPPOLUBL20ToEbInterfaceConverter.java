@@ -74,6 +74,7 @@ public abstract class AbstractPEPPOLUBL20ToEbInterfaceConverter
     PARTY_NO_NAME ("Der Name der Party fehlt.", "Party name is missing."),
     PARTY_UNSUPPORTED_ENDPOINT ("Ignoriere den Enpunkt ''{0}'' des Typs ''{1}''.", "Ignoring endpoint ID ''{0}'' of type ''{1}''."),
     PARTY_UNSUPPORTED_ADDRESS_IDENTIFIER ("Ignoriere die ID ''{0}'' des Typs ''{1}''.", "Ignoring identification ''{0}'' of type ''{1}''."),
+    ALPHANUM_ID_TYPE_EMPTY ("Es muss ein Wert angegeben werden.", "A value must be provided."),
     ALPHANUM_ID_TYPE_CHANGE ("''{0}'' ist ein ungültiger Typ und wurde auf ''{1}'' geändert.", "''{0}'' is an invalid value and was changed to ''{1}''."),
     INVALID_CURRENCY_CODE ("Der angegebene Währungscode ''{0}'' ist ungültig.", "Invalid currency code ''{0}'' provided."),
     MISSING_INVOICE_NUMBER ("Es wurde keine Rechnungsnummer angegeben.", "No invoice number was provided."),

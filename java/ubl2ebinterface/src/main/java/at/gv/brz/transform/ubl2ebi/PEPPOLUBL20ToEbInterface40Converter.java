@@ -310,18 +310,23 @@ public final class PEPPOLUBL20ToEbInterface40Converter extends AbstractPEPPOLUBL
   }
 
   @Nullable
-  private String _makeAlphaNumIDType (@Nullable final String sText,
-                                      @Nonnull final String sContext,
-                                      @Nonnull final ErrorList aTransformationErrorList)
+  private String _makeAlphaNumType (@Nullable final String sText,
+                                    @Nonnull final String sContext,
+                                    @Nonnull final ErrorList aTransformationErrorList)
   {
     if (sText != null && !RegExHelper.stringMatchesPattern ("[0-9 | A-Z | a-z | -_äöüÄÖÜß]+", sText))
     {
-      final String ret = RegExHelper.stringReplacePattern ("[^0-9 | A-Z | a-z | -_äöüÄÖÜß]", sText, "_");
-      aTransformationErrorList.addWarning (sContext,
-                                           EText.ALPHANUM_ID_TYPE_CHANGE.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                                 sText,
-                                                                                                 ret));
-      return ret;
+      if (sText.length () == 0)
+        aTransformationErrorList.addError (sContext, EText.ALPHANUM_ID_TYPE_EMPTY.getDisplayText (m_aDisplayLocale));
+      else
+      {
+        final String ret = RegExHelper.stringReplacePattern ("[^0-9 | A-Z | a-z | -_äöüÄÖÜß]", sText, "_");
+        aTransformationErrorList.addWarning (sContext,
+                                             EText.ALPHANUM_ID_TYPE_CHANGE.getDisplayTextWithArgs (m_aDisplayLocale,
+                                                                                                   sText,
+                                                                                                   ret));
+        return ret;
+      }
     }
     return sText;
   }
@@ -494,7 +499,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter extends AbstractPEPPOLUBL
           sUBLOrderReferenceID = sUBLOrderReferenceID.substring (0, ORDER_REFERENCE_MAX_LENGTH);
         }
 
-        sUBLOrderReferenceID = _makeAlphaNumIDType (sUBLOrderReferenceID, "OrderReference/ID", aTransformationErrorList);
+        sUBLOrderReferenceID = _makeAlphaNumType (sUBLOrderReferenceID, "OrderReference/ID", aTransformationErrorList);
       }
 
       final Ebi40OrderReferenceType aEbiOrderReference = new Ebi40OrderReferenceType ();
@@ -802,7 +807,13 @@ public final class PEPPOLUBL20ToEbInterface40Converter extends AbstractPEPPOLUBL
             aEbiOrderRefDetail.setOrderID (sUBLLineOrderReferenceID);
 
             // Order position number
-            aEbiOrderRefDetail.setOrderPositionNumber (StringHelper.trim (aUBLOrderLineReference.getLineIDValue ()));
+            final String sOrderPosNumber = StringHelper.trim (aUBLOrderLineReference.getLineIDValue ());
+            aEbiOrderRefDetail.setOrderPositionNumber (_makeAlphaNumType (sOrderPosNumber,
+                                                                          "InvoiceLine[" +
+                                                                              nInvoiceLineIndex +
+                                                                              "]/OrderLineReference/LineID",
+                                                                          aTransformationErrorList));
+
             aEbiListLineItem.setInvoiceRecipientsOrderReference (aEbiOrderRefDetail);
             break;
           }
