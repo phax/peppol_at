@@ -316,17 +316,12 @@ public final class PEPPOLUBL20ToEbInterface40Converter extends AbstractPEPPOLUBL
   {
     if (sText != null && !RegExHelper.stringMatchesPattern ("[0-9 | A-Z | a-z | -_äöüÄÖÜß]+", sText))
     {
-      if (sText.length () == 0)
-        aTransformationErrorList.addError (sContext, EText.ALPHANUM_ID_TYPE_EMPTY.getDisplayText (m_aDisplayLocale));
-      else
-      {
-        final String ret = RegExHelper.stringReplacePattern ("[^0-9 | A-Z | a-z | -_äöüÄÖÜß]", sText, "_");
-        aTransformationErrorList.addWarning (sContext,
-                                             EText.ALPHANUM_ID_TYPE_CHANGE.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                                   sText,
-                                                                                                   ret));
-        return ret;
-      }
+      final String ret = RegExHelper.stringReplacePattern ("[^0-9 | A-Z | a-z | -_äöüÄÖÜß]", sText, "_");
+      aTransformationErrorList.addWarning (sContext,
+                                           EText.ALPHANUM_ID_TYPE_CHANGE.getDisplayTextWithArgs (m_aDisplayLocale,
+                                                                                                 sText,
+                                                                                                 ret));
+      return ret;
     }
     return sText;
   }
@@ -381,7 +376,8 @@ public final class PEPPOLUBL20ToEbInterface40Converter extends AbstractPEPPOLUBL
     final String sInvoiceNumber = StringHelper.trim (aUBLInvoice.getIDValue ());
     if (StringHelper.hasNoText (sInvoiceNumber))
       aTransformationErrorList.addError ("ID", EText.MISSING_INVOICE_NUMBER.getDisplayText (m_aDisplayLocale));
-    aEbiInvoice.setInvoiceNumber (sInvoiceNumber);
+    else
+      aEbiInvoice.setInvoiceNumber (_makeAlphaNumType (sInvoiceNumber, "ID", aTransformationErrorList));
 
     // Ignore the time!
     aEbiInvoice.setInvoiceDate (aUBLInvoice.getIssueDateValue ());
@@ -447,7 +443,8 @@ public final class PEPPOLUBL20ToEbInterface40Converter extends AbstractPEPPOLUBL
         // UBL: An identifier for the Customer's account, assigned by the
         // Supplier.
         // eb: Identifikation des Rechnungsempfängers beim Rechnungssteller.
-        aEbiRecipient.setBillersInvoiceRecipientID (StringHelper.trim (aUBLCustomer.getSupplierAssignedAccountIDValue ()));
+        final String sBillersInvoiceRecipientID = StringHelper.trim (aUBLCustomer.getSupplierAssignedAccountIDValue ());
+        aEbiRecipient.setBillersInvoiceRecipientID (sBillersInvoiceRecipientID);
       }
       if (StringHelper.hasNoText (aEbiRecipient.getBillersInvoiceRecipientID ()))
       {
@@ -808,12 +805,22 @@ public final class PEPPOLUBL20ToEbInterface40Converter extends AbstractPEPPOLUBL
 
             // Order position number
             final String sOrderPosNumber = StringHelper.trim (aUBLOrderLineReference.getLineIDValue ());
-            aEbiOrderRefDetail.setOrderPositionNumber (_makeAlphaNumType (sOrderPosNumber,
-                                                                          "InvoiceLine[" +
-                                                                              nInvoiceLineIndex +
-                                                                              "]/OrderLineReference/LineID",
-                                                                          aTransformationErrorList));
-
+            if (sOrderPosNumber != null)
+            {
+              if (sOrderPosNumber.length () == 0)
+              {
+                aTransformationErrorList.addError ("InvoiceLine[" + nInvoiceLineIndex + "]/OrderLineReference/LineID",
+                                                   EText.ORDERLINE_REF_ID_EMPTY.getDisplayText (m_aDisplayLocale));
+              }
+              else
+              {
+                aEbiOrderRefDetail.setOrderPositionNumber (_makeAlphaNumType (sOrderPosNumber,
+                                                                              "InvoiceLine[" +
+                                                                                  nInvoiceLineIndex +
+                                                                                  "]/OrderLineReference/LineID",
+                                                                              aTransformationErrorList));
+              }
+            }
             aEbiListLineItem.setInvoiceRecipientsOrderReference (aEbiOrderRefDetail);
             break;
           }
