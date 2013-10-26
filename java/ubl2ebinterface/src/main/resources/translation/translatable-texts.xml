@@ -17,7 +17,7 @@
     limitations under the License.
 
 -->
-<translationitems count="51">
+<translationitems count="52">
   <item id="at.gv.brz.transform.ubl2ebi.AbstractPEPPOLUBL20ToEbInterfaceConverter$EText.ADDRESS_INVALID_COUNTRY">
     <de>Der angegebene Ländercode &#39;&#39;{0}&#39;&#39; ist ungültig.</de>
     <en>The provided country code &#39;&#39;{0}&#39;&#39; is invalid.</en>
@@ -145,6 +145,10 @@
   <item id="at.gv.brz.transform.ubl2ebi.AbstractPEPPOLUBL20ToEbInterfaceConverter$EText.NO_UBL_VERSION_ID">
     <de>Die UBLVersionID fehlt. Es wird der Wert &#39;&#39;{0}&#39;&#39; erwartet.</de>
     <en>No UBLVersionID present. It must be &#39;&#39;{0}&#39;&#39;.</en>
+  </item>
+  <item id="at.gv.brz.transform.ubl2ebi.AbstractPEPPOLUBL20ToEbInterfaceConverter$EText.ORDERLINE_REF_ID_EMPTY">
+    <de>Es muss ein Wert für die Bestellpositionsnummer angegeben werden.</de>
+    <en>A value must be provided for the order line reference ID.</en>
   </item>
   <item id="at.gv.brz.transform.ubl2ebi.AbstractPEPPOLUBL20ToEbInterfaceConverter$EText.ORDER_REFERENCE_MISSING">
     <de>Die Auftragsreferenz fehlt.</de>
