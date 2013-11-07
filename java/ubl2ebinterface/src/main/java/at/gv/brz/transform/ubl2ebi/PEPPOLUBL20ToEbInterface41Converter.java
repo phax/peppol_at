@@ -27,6 +27,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.AddressType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.AllowanceChargeType;
@@ -1312,10 +1313,24 @@ public final class PEPPOLUBL20ToEbInterface41Converter extends AbstractPEPPOLUBL
         final PeriodType aUBLInvoicePeriod = ContainerHelper.getSafe (aUBLInvoice.getInvoicePeriod (), 0);
         if (aUBLInvoicePeriod != null)
         {
-          final Ebi41PeriodType aEbiPeriod = new Ebi41PeriodType ();
-          aEbiPeriod.setFromDate (aUBLInvoicePeriod.getStartDateValue ());
-          aEbiPeriod.setToDate (aUBLInvoicePeriod.getEndDateValue ());
-          aEbiDelivery.setPeriod (aEbiPeriod);
+          final XMLGregorianCalendar aStartDate = aUBLInvoicePeriod.getStartDateValue ();
+          final XMLGregorianCalendar aEndDate = aUBLInvoicePeriod.getEndDateValue ();
+          if (aStartDate != null)
+          {
+            if (aEndDate == null)
+            {
+              // It's just a date
+              aEbiDelivery.setDate (aStartDate);
+            }
+            else
+            {
+              // It's a period!
+              final Ebi41PeriodType aEbiPeriod = new Ebi41PeriodType ();
+              aEbiPeriod.setFromDate (aStartDate);
+              aEbiPeriod.setToDate (aEndDate);
+              aEbiDelivery.setPeriod (aEbiPeriod);
+            }
+          }
         }
       }
     }
