@@ -86,7 +86,6 @@ import com.phloc.ebinterface.v41.Ebi41FurtherIdentificationType;
 import com.phloc.ebinterface.v41.Ebi41InvoiceRecipientType;
 import com.phloc.ebinterface.v41.Ebi41InvoiceType;
 import com.phloc.ebinterface.v41.Ebi41ItemListType;
-import com.phloc.ebinterface.v41.Ebi41ItemType;
 import com.phloc.ebinterface.v41.Ebi41ListLineItemType;
 import com.phloc.ebinterface.v41.Ebi41OrderReferenceDetailType;
 import com.phloc.ebinterface.v41.Ebi41OrderReferenceType;
@@ -104,6 +103,7 @@ import com.phloc.ebinterface.v41.Ebi41TaxType;
 import com.phloc.ebinterface.v41.Ebi41UnitPriceType;
 import com.phloc.ebinterface.v41.Ebi41UnitType;
 import com.phloc.ebinterface.v41.Ebi41UniversalBankTransactionType;
+import com.phloc.ebinterface.v41.Ebi41VATItemType;
 import com.phloc.ebinterface.v41.Ebi41VATType;
 import com.phloc.ebinterface.v41.ObjectFactory;
 import com.phloc.ubl20.codelist.EPaymentMeansCode20;
@@ -561,7 +561,7 @@ public final class PEPPOLUBL20ToEbInterface41Converter extends AbstractPEPPOLUBL
                 else
                 {
                   // add VAT item
-                  final Ebi41ItemType aEbiVATItem = new Ebi41ItemType ();
+                  final Ebi41VATItemType aEbiVATItem = new Ebi41VATItemType ();
                   // Base amount
                   aEbiVATItem.setTaxedAmount (aUBLTaxableAmount);
                   // tax rate
@@ -574,7 +574,7 @@ public final class PEPPOLUBL20ToEbInterface41Converter extends AbstractPEPPOLUBL
                   // Tax amount (mandatory)
                   aEbiVATItem.setAmount (aUBLSubtotal.getTaxAmountValue ());
                   // Add to list
-                  aEbiVAT.getItem ().add (aEbiVATItem);
+                  aEbiVAT.getVATItem ().add (aEbiVATItem);
                 }
               }
               else
@@ -872,19 +872,19 @@ public final class PEPPOLUBL20ToEbInterface41Converter extends AbstractPEPPOLUBL
       aEbiInvoice.setDetails (aEbiDetails);
     }
 
-    if (aEbiVAT.hasNoItemEntries ())
+    if (aEbiVAT.hasNoVATItemEntries ())
     {
       aTransformationErrorList.addError ("InvoiceLine", EText.VAT_ITEM_MISSING.getDisplayText (m_aDisplayLocale));
       if (false)
       {
         // No default in this case
-        final Ebi41ItemType aEbiVATItem = new Ebi41ItemType ();
+        final Ebi41VATItemType aEbiVATItem = new Ebi41VATItemType ();
         aEbiVATItem.setTaxedAmount (aTotalZeroPercLineExtensionAmount);
         final Ebi41TaxRateType aEbiVATTaxRate = new Ebi41TaxRateType ();
         aEbiVATTaxRate.setValue (BigDecimal.ZERO);
         aEbiVATItem.setTaxRate (aEbiVATTaxRate);
         aEbiVATItem.setAmount (aTotalZeroPercLineExtensionAmount);
-        aEbiVAT.getItem ().add (aEbiVATItem);
+        aEbiVAT.getVATItem ().add (aEbiVATItem);
       }
     }
 
