@@ -1071,8 +1071,8 @@ public final class PEPPOLUBL20ToEbInterface40Converter extends AbstractPEPPOLUBL
                                                            "]/PaymentID[" +
                                                            nPaymentIDIndex +
                                                            "]",
-                                                       EText.PAYMENT_ID_TOO_LONG.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                                         sUBLPaymentID));
+                                                       EText.PAYMENT_ID_TOO_LONG_IGNORED.getDisplayTextWithArgs (m_aDisplayLocale,
+                                                                                                                 sUBLPaymentID));
                 }
               }
               ++nPaymentIDIndex;

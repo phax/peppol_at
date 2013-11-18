@@ -120,6 +120,7 @@ import eu.europa.ec.cipa.peppol.codelist.ETaxSchemeID;
 @Immutable
 public final class PEPPOLUBL20ToEbInterface41Converter extends AbstractPEPPOLUBL20ToEbInterfaceConverter
 {
+  public static final int PAYMENT_REFERENCE_MAX_LENGTH = 35;
 
   /**
    * Constructor
@@ -895,21 +896,15 @@ public final class PEPPOLUBL20ToEbInterface41Converter extends AbstractPEPPOLUBL
       BigDecimal aEbiBaseAmount = aUBLInvoice.getLegalMonetaryTotal ().getLineExtensionAmountValue ();
       final Ebi41ReductionAndSurchargeDetailsType aEbiRS = new Ebi41ReductionAndSurchargeDetailsType ();
 
-      // ebInterface can handle only Reduction or only Surcharge
-      ETriState eSurcharge = ETriState.UNDEFINED;
-
       int nAllowanceChargeIndex = 0;
       for (final AllowanceChargeType aUBLAllowanceCharge : aUBLInvoice.getAllowanceCharge ())
       {
         final boolean bItemIsSurcharge = aUBLAllowanceCharge.getChargeIndicator ().isValue ();
-        if (eSurcharge.isUndefined ())
-          eSurcharge = ETriState.valueOf (bItemIsSurcharge);
-        final boolean bSwapSigns = bItemIsSurcharge != eSurcharge.isTrue ();
 
         final Ebi41ReductionAndSurchargeType aEbiRSItem = new Ebi41ReductionAndSurchargeType ();
         // Amount is mandatory
         final BigDecimal aAmount = aUBLAllowanceCharge.getAmountValue ();
-        aEbiRSItem.setAmount (bSwapSigns ? aAmount.negate () : aAmount);
+        aEbiRSItem.setAmount (aAmount);
 
         // Base amount is optional
         if (aUBLAllowanceCharge.getBaseAmount () != null)
@@ -921,7 +916,7 @@ public final class PEPPOLUBL20ToEbInterface41Converter extends AbstractPEPPOLUBL
         {
           // Percentage is optional
           final BigDecimal aPerc = aUBLAllowanceCharge.getMultiplierFactorNumericValue ().multiply (CGlobal.BIGDEC_100);
-          aEbiRSItem.setPercentage (bSwapSigns ? aPerc.negate () : aPerc);
+          aEbiRSItem.setPercentage (aPerc);
         }
 
         Ebi41TaxRateType aEbiTaxRate = null;
@@ -948,7 +943,7 @@ public final class PEPPOLUBL20ToEbInterface41Converter extends AbstractPEPPOLUBL
         }
         aEbiRSItem.setTaxRate (aEbiTaxRate);
 
-        if (eSurcharge.isTrue ())
+        if (bItemIsSurcharge)
         {
           aEbiRS.getReductionOrSurcharge ().add (new ObjectFactory ().createSurcharge (aEbiRSItem));
           aEbiBaseAmount = aEbiBaseAmount.add (aEbiRSItem.getAmount ());
@@ -997,68 +992,25 @@ public final class PEPPOLUBL20ToEbInterface41Converter extends AbstractPEPPOLUBL
             int nPaymentIDIndex = 0;
             for (final PaymentIDType aUBLPaymentID : aUBLPaymentMeans.getPaymentID ())
             {
-              final String sUBLPaymentID = StringHelper.trim (aUBLPaymentID.getValue ());
+              String sUBLPaymentID = StringHelper.trim (aUBLPaymentID.getValue ());
               if (StringHelper.hasText (sUBLPaymentID))
               {
-                String sPaymentReference = null;
-                String sChecksum = null;
-
-                if (sUBLPaymentID.length () <= 12)
+                if (sUBLPaymentID.length () > PAYMENT_REFERENCE_MAX_LENGTH)
                 {
-                  // Reference without checksum
-                  sPaymentReference = sUBLPaymentID;
-                }
-                else
-                  if (sUBLPaymentID.length () == 13)
-                  {
-                    // Reference and checksum
-                    sPaymentReference = sUBLPaymentID.substring (0, 12);
-                    sChecksum = sUBLPaymentID.substring (12);
-                  }
-
-                if (sPaymentReference != null)
-                {
-                  if (!StringParser.isUnsignedLong (sPaymentReference))
-                  {
-                    aTransformationErrorList.addWarning ("PaymentMeans[" +
-                                                             nPaymentMeansIndex +
-                                                             "]/PaymentID[" +
-                                                             nPaymentIDIndex +
-                                                             "]",
-                                                         EText.PAYMENT_ID_NOT_NUMERIC.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                                              sPaymentReference));
-                  }
-                  else
-                  {
-                    // Checksum is optional
-                    if (sChecksum != null && !_isValidPaymentReferenceChecksum (sChecksum))
-                    {
-                      aTransformationErrorList.addWarning ("PaymentMeans[" +
-                                                               nPaymentMeansIndex +
-                                                               "]/PaymentID[" +
-                                                               nPaymentIDIndex +
-                                                               "]",
-                                                           EText.PAYMENT_ID_CHECKSUM_INVALID.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                                                     sChecksum));
-                      sChecksum = null;
-                    }
-
-                    final Ebi41PaymentReferenceType aEbiPaymentReference = new Ebi41PaymentReferenceType ();
-                    aEbiPaymentReference.setValue (sPaymentReference);
-                    aEbiPaymentReference.setCheckSum (sChecksum);
-                    aEbiUBTMethod.setPaymentReference (aEbiPaymentReference);
-                  }
-                }
-                else
-                {
+                  // Reference
                   aTransformationErrorList.addWarning ("PaymentMeans[" +
                                                            nPaymentMeansIndex +
                                                            "]/PaymentID[" +
                                                            nPaymentIDIndex +
                                                            "]",
-                                                       EText.PAYMENT_ID_TOO_LONG.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                                         sUBLPaymentID));
+                                                       EText.PAYMENT_ID_TOO_LONG_CUT.getDisplayTextWithArgs (m_aDisplayLocale,
+                                                                                                             sUBLPaymentID));
+                  sUBLPaymentID = sUBLPaymentID.substring (0, PAYMENT_REFERENCE_MAX_LENGTH);
                 }
+
+                final Ebi41PaymentReferenceType aEbiPaymentReference = new Ebi41PaymentReferenceType ();
+                aEbiPaymentReference.setValue (sUBLPaymentID);
+                aEbiUBTMethod.setPaymentReference (aEbiPaymentReference);
               }
               ++nPaymentIDIndex;
             }
