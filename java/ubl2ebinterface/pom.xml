@@ -28,13 +28,8 @@
   <!-- Used licenses -->
   <licenses>
     <license>
-      <name>Mozilla Public License 1.1</name>
-      <url>http://www.mozilla.org/MPL/</url>
-      <distribution>repo</distribution>
-    </license>
-    <license>
-      <name>EUPL 1.1</name>
-      <url>http://joinup.ec.europa.eu/software/page/eupl/licence-eupl</url>
+      <name>Apache 2</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
