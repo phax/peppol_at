@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.gv.brz.transform.ubl2ebi;
+package at.gv.brz.transform.ubl2ebi.invoice;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -34,6 +34,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
+import at.gv.brz.transform.ubl2ebi.EbiNamespacePrefixMapper;
+import at.gv.brz.transform.ubl2ebi.invoice.PEPPOLUBL20ToEbInterface41Converter;
+
 import com.phloc.commons.error.EErrorLevel;
 import com.phloc.commons.io.IReadableResource;
 import com.phloc.commons.io.file.FileUtils;
@@ -44,8 +47,8 @@ import com.phloc.commons.io.file.iterate.FileSystemRecursiveIterator;
 import com.phloc.commons.io.resource.FileSystemResource;
 import com.phloc.commons.jaxb.JAXBMarshallerUtils;
 import com.phloc.commons.xml.serialize.XMLWriter;
-import com.phloc.ebinterface.EbInterface40Marshaller;
-import com.phloc.ebinterface.v40.Ebi40InvoiceType;
+import com.phloc.ebinterface.EbInterface41Marshaller;
+import com.phloc.ebinterface.v41.Ebi41InvoiceType;
 import com.phloc.ubl.UBL20Reader;
 import com.phloc.validation.error.ErrorList;
 
@@ -53,13 +56,13 @@ import eu.europa.ec.cipa.test.ETestFileType;
 import eu.europa.ec.cipa.test.TestFiles;
 
 /**
- * Test class for class {@link PEPPOLUBL20ToEbInterface40Converter}.
+ * Test class for class {@link PEPPOLUBL20ToEbInterface41Converter}.
  * 
  * @author PEPPOL.AT, BRZ, Philip Helger
  */
-public class PEPPOLUBL20ToEbInterface40ConverterTest
+public class PEPPOLUBL20ToEbInterface41ConverterTest
 {
-  private static final Logger s_aLogger = LoggerFactory.getLogger (PEPPOLUBL20ToEbInterface40ConverterTest.class);
+  private static final Logger s_aLogger = LoggerFactory.getLogger (PEPPOLUBL20ToEbInterface41ConverterTest.class);
 
   @Test
   public void testConvertPEPPOLInvoiceLax ()
@@ -83,7 +86,7 @@ public class PEPPOLUBL20ToEbInterface40ConverterTest
 
       // Convert to ebInterface
       final ErrorList aErrorList = new ErrorList ();
-      final Ebi40InvoiceType aEbInvoice = new PEPPOLUBL20ToEbInterface40Converter (Locale.GERMANY,
+      final Ebi41InvoiceType aEbInvoice = new PEPPOLUBL20ToEbInterface41Converter (Locale.GERMANY,
                                                                                    Locale.GERMANY,
                                                                                    false).convertToEbInterface (aUBLInvoice,
                                                                                                                 aErrorList);
@@ -96,7 +99,7 @@ public class PEPPOLUBL20ToEbInterface40ConverterTest
         s_aLogger.info ("  " + aErrorList.getAllItems ());
 
       // Convert ebInterface to XML
-      final Document aDocEb = new EbInterface40Marshaller ()
+      final Document aDocEb = new EbInterface41Marshaller ()
       {
         @Override
         protected void customizeMarshaller (@Nonnull final Marshaller aMarshaller)
@@ -107,7 +110,7 @@ public class PEPPOLUBL20ToEbInterface40ConverterTest
       assertNotNull (aDocEb);
 
       XMLWriter.writeToStream (aDocEb,
-                               FileUtils.getOutputStream ("generated-ebi40-files/" +
+                               FileUtils.getOutputStream ("generated-ebi41-files/" +
                                                           FilenameHelper.getWithoutPath (aRes.getPath ())));
     }
   }
@@ -132,7 +135,7 @@ public class PEPPOLUBL20ToEbInterface40ConverterTest
 
       // Convert to ebInterface
       final ErrorList aErrorList = new ErrorList ();
-      final Ebi40InvoiceType aEbInvoice = new PEPPOLUBL20ToEbInterface40Converter (Locale.GERMANY, Locale.GERMANY, true).convertToEbInterface (aUBLInvoice,
+      final Ebi41InvoiceType aEbInvoice = new PEPPOLUBL20ToEbInterface41Converter (Locale.GERMANY, Locale.GERMANY, true).convertToEbInterface (aUBLInvoice,
                                                                                                                                                aErrorList);
       assertTrue (aRes.getPath () + ": " + aErrorList.toString (), aErrorList.getMostSevereErrorLevel ()
                                                                              .isLessSevereThan (EErrorLevel.ERROR));
@@ -142,7 +145,7 @@ public class PEPPOLUBL20ToEbInterface40ConverterTest
         s_aLogger.info ("  " + aErrorList.getAllItems ());
 
       // Convert ebInterface to XML
-      final Document aDocEb = new EbInterface40Marshaller ()
+      final Document aDocEb = new EbInterface41Marshaller ()
       {
         @Override
         protected void customizeMarshaller (@Nonnull final Marshaller aMarshaller)
@@ -153,7 +156,7 @@ public class PEPPOLUBL20ToEbInterface40ConverterTest
       assertNotNull (aDocEb);
 
       XMLWriter.writeToStream (aDocEb,
-                               FileUtils.getOutputStream ("generated-ebi40-files/" +
+                               FileUtils.getOutputStream ("generated-ebi41-files/" +
                                                           FilenameHelper.getWithoutPath (aRes.getPath ())));
     }
   }

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.gv.brz.transform.ubl2ebi;
+package at.gv.brz.transform.ubl2ebi.invoice;
 
 import java.math.RoundingMode;
 import java.util.Locale;
@@ -28,6 +28,7 @@ import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.InvoiceT
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ProfileIDType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.UBLVersionIDType;
 import oasis.names.specification.ubl.schema.xsd.invoice_2.InvoiceType;
+import at.gv.brz.transform.ubl2ebi.CPeppolUBL;
 
 import com.phloc.commons.annotations.Translatable;
 import com.phloc.commons.name.IHasDisplayText;
@@ -38,6 +39,7 @@ import com.phloc.commons.text.impl.TextProvider;
 import com.phloc.commons.text.resolve.DefaultTextResolver;
 import com.phloc.validation.error.ErrorList;
 
+import eu.europa.ec.cipa.peppol.codelist.EInvoiceTypeCode;
 import eu.europa.ec.cipa.peppol.codelist.ETaxSchemeID;
 import eu.europa.ec.cipa.peppol.identifier.doctype.IPeppolPredefinedDocumentTypeIdentifier;
 import eu.europa.ec.cipa.peppol.identifier.process.IPeppolPredefinedProcessIdentifier;
@@ -142,6 +144,8 @@ public abstract class AbstractPEPPOLUBL20ToEbInterfaceConverter
   public static final int SCALE_PRICE_LINE = 4;
   // Austria uses HALF_UP mode!
   public static final RoundingMode ROUNDING_MODE = RoundingMode.HALF_UP;
+  /** The invoice type code to use */
+  public static final String INVOICE_TYPE_CODE = EInvoiceTypeCode.COMMERCIAL_INVOICE.getID ();
 
   protected final Locale m_aDisplayLocale;
   protected final Locale m_aContentLocale;
@@ -184,32 +188,40 @@ public abstract class AbstractPEPPOLUBL20ToEbInterfaceConverter
     // Check UBLVersionID
     final UBLVersionIDType aUBLVersionID = aUBLInvoice.getUBLVersionID ();
     if (aUBLVersionID == null)
+    {
       aTransformationErrorList.addError ("UBLVersionID",
                                          EText.NO_UBL_VERSION_ID.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                          CPeppolUBL.UBL_VERSION));
+    }
     else
     {
       final String sUBLVersionID = StringHelper.trim (aUBLVersionID.getValue ());
       if (!CPeppolUBL.UBL_VERSION.equals (sUBLVersionID))
+      {
         aTransformationErrorList.addError ("UBLVersionID",
                                            EText.INVALID_UBL_VERSION_ID.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                                 sUBLVersionID,
                                                                                                 CPeppolUBL.UBL_VERSION));
+      }
     }
 
     // Check ProfileID
     IPeppolPredefinedProcessIdentifier aProcID = null;
     final ProfileIDType aProfileID = aUBLInvoice.getProfileID ();
     if (aProfileID == null)
+    {
       aTransformationErrorList.addError ("ProfileID", EText.NO_PROFILE_ID.getDisplayText (m_aDisplayLocale));
+    }
     else
     {
       final String sProfileID = StringHelper.trim (aProfileID.getValue ());
       aProcID = PredefinedProcessIdentifierManager.getProcessIdentifierOfID (sProfileID);
       if (aProcID == null)
+      {
         aTransformationErrorList.addError ("ProfileID",
                                            EText.INVALID_PROFILE_ID.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                             sProfileID));
+      }
     }
 
     // Check CustomizationID
@@ -252,17 +264,19 @@ public abstract class AbstractPEPPOLUBL20ToEbInterfaceConverter
       // None present
       aTransformationErrorList.addWarning ("InvoiceTypeCode",
                                            EText.NO_INVOICE_TYPECODE.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                             CPeppolUBL.INVOICE_TYPE_CODE));
+                                                                                             INVOICE_TYPE_CODE));
     }
     else
     {
       // If one is present, it must match
       final String sInvoiceTypeCode = StringHelper.trim (aInvoiceTypeCode.getValue ());
-      if (!CPeppolUBL.INVOICE_TYPE_CODE.equals (sInvoiceTypeCode))
+      if (!INVOICE_TYPE_CODE.equals (sInvoiceTypeCode))
+      {
         aTransformationErrorList.addError ("InvoiceTypeCode",
                                            EText.INVALID_INVOICE_TYPECODE.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                                   sInvoiceTypeCode,
-                                                                                                  CPeppolUBL.INVOICE_TYPE_CODE));
+                                                                                                  INVOICE_TYPE_CODE));
+      }
     }
   }
 
