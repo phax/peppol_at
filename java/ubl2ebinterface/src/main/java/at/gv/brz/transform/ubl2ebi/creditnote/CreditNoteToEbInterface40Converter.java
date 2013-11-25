@@ -557,7 +557,7 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
                                                        new SchemedID (sUBLTaxCategorySchemeID, sUBLTaxCategoryID)),
                                    aUBLPercentage);
 
-          if (_isSupportedTaxSchemeSchemeID (sUBLTaxSchemeSchemeID))
+          if (isSupportedTaxSchemeSchemeID (sUBLTaxSchemeSchemeID))
           {
             final ETaxSchemeID eUBLTaxScheme = ETaxSchemeID.getFromIDOrNull (sUBLTaxSchemeID);
             if (eUBLTaxScheme == null)

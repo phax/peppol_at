@@ -533,7 +533,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
                                                        new SchemedID (sUBLTaxCategorySchemeID, sUBLTaxCategoryID)),
                                    aUBLPercentage);
 
-          if (_isSupportedTaxSchemeSchemeID (sUBLTaxSchemeSchemeID))
+          if (isSupportedTaxSchemeSchemeID (sUBLTaxSchemeSchemeID))
           {
             final ETaxSchemeID eUBLTaxScheme = ETaxSchemeID.getFromIDOrNull (sUBLTaxSchemeID);
             if (eUBLTaxScheme == null)
