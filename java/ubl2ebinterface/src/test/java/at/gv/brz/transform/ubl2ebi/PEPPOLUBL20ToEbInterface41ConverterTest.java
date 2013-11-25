@@ -67,7 +67,7 @@ public class PEPPOLUBL20ToEbInterface41ConverterTest
     final List <IReadableResource> aTestFiles = new ArrayList <IReadableResource> ();
     if (false)
       aTestFiles.addAll (TestFiles.getSuccessFiles (ETestFileType.INVOICE));
-    for (final File aFile : FileSystemRecursiveIterator.create (new File ("src/test/resources/ubl20"),
+    for (final File aFile : FileSystemRecursiveIterator.create (new File ("src/test/resources/ubl20/invoice"),
                                                                 new FilenameFilterEndsWith (".xml")))
       aTestFiles.add (new FileSystemResource (aFile));
 
@@ -116,7 +116,7 @@ public class PEPPOLUBL20ToEbInterface41ConverterTest
   public void testConvertPEPPOLInvoiceERB ()
   {
     final List <IReadableResource> aTestFiles = new ArrayList <IReadableResource> ();
-    for (final File aFile : FileSystemIterator.create (new File ("src/test/resources/ubl20"),
+    for (final File aFile : FileSystemIterator.create (new File ("src/test/resources/ubl20/invoice"),
                                                        new FilenameFilterEndsWith (".xml")))
       aTestFiles.add (new FileSystemResource (aFile));
 
