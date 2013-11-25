@@ -115,7 +115,7 @@ import eu.europa.ec.cipa.peppol.codelist.ETaxSchemeID;
  * @author philip
  */
 @Immutable
-public final class PEPPOLUBL20ToEbInterface40Converter extends AbstractPEPPOLUBL20ToEbInterfaceConverter
+public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConverter
 {
 
   /**
@@ -129,7 +129,7 @@ public final class PEPPOLUBL20ToEbInterface40Converter extends AbstractPEPPOLUBL
    * @param bStrictERBMode
    *        <code>true</code> if ER>B specific checks should be performed
    */
-  public PEPPOLUBL20ToEbInterface40Converter (@Nonnull final Locale aDisplayLocale,
+  public InvoiceToEbInterface40Converter (@Nonnull final Locale aDisplayLocale,
                                               @Nonnull final Locale aContentLocale,
                                               final boolean bStrictERBMode)
   {

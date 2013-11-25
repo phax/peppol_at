@@ -118,7 +118,7 @@ import eu.europa.ec.cipa.peppol.codelist.ETaxSchemeID;
  * @author philip
  */
 @Immutable
-public final class PEPPOLUBL20ToEbInterface41Converter extends AbstractPEPPOLUBL20ToEbInterfaceConverter
+public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConverter
 {
   public static final int PAYMENT_REFERENCE_MAX_LENGTH = 35;
 
@@ -133,7 +133,7 @@ public final class PEPPOLUBL20ToEbInterface41Converter extends AbstractPEPPOLUBL
    * @param bStrictERBMode
    *        <code>true</code> if ER>B specific checks should be performed
    */
-  public PEPPOLUBL20ToEbInterface41Converter (@Nonnull final Locale aDisplayLocale,
+  public InvoiceToEbInterface41Converter (@Nonnull final Locale aDisplayLocale,
                                               @Nonnull final Locale aContentLocale,
                                               final boolean bStrictERBMode)
   {

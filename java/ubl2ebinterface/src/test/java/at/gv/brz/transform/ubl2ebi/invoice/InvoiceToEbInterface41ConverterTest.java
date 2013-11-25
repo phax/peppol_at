@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import at.gv.brz.transform.ubl2ebi.EbiNamespacePrefixMapper;
-import at.gv.brz.transform.ubl2ebi.invoice.PEPPOLUBL20ToEbInterface41Converter;
+import at.gv.brz.transform.ubl2ebi.invoice.InvoiceToEbInterface41Converter;
 
 import com.phloc.commons.error.EErrorLevel;
 import com.phloc.commons.io.IReadableResource;
@@ -56,13 +56,13 @@ import eu.europa.ec.cipa.test.ETestFileType;
 import eu.europa.ec.cipa.test.TestFiles;
 
 /**
- * Test class for class {@link PEPPOLUBL20ToEbInterface41Converter}.
+ * Test class for class {@link InvoiceToEbInterface41Converter}.
  * 
  * @author PEPPOL.AT, BRZ, Philip Helger
  */
-public class PEPPOLUBL20ToEbInterface41ConverterTest
+public class InvoiceToEbInterface41ConverterTest
 {
-  private static final Logger s_aLogger = LoggerFactory.getLogger (PEPPOLUBL20ToEbInterface41ConverterTest.class);
+  private static final Logger s_aLogger = LoggerFactory.getLogger (InvoiceToEbInterface41ConverterTest.class);
 
   @Test
   public void testConvertPEPPOLInvoiceLax ()
@@ -86,7 +86,7 @@ public class PEPPOLUBL20ToEbInterface41ConverterTest
 
       // Convert to ebInterface
       final ErrorList aErrorList = new ErrorList ();
-      final Ebi41InvoiceType aEbInvoice = new PEPPOLUBL20ToEbInterface41Converter (Locale.GERMANY,
+      final Ebi41InvoiceType aEbInvoice = new InvoiceToEbInterface41Converter (Locale.GERMANY,
                                                                                    Locale.GERMANY,
                                                                                    false).convertToEbInterface (aUBLInvoice,
                                                                                                                 aErrorList);
@@ -135,7 +135,7 @@ public class PEPPOLUBL20ToEbInterface41ConverterTest
 
       // Convert to ebInterface
       final ErrorList aErrorList = new ErrorList ();
-      final Ebi41InvoiceType aEbInvoice = new PEPPOLUBL20ToEbInterface41Converter (Locale.GERMANY, Locale.GERMANY, true).convertToEbInterface (aUBLInvoice,
+      final Ebi41InvoiceType aEbInvoice = new InvoiceToEbInterface41Converter (Locale.GERMANY, Locale.GERMANY, true).convertToEbInterface (aUBLInvoice,
                                                                                                                                                aErrorList);
       assertTrue (aRes.getPath () + ": " + aErrorList.toString (), aErrorList.getMostSevereErrorLevel ()
                                                                              .isLessSevereThan (EErrorLevel.ERROR));

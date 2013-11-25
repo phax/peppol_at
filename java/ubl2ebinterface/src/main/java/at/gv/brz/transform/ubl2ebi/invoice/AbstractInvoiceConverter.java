@@ -46,12 +46,12 @@ import eu.europa.ec.cipa.peppol.identifier.process.IPeppolPredefinedProcessIdent
 import eu.europa.ec.cipa.peppol.identifier.process.PredefinedProcessIdentifierManager;
 
 /**
- * Base class for PEPPOL 2.0 to ebInterface converter
+ * Base class for PEPPOL UBL 2.0 to ebInterface converter
  * 
  * @author philip
  */
 @Immutable
-public abstract class AbstractPEPPOLUBL20ToEbInterfaceConverter
+public abstract class AbstractInvoiceConverter
 {
   public static final String DEFAULT_BILLERS_INVOICERECIPIENT_ID = "000";
 
@@ -162,7 +162,7 @@ public abstract class AbstractPEPPOLUBL20ToEbInterfaceConverter
    * @param bStrictERBMode
    *        <code>true</code> if ER>B specific checks should be performed
    */
-  public AbstractPEPPOLUBL20ToEbInterfaceConverter (@Nonnull final Locale aDisplayLocale,
+  public AbstractInvoiceConverter (@Nonnull final Locale aDisplayLocale,
                                                     @Nonnull final Locale aContentLocale,
                                                     final boolean bStrictERBMode)
   {
