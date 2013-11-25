@@ -37,6 +37,10 @@ public class EbiNamespacePrefixMapper extends NamespacePrefixMapper
     if (sNamespaceUri.equals (CEbInterface.EBINTERFACE_40_NS) || sNamespaceUri.equals (CEbInterface.EBINTERFACE_41_NS))
       return "eb";
 
+    // XMLDsig
+    if (sNamespaceUri.equals ("http://www.w3.org/2000/09/xmldsig#"))
+      return "dsig";
+
     return sSuggestion;
   }
 }

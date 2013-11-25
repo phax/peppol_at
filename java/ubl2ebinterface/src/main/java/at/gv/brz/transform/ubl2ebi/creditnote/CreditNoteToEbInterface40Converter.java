@@ -18,9 +18,7 @@ package at.gv.brz.transform.ubl2ebi.creditnote;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -32,19 +30,14 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.AddressType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.AllowanceChargeType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.ContactType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.CreditNoteLineType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.CustomerPartyType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.DeliveryType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.DocumentReferenceType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.FinancialAccountType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.InvoiceLineType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.OrderLineReferenceType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.OrderReferenceType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyIdentificationType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyNameType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyTaxSchemeType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PaymentMeansType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PaymentTermsType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PeriodType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PersonType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.SupplierPartyType;
@@ -52,11 +45,8 @@ import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.TaxC
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.TaxSubtotalType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.TaxTotalType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DescriptionType;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.InstructionNoteType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.NameType;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.NoteType;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PaymentIDType;
-import oasis.names.specification.ubl.schema.xsd.invoice_2.InvoiceType;
+import oasis.names.specification.ubl.schema.xsd.creditnote_2.CreditNoteType;
 import at.gv.brz.transform.ubl2ebi.helper.SchemedID;
 import at.gv.brz.transform.ubl2ebi.helper.TaxCategoryKey;
 
@@ -69,7 +59,6 @@ import com.phloc.commons.state.ETriState;
 import com.phloc.commons.string.StringHelper;
 import com.phloc.commons.string.StringParser;
 import com.phloc.ebinterface.codelist.ETaxCode;
-import com.phloc.ebinterface.v40.Ebi40AccountType;
 import com.phloc.ebinterface.v40.Ebi40AddressIdentifierType;
 import com.phloc.ebinterface.v40.Ebi40AddressIdentifierTypeType;
 import com.phloc.ebinterface.v40.Ebi40AddressType;
@@ -79,31 +68,24 @@ import com.phloc.ebinterface.v40.Ebi40CountryType;
 import com.phloc.ebinterface.v40.Ebi40CurrencyType;
 import com.phloc.ebinterface.v40.Ebi40DeliveryType;
 import com.phloc.ebinterface.v40.Ebi40DetailsType;
-import com.phloc.ebinterface.v40.Ebi40DirectDebitType;
-import com.phloc.ebinterface.v40.Ebi40DiscountType;
 import com.phloc.ebinterface.v40.Ebi40DocumentTypeType;
 import com.phloc.ebinterface.v40.Ebi40InvoiceRecipientType;
 import com.phloc.ebinterface.v40.Ebi40InvoiceType;
 import com.phloc.ebinterface.v40.Ebi40ItemListType;
 import com.phloc.ebinterface.v40.Ebi40ItemType;
 import com.phloc.ebinterface.v40.Ebi40ListLineItemType;
-import com.phloc.ebinterface.v40.Ebi40OrderReferenceDetailType;
+import com.phloc.ebinterface.v40.Ebi40NoPaymentType;
 import com.phloc.ebinterface.v40.Ebi40OrderReferenceType;
 import com.phloc.ebinterface.v40.Ebi40OtherTaxType;
 import com.phloc.ebinterface.v40.Ebi40PaymentConditionsType;
-import com.phloc.ebinterface.v40.Ebi40PaymentReferenceType;
 import com.phloc.ebinterface.v40.Ebi40PeriodType;
-import com.phloc.ebinterface.v40.Ebi40ReductionAndSurchargeBaseType;
 import com.phloc.ebinterface.v40.Ebi40ReductionAndSurchargeDetailsType;
-import com.phloc.ebinterface.v40.Ebi40ReductionAndSurchargeListLineItemDetailsType;
 import com.phloc.ebinterface.v40.Ebi40ReductionAndSurchargeType;
 import com.phloc.ebinterface.v40.Ebi40TaxRateType;
 import com.phloc.ebinterface.v40.Ebi40TaxType;
 import com.phloc.ebinterface.v40.Ebi40UnitType;
-import com.phloc.ebinterface.v40.Ebi40UniversalBankTransactionType;
 import com.phloc.ebinterface.v40.Ebi40VATType;
 import com.phloc.ebinterface.v40.ObjectFactory;
-import com.phloc.ubl20.codelist.EPaymentMeansCode20;
 import com.phloc.ubl20.codelist.EUnitOfMeasureCode20;
 import com.phloc.validation.error.ErrorList;
 
@@ -329,7 +311,7 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
   /**
    * Main conversion method to convert from UBL 2.0 to ebInterface 4.0
    * 
-   * @param aUBLInvoice
+   * @param aUBLCreditNote
    *        The UBL invoice to be converted
    * @param aTransformationErrorList
    *        Error list. Must be empty!
@@ -337,33 +319,33 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
    *         of a severe error.
    */
   @Nullable
-  public Ebi40InvoiceType convertToEbInterface (@Nonnull final InvoiceType aUBLInvoice,
+  public Ebi40InvoiceType convertToEbInterface (@Nonnull final CreditNoteType aUBLCreditNote,
                                                 @Nonnull final ErrorList aTransformationErrorList)
   {
-    if (aUBLInvoice == null)
-      throw new NullPointerException ("UBLInvoice");
+    if (aUBLCreditNote == null)
+      throw new NullPointerException ("UBLCreditNote");
     if (aTransformationErrorList == null)
       throw new NullPointerException ("TransformationErrorList");
     if (!aTransformationErrorList.isEmpty ())
       throw new IllegalArgumentException ("TransformationErrorList must be empty!");
 
     // Consistency check before starting the conversion
-    _checkConsistency (aUBLInvoice, aTransformationErrorList);
+    _checkConsistency (aUBLCreditNote, aTransformationErrorList);
     if (aTransformationErrorList.containsAtLeastOneError ())
       return null;
 
     // Build ebInterface invoice
-    final Ebi40InvoiceType aEbiInvoice = new Ebi40InvoiceType ();
-    aEbiInvoice.setGeneratingSystem (EBI_GENERATING_SYSTEM);
-    aEbiInvoice.setDocumentType (Ebi40DocumentTypeType.INVOICE);
+    final Ebi40InvoiceType aEbiCreditNote = new Ebi40InvoiceType ();
+    aEbiCreditNote.setGeneratingSystem (EBI_GENERATING_SYSTEM);
+    aEbiCreditNote.setDocumentType (Ebi40DocumentTypeType.CREDIT_MEMO);
 
     // Cannot set the language, because the 3letter code is expected but we only
     // have the 2letter code!
 
-    final String sUBLCurrencyCode = StringHelper.trim (aUBLInvoice.getDocumentCurrencyCodeValue ());
+    final String sUBLCurrencyCode = StringHelper.trim (aUBLCreditNote.getDocumentCurrencyCodeValue ());
     try
     {
-      aEbiInvoice.setInvoiceCurrency (Ebi40CurrencyType.fromValue (sUBLCurrencyCode));
+      aEbiCreditNote.setInvoiceCurrency (Ebi40CurrencyType.fromValue (sUBLCurrencyCode));
     }
     catch (final IllegalArgumentException ex)
     {
@@ -372,21 +354,21 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
                                                                                              sUBLCurrencyCode));
     }
 
-    // Invoice Number
-    final String sInvoiceNumber = StringHelper.trim (aUBLInvoice.getIDValue ());
-    if (StringHelper.hasNoText (sInvoiceNumber))
+    // CreditNote Number
+    final String sCreditNoteNumber = StringHelper.trim (aUBLCreditNote.getIDValue ());
+    if (StringHelper.hasNoText (sCreditNoteNumber))
       aTransformationErrorList.addError ("ID", EText.MISSING_INVOICE_NUMBER.getDisplayText (m_aDisplayLocale));
     else
-      aEbiInvoice.setInvoiceNumber (_makeAlphaNumType (sInvoiceNumber, "ID", aTransformationErrorList));
+      aEbiCreditNote.setInvoiceNumber (_makeAlphaNumType (sCreditNoteNumber, "ID", aTransformationErrorList));
 
     // Ignore the time!
-    aEbiInvoice.setInvoiceDate (aUBLInvoice.getIssueDateValue ());
-    if (aEbiInvoice.getInvoiceDate () == null)
+    aEbiCreditNote.setInvoiceDate (aUBLCreditNote.getIssueDateValue ());
+    if (aEbiCreditNote.getInvoiceDate () == null)
       aTransformationErrorList.addError ("IssueDate", EText.MISSING_INVOICE_DATE.getDisplayText (m_aDisplayLocale));
 
     // Biller/Supplier (creator of the invoice)
     {
-      final SupplierPartyType aUBLSupplier = aUBLInvoice.getAccountingSupplierParty ();
+      final SupplierPartyType aUBLSupplier = aUBLCreditNote.getAccountingSupplierParty ();
       final Ebi40BillerType aEbiBiller = new Ebi40BillerType ();
       // Find the tax scheme that uses VAT
       for (final PartyTaxSchemeType aUBLPartyTaxScheme : aUBLSupplier.getParty ().getPartyTaxScheme ())
@@ -418,12 +400,12 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
       aEbiBiller.setAddress (_convertParty (aUBLSupplier.getParty (),
                                             "AccountingSupplierParty",
                                             aTransformationErrorList));
-      aEbiInvoice.setBiller (aEbiBiller);
+      aEbiCreditNote.setBiller (aEbiBiller);
     }
 
-    // Invoice recipient
+    // CreditNote recipient
     {
-      final CustomerPartyType aUBLCustomer = aUBLInvoice.getAccountingCustomerParty ();
+      final CustomerPartyType aUBLCustomer = aUBLCreditNote.getAccountingCustomerParty ();
       final Ebi40InvoiceRecipientType aEbiRecipient = new Ebi40InvoiceRecipientType ();
       // Find the tax scheme that uses VAT
       for (final PartyTaxSchemeType aUBLPartyTaxScheme : aUBLCustomer.getParty ().getPartyTaxScheme ())
@@ -457,13 +439,13 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
       aEbiRecipient.setAddress (_convertParty (aUBLCustomer.getParty (),
                                                "AccountingCustomerParty",
                                                aTransformationErrorList));
-      aEbiInvoice.setInvoiceRecipient (aEbiRecipient);
+      aEbiCreditNote.setInvoiceRecipient (aEbiRecipient);
     }
 
     // Order reference of invoice recipient
     String sUBLOrderReferenceID = null;
     {
-      final OrderReferenceType aUBLOrderReference = aUBLInvoice.getOrderReference ();
+      final OrderReferenceType aUBLOrderReference = aUBLCreditNote.getOrderReference ();
       if (aUBLOrderReference != null)
       {
         // Use directly from order reference
@@ -472,7 +454,7 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
       if (StringHelper.hasNoText (sUBLOrderReferenceID))
       {
         // Check if a contract reference is present
-        for (final DocumentReferenceType aDocumentReference : aUBLInvoice.getContractDocumentReference ())
+        for (final DocumentReferenceType aDocumentReference : aUBLCreditNote.getContractDocumentReference ())
           if (StringHelper.hasTextAfterTrim (aDocumentReference.getIDValue ()))
           {
             sUBLOrderReferenceID = StringHelper.trim (aDocumentReference.getIDValue ());
@@ -501,7 +483,7 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
 
       final Ebi40OrderReferenceType aEbiOrderReference = new Ebi40OrderReferenceType ();
       aEbiOrderReference.setOrderID (sUBLOrderReferenceID);
-      aEbiInvoice.getInvoiceRecipient ().setOrderReference (aEbiOrderReference);
+      aEbiCreditNote.getInvoiceRecipient ().setOrderReference (aEbiOrderReference);
     }
 
     // Tax totals
@@ -511,7 +493,7 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
     final Ebi40VATType aEbiVAT = new Ebi40VATType ();
     {
       int nTaxTotalIndex = 0;
-      for (final TaxTotalType aUBLTaxTotal : aUBLInvoice.getTaxTotal ())
+      for (final TaxTotalType aUBLTaxTotal : aUBLCreditNote.getTaxTotal ())
       {
         int nTaxSubtotalIndex = 0;
         for (final TaxSubtotalType aUBLSubtotal : aUBLTaxTotal.getTaxSubtotal ())
@@ -631,7 +613,7 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
       }
 
       aEbiTax.setVAT (aEbiVAT);
-      aEbiInvoice.setTax (aEbiTax);
+      aEbiCreditNote.setTax (aEbiTax);
     }
 
     // Line items
@@ -639,16 +621,16 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
     {
       final Ebi40DetailsType aEbiDetails = new Ebi40DetailsType ();
       final Ebi40ItemListType aEbiItemList = new Ebi40ItemListType ();
-      int nInvoiceLineIndex = 0;
-      for (final InvoiceLineType aUBLInvoiceLine : aUBLInvoice.getInvoiceLine ())
+      int nCreditNoteLineIndex = 0;
+      for (final CreditNoteLineType aUBLCreditNoteLine : aUBLCreditNote.getCreditNoteLine ())
       {
         // Try to resolve tax category
-        TaxCategoryType aUBLTaxCategory = ContainerHelper.getSafe (aUBLInvoiceLine.getItem ()
-                                                                                  .getClassifiedTaxCategory (), 0);
+        TaxCategoryType aUBLTaxCategory = ContainerHelper.getSafe (aUBLCreditNoteLine.getItem ()
+                                                                                     .getClassifiedTaxCategory (), 0);
         if (aUBLTaxCategory == null)
         {
           // No direct tax category -> check if it is somewhere in the tax total
-          outer: for (final TaxTotalType aUBLTaxTotal : aUBLInvoiceLine.getTaxTotal ())
+          outer: for (final TaxTotalType aUBLTaxTotal : aUBLCreditNoteLine.getTaxTotal ())
             for (final TaxSubtotalType aUBLTaxSubTotal : aUBLTaxTotal.getTaxSubtotal ())
             {
               // Only handle VAT items
@@ -693,7 +675,9 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
         if (aUBLPercent == null)
         {
           aUBLPercent = BigDecimal.ZERO;
-          aTransformationErrorList.addWarning ("InvoiceLine[" + nInvoiceLineIndex + "]/Item/ClassifiedTaxCategory",
+          aTransformationErrorList.addWarning ("CreditNoteLine[" +
+                                                   nCreditNoteLineIndex +
+                                                   "]/Item/ClassifiedTaxCategory",
                                                EText.DETAILS_TAX_PERCENTAGE_NOT_FOUND.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                                               aUBLPercent));
         }
@@ -701,13 +685,13 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
         // Start creating ebInterface line
         final Ebi40ListLineItemType aEbiListLineItem = new Ebi40ListLineItemType ();
 
-        // Invoice line number
-        final String sUBLPositionNumber = StringHelper.trim (aUBLInvoiceLine.getIDValue ());
+        // CreditNote line number
+        final String sUBLPositionNumber = StringHelper.trim (aUBLCreditNoteLine.getIDValue ());
         BigInteger aUBLPositionNumber = StringParser.parseBigInteger (sUBLPositionNumber);
         if (aUBLPositionNumber == null)
         {
-          aUBLPositionNumber = BigInteger.valueOf (nInvoiceLineIndex + 1);
-          aTransformationErrorList.addWarning ("InvoiceLine[" + nInvoiceLineIndex + "]/ID",
+          aUBLPositionNumber = BigInteger.valueOf (nCreditNoteLineIndex + 1);
+          aTransformationErrorList.addWarning ("CreditNoteLine[" + nCreditNoteLineIndex + "]/ID",
                                                EText.DETAILS_INVALID_POSITION.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                                       sUBLPositionNumber,
                                                                                                       aUBLPositionNumber));
@@ -715,49 +699,51 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
         aEbiListLineItem.setPositionNumber (aUBLPositionNumber);
 
         // Descriptions
-        for (final DescriptionType aUBLDescription : aUBLInvoiceLine.getItem ().getDescription ())
+        for (final DescriptionType aUBLDescription : aUBLCreditNoteLine.getItem ().getDescription ())
           aEbiListLineItem.getDescription ().add (StringHelper.trim (aUBLDescription.getValue ()));
         if (aEbiListLineItem.getDescription ().isEmpty ())
         {
           // Use item name as description
-          final NameType aUBLName = aUBLInvoiceLine.getItem ().getName ();
+          final NameType aUBLName = aUBLCreditNoteLine.getItem ().getName ();
           if (aUBLName != null)
             aEbiListLineItem.getDescription ().add (StringHelper.trim (aUBLName.getValue ()));
         }
 
         // Quantity
         final Ebi40UnitType aEbiQuantity = new Ebi40UnitType ();
-        if (aUBLInvoiceLine.getInvoicedQuantity () != null)
+        if (aUBLCreditNoteLine.getCreditedQuantity () != null)
         {
           // Unit code is optional
-          if (aUBLInvoiceLine.getInvoicedQuantity ().getUnitCode () != null)
-            aEbiQuantity.setUnit (StringHelper.trim (aUBLInvoiceLine.getInvoicedQuantity ().getUnitCode ().value ()));
-          aEbiQuantity.setValue (aUBLInvoiceLine.getInvoicedQuantityValue ());
+          if (aUBLCreditNoteLine.getCreditedQuantity ().getUnitCode () != null)
+            aEbiQuantity.setUnit (StringHelper.trim (aUBLCreditNoteLine.getCreditedQuantity ().getUnitCode ().value ()));
+          aEbiQuantity.setValue (aUBLCreditNoteLine.getCreditedQuantityValue ());
         }
         if (aEbiQuantity.getUnit () == null)
         {
           // ebInterface requires a quantity!
           aEbiQuantity.setUnit (EUnitOfMeasureCode20.C62.getID ());
-          aTransformationErrorList.addWarning ("InvoiceLine[" + nInvoiceLineIndex + "]/InvoicedQuantity/UnitCode",
+          aTransformationErrorList.addWarning ("CreditNoteLine[" +
+                                                   nCreditNoteLineIndex +
+                                                   "]/CreditNotedQuantity/UnitCode",
                                                EText.DETAILS_INVALID_UNIT.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                                   aEbiQuantity.getUnit ()));
         }
         if (aEbiQuantity.getValue () == null)
         {
           aEbiQuantity.setValue (BigDecimal.ONE);
-          aTransformationErrorList.addWarning ("InvoiceLine[" + nInvoiceLineIndex + "]/InvoicedQuantity",
+          aTransformationErrorList.addWarning ("CreditNoteLine[" + nCreditNoteLineIndex + "]/CreditNotedQuantity",
                                                EText.DETAILS_INVALID_QUANTITY.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                                       aEbiQuantity.getValue ()));
         }
         aEbiListLineItem.setQuantity (aEbiQuantity);
 
         // Unit price
-        if (aUBLInvoiceLine.getPrice () != null)
+        if (aUBLCreditNoteLine.getPrice () != null)
         {
           // Unit price = priceAmount/baseQuantity (mandatory)
-          final BigDecimal aUBLPriceAmount = aUBLInvoiceLine.getPrice ().getPriceAmountValue ();
+          final BigDecimal aUBLPriceAmount = aUBLCreditNoteLine.getPrice ().getPriceAmountValue ();
           // If no base quantity is present, assume 1 (optional)
-          final BigDecimal aUBLBaseQuantity = aUBLInvoiceLine.getPrice ().getBaseQuantityValue ();
+          final BigDecimal aUBLBaseQuantity = aUBLCreditNoteLine.getPrice ().getBaseQuantityValue ();
           aEbiListLineItem.setUnitPrice (aUBLBaseQuantity == null ? aUBLPriceAmount
                                                                  : MathHelper.isEqualToZero (aUBLBaseQuantity) ? BigDecimal.ZERO
                                                                                                               : aUBLPriceAmount.divide (aUBLBaseQuantity,
@@ -767,7 +753,7 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
         else
         {
           // Unit price = lineExtensionAmount / quantity (mandatory)
-          final BigDecimal aUBLLineExtensionAmount = aUBLInvoiceLine.getLineExtensionAmountValue ();
+          final BigDecimal aUBLLineExtensionAmount = aUBLCreditNoteLine.getLineExtensionAmountValue ();
           aEbiListLineItem.setUnitPrice (aUBLLineExtensionAmount.divide (aEbiQuantity.getValue (),
                                                                          SCALE_PRICE_LINE,
                                                                          ROUNDING_MODE));
@@ -783,115 +769,23 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
         aEbiListLineItem.setTaxRate (aEbiTaxRate);
 
         // Line item amount (quantity * unit price +- reduction / surcharge)
-        aEbiListLineItem.setLineItemAmount (aUBLInvoiceLine.getLineExtensionAmountValue ());
+        aEbiListLineItem.setLineItemAmount (aUBLCreditNoteLine.getLineExtensionAmountValue ());
 
         // Special handling in case no VAT item is present
         if (MathHelper.isEqualToZero (aUBLPercent))
-          aTotalZeroPercLineExtensionAmount = aTotalZeroPercLineExtensionAmount.add (aUBLInvoiceLine.getLineExtensionAmountValue ());
-
-        // Order reference per line
-        for (final OrderLineReferenceType aUBLOrderLineReference : aUBLInvoiceLine.getOrderLineReference ())
-          if (StringHelper.hasText (aUBLOrderLineReference.getLineIDValue ()))
-          {
-            final Ebi40OrderReferenceDetailType aEbiOrderRefDetail = new Ebi40OrderReferenceDetailType ();
-
-            // order reference
-            String sUBLLineOrderReferenceID = null;
-            if (aUBLOrderLineReference.getOrderReference () != null)
-              sUBLLineOrderReferenceID = StringHelper.trim (aUBLOrderLineReference.getOrderReference ().getIDValue ());
-            if (StringHelper.hasNoText (sUBLLineOrderReferenceID))
-            {
-              // Use the global order reference from header level
-              sUBLLineOrderReferenceID = sUBLOrderReferenceID;
-            }
-            aEbiOrderRefDetail.setOrderID (sUBLLineOrderReferenceID);
-
-            // Order position number
-            final String sOrderPosNumber = StringHelper.trim (aUBLOrderLineReference.getLineIDValue ());
-            if (sOrderPosNumber != null)
-            {
-              if (sOrderPosNumber.length () == 0)
-              {
-                aTransformationErrorList.addError ("InvoiceLine[" + nInvoiceLineIndex + "]/OrderLineReference/LineID",
-                                                   EText.ORDERLINE_REF_ID_EMPTY.getDisplayText (m_aDisplayLocale));
-              }
-              else
-              {
-                aEbiOrderRefDetail.setOrderPositionNumber (_makeAlphaNumType (sOrderPosNumber,
-                                                                              "InvoiceLine[" +
-                                                                                  nInvoiceLineIndex +
-                                                                                  "]/OrderLineReference/LineID",
-                                                                              aTransformationErrorList));
-              }
-            }
-            aEbiListLineItem.setInvoiceRecipientsOrderReference (aEbiOrderRefDetail);
-            break;
-          }
-
-        // Reduction and surcharge
-        if (aUBLInvoiceLine.hasAllowanceChargeEntries ())
-        {
-          // Start with quantity*unitPrice for base amount
-          BigDecimal aEbiBaseAmount = aEbiListLineItem.getQuantity ()
-                                                      .getValue ()
-                                                      .multiply (aEbiListLineItem.getUnitPrice ());
-          final Ebi40ReductionAndSurchargeListLineItemDetailsType aEbiRSDetails = new Ebi40ReductionAndSurchargeListLineItemDetailsType ();
-
-          // ebInterface can handle only Reduction or only Surcharge
-          ETriState eSurcharge = ETriState.UNDEFINED;
-          for (final AllowanceChargeType aUBLAllowanceCharge : aUBLInvoiceLine.getAllowanceCharge ())
-          {
-            final boolean bItemIsSurcharge = aUBLAllowanceCharge.getChargeIndicator ().isValue ();
-
-            // Remember for next item
-            if (eSurcharge.isUndefined ())
-              eSurcharge = ETriState.valueOf (bItemIsSurcharge);
-            final boolean bSwapSigns = bItemIsSurcharge != eSurcharge.isTrue ();
-
-            final Ebi40ReductionAndSurchargeBaseType aEbiRSItem = new Ebi40ReductionAndSurchargeBaseType ();
-            // Amount is mandatory
-            final BigDecimal aAmount = aUBLAllowanceCharge.getAmountValue ();
-            aEbiRSItem.setAmount (bSwapSigns ? aAmount.negate () : aAmount);
-
-            // Base amount is optional
-            if (aUBLAllowanceCharge.getBaseAmount () != null)
-              aEbiRSItem.setBaseAmount (aUBLAllowanceCharge.getBaseAmountValue ());
-            if (aEbiRSItem.getBaseAmount () == null)
-              aEbiRSItem.setBaseAmount (aEbiBaseAmount);
-
-            if (aUBLAllowanceCharge.getMultiplierFactorNumeric () != null)
-            {
-              // Percentage is optional
-              final BigDecimal aPerc = aUBLAllowanceCharge.getMultiplierFactorNumericValue ()
-                                                          .multiply (CGlobal.BIGDEC_100);
-              aEbiRSItem.setPercentage (bSwapSigns ? aPerc.negate () : aPerc);
-            }
-
-            if (eSurcharge.isTrue ())
-            {
-              aEbiRSDetails.getSurchargeListLineItem ().add (aEbiRSItem);
-              aEbiBaseAmount = aEbiBaseAmount.add (aEbiRSItem.getAmount ());
-            }
-            else
-            {
-              aEbiRSDetails.getReductionListLineItem ().add (aEbiRSItem);
-              aEbiBaseAmount = aEbiBaseAmount.subtract (aEbiRSItem.getAmount ());
-            }
-          }
-          aEbiListLineItem.setReductionAndSurchargeListLineItemDetails (aEbiRSDetails);
-        }
+          aTotalZeroPercLineExtensionAmount = aTotalZeroPercLineExtensionAmount.add (aUBLCreditNoteLine.getLineExtensionAmountValue ());
 
         // Add the item to the list
         aEbiItemList.getListLineItem ().add (aEbiListLineItem);
-        nInvoiceLineIndex++;
+        nCreditNoteLineIndex++;
       }
       aEbiDetails.getItemList ().add (aEbiItemList);
-      aEbiInvoice.setDetails (aEbiDetails);
+      aEbiCreditNote.setDetails (aEbiDetails);
     }
 
     if (aEbiVAT.hasNoItemEntries ())
     {
-      aTransformationErrorList.addError ("InvoiceLine", EText.VAT_ITEM_MISSING.getDisplayText (m_aDisplayLocale));
+      aTransformationErrorList.addError ("CreditNoteLine", EText.VAT_ITEM_MISSING.getDisplayText (m_aDisplayLocale));
       if (false)
       {
         // No default in this case
@@ -906,17 +800,17 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
     }
 
     // Global reduction and surcharge
-    if (aUBLInvoice.hasAllowanceChargeEntries ())
+    if (aUBLCreditNote.hasAllowanceChargeEntries ())
     {
       // Start with quantity*unitPrice for base amount
-      BigDecimal aEbiBaseAmount = aUBLInvoice.getLegalMonetaryTotal ().getLineExtensionAmountValue ();
+      BigDecimal aEbiBaseAmount = aUBLCreditNote.getLegalMonetaryTotal ().getLineExtensionAmountValue ();
       final Ebi40ReductionAndSurchargeDetailsType aEbiRS = new Ebi40ReductionAndSurchargeDetailsType ();
 
       // ebInterface can handle only Reduction or only Surcharge
       ETriState eSurcharge = ETriState.UNDEFINED;
 
       int nAllowanceChargeIndex = 0;
-      for (final AllowanceChargeType aUBLAllowanceCharge : aUBLInvoice.getAllowanceCharge ())
+      for (final AllowanceChargeType aUBLAllowanceCharge : aUBLCreditNote.getAllowanceCharge ())
       {
         final boolean bItemIsSurcharge = aUBLAllowanceCharge.getChargeIndicator ().isValue ();
         if (eSurcharge.isUndefined ())
@@ -953,7 +847,7 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
           }
         if (aEbiTaxRate == null)
         {
-          aTransformationErrorList.addError ("Invoice/AllowanceCharge[" + nAllowanceChargeIndex + "]",
+          aTransformationErrorList.addError ("CreditNote/AllowanceCharge[" + nAllowanceChargeIndex + "]",
                                              EText.ALLOWANCE_CHARGE_NO_TAXRATE.getDisplayText (m_aDisplayLocale));
           // No default in this case
           if (false)
@@ -975,280 +869,33 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
           aEbiRS.getReductionOrSurcharge ().add (new ObjectFactory ().createReduction (aEbiRSItem));
           aEbiBaseAmount = aEbiBaseAmount.subtract (aEbiRSItem.getAmount ());
         }
-        aEbiInvoice.setReductionAndSurchargeDetails (aEbiRS);
+        aEbiCreditNote.setReductionAndSurchargeDetails (aEbiRS);
         ++nAllowanceChargeIndex;
       }
     }
 
     // PrepaidAmount is not supported!
-    if (aUBLInvoice.getLegalMonetaryTotal ().getPrepaidAmount () != null &&
-        !MathHelper.isEqualToZero (aUBLInvoice.getLegalMonetaryTotal ().getPrepaidAmountValue ()))
+    if (aUBLCreditNote.getLegalMonetaryTotal ().getPrepaidAmount () != null &&
+        !MathHelper.isEqualToZero (aUBLCreditNote.getLegalMonetaryTotal ().getPrepaidAmountValue ()))
     {
-      aTransformationErrorList.addError ("Invoice/LegalMonetaryTotal/PrepaidAmount",
+      aTransformationErrorList.addError ("CreditNote/LegalMonetaryTotal/PrepaidAmount",
                                          EText.PREPAID_NOT_SUPPORTED.getDisplayText (m_aDisplayLocale));
     }
 
     // Total gross amount
-    aEbiInvoice.setTotalGrossAmount (aUBLInvoice.getLegalMonetaryTotal ().getPayableAmountValue ());
+    aEbiCreditNote.setTotalGrossAmount (aUBLCreditNote.getLegalMonetaryTotal ().getPayableAmountValue ());
 
-    // Payment method
-    final Ebi40PaymentConditionsType aEbiPaymentConditions = new Ebi40PaymentConditionsType ();
-    {
-      int nPaymentMeansIndex = 0;
-      for (final PaymentMeansType aUBLPaymentMeans : aUBLInvoice.getPaymentMeans ())
-      {
-        final String sPaymentMeansCode = StringHelper.trim (aUBLPaymentMeans.getPaymentMeansCodeValue ());
-        final EPaymentMeansCode20 ePaymentMeans = EPaymentMeansCode20.getFromIDOrNull (sPaymentMeansCode);
-        if (ePaymentMeans == EPaymentMeansCode20._31)
-        {
-          // Is a payment channel code present?
-          final String sPaymentChannelCode = StringHelper.trim (aUBLPaymentMeans.getPaymentChannelCodeValue ());
-          if (PAYMENT_CHANNEL_CODE_IBAN.equals (sPaymentChannelCode))
-          {
-            final Ebi40UniversalBankTransactionType aEbiUBTMethod = new Ebi40UniversalBankTransactionType ();
-
-            // Find payment reference
-            int nPaymentIDIndex = 0;
-            for (final PaymentIDType aUBLPaymentID : aUBLPaymentMeans.getPaymentID ())
-            {
-              final String sUBLPaymentID = StringHelper.trim (aUBLPaymentID.getValue ());
-              if (StringHelper.hasText (sUBLPaymentID))
-              {
-                String sPaymentReference = null;
-                String sChecksum = null;
-
-                if (sUBLPaymentID.length () <= 12)
-                {
-                  // Reference without checksum
-                  sPaymentReference = sUBLPaymentID;
-                }
-                else
-                  if (sUBLPaymentID.length () == 13)
-                  {
-                    // Reference and checksum
-                    sPaymentReference = sUBLPaymentID.substring (0, 12);
-                    sChecksum = sUBLPaymentID.substring (12);
-                  }
-
-                if (sPaymentReference != null)
-                {
-                  if (!StringParser.isUnsignedLong (sPaymentReference))
-                  {
-                    aTransformationErrorList.addWarning ("PaymentMeans[" +
-                                                             nPaymentMeansIndex +
-                                                             "]/PaymentID[" +
-                                                             nPaymentIDIndex +
-                                                             "]",
-                                                         EText.PAYMENT_ID_NOT_NUMERIC.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                                              sPaymentReference));
-                  }
-                  else
-                  {
-                    // Checksum is optional
-                    if (sChecksum != null && !_isValidPaymentReferenceChecksum (sChecksum))
-                    {
-                      aTransformationErrorList.addWarning ("PaymentMeans[" +
-                                                               nPaymentMeansIndex +
-                                                               "]/PaymentID[" +
-                                                               nPaymentIDIndex +
-                                                               "]",
-                                                           EText.PAYMENT_ID_CHECKSUM_INVALID.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                                                     sChecksum));
-                      sChecksum = null;
-                    }
-
-                    final Ebi40PaymentReferenceType aEbiPaymentReference = new Ebi40PaymentReferenceType ();
-                    aEbiPaymentReference.setValue (sPaymentReference);
-                    aEbiPaymentReference.setCheckSum (sChecksum);
-                    aEbiUBTMethod.setPaymentReference (aEbiPaymentReference);
-                  }
-                }
-                else
-                {
-                  aTransformationErrorList.addWarning ("PaymentMeans[" +
-                                                           nPaymentMeansIndex +
-                                                           "]/PaymentID[" +
-                                                           nPaymentIDIndex +
-                                                           "]",
-                                                       EText.PAYMENT_ID_TOO_LONG_IGNORED.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                                                 sUBLPaymentID));
-                }
-              }
-              ++nPaymentIDIndex;
-            }
-
-            // Beneficiary account
-            final Ebi40AccountType aEbiAccount = new Ebi40AccountType ();
-
-            // BIC
-            final FinancialAccountType aUBLFinancialAccount = aUBLPaymentMeans.getPayeeFinancialAccount ();
-            if (aUBLFinancialAccount.getFinancialInstitutionBranch () != null &&
-                aUBLFinancialAccount.getFinancialInstitutionBranch ().getFinancialInstitution () != null)
-            {
-              final String sBIC = StringHelper.trim (aUBLFinancialAccount.getFinancialInstitutionBranch ()
-                                                                         .getFinancialInstitution ()
-                                                                         .getIDValue ());
-              aEbiAccount.setBIC (sBIC);
-              if (!RegExHelper.stringMatchesPattern (REGEX_BIC, sBIC))
-              {
-                aTransformationErrorList.addError ("PaymentMeans[" +
-                                                       nPaymentMeansIndex +
-                                                       "]/PayeeFinancialAccount/FinancialInstitutionBranch/FinancialInstitution/ID",
-                                                   EText.BIC_INVALID.getDisplayTextWithArgs (m_aDisplayLocale, sBIC));
-                aEbiAccount.setBIC (null);
-              }
-            }
-
-            // IBAN
-            final String sIBAN = StringHelper.trim (aUBLPaymentMeans.getPayeeFinancialAccount ().getIDValue ());
-            aEbiAccount.setIBAN (sIBAN);
-            if (StringHelper.getLength (sIBAN) > IBAN_MAX_LENGTH)
-            {
-              aTransformationErrorList.addWarning ("PaymentMeans[" + nPaymentMeansIndex + "]/PayeeFinancialAccount/ID",
-                                                   EText.IBAN_TOO_LONG.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                               sIBAN,
-                                                                                               Integer.valueOf (IBAN_MAX_LENGTH)));
-              aEbiAccount.setIBAN (sIBAN.substring (0, IBAN_MAX_LENGTH));
-            }
-
-            // Bank Account Owner - no field present - check PayeePart or
-            // SupplierPartyName
-            String sBankAccountOwnerName = null;
-            if (aUBLInvoice.getPayeeParty () != null)
-              for (final PartyNameType aPartyName : aUBLInvoice.getPayeeParty ().getPartyName ())
-              {
-                sBankAccountOwnerName = StringHelper.trim (aPartyName.getNameValue ());
-                if (StringHelper.hasText (sBankAccountOwnerName))
-                  break;
-              }
-            if (StringHelper.hasNoText (sBankAccountOwnerName))
-            {
-              final PartyType aSupplierParty = aUBLInvoice.getAccountingSupplierParty ().getParty ();
-              if (aSupplierParty != null)
-                for (final PartyNameType aPartyName : aSupplierParty.getPartyName ())
-                {
-                  sBankAccountOwnerName = StringHelper.trim (aPartyName.getNameValue ());
-                  if (StringHelper.hasText (sBankAccountOwnerName))
-                    break;
-                }
-            }
-            aEbiAccount.setBankAccountOwner (sBankAccountOwnerName);
-
-            // Comments
-            if (aUBLPaymentMeans.hasInstructionNoteEntries ())
-            {
-              final List <String> aNotes = new ArrayList <String> ();
-              for (final InstructionNoteType aUBLNote : aUBLPaymentMeans.getInstructionNote ())
-              {
-                final String sNote = StringHelper.trim (aUBLNote.getValue ());
-                if (StringHelper.hasText (sNote))
-                  aNotes.add (sNote);
-              }
-              if (!aNotes.isEmpty ())
-                aEbiUBTMethod.setComment (StringHelper.getImploded ('\n', aNotes));
-            }
-
-            aEbiUBTMethod.getBeneficiaryAccount ().add (aEbiAccount);
-            aEbiInvoice.setPaymentMethod (aEbiUBTMethod);
-
-            // Set due date (optional)
-            aEbiPaymentConditions.setDueDate (aUBLPaymentMeans.getPaymentDueDateValue ());
-
-            break;
-          }
-
-          aTransformationErrorList.addWarning ("PaymentMeans[" + nPaymentMeansIndex + "]",
-                                               EText.PAYMENTMEANS_UNSUPPORTED_CHANNELCODE.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                                                  sPaymentChannelCode));
-        }
-        else
-          if (ePaymentMeans == EPaymentMeansCode20._49)
-          {
-            final Ebi40DirectDebitType aEbiDirectDebit = new Ebi40DirectDebitType ();
-
-            if (aUBLPaymentMeans.hasInstructionNoteEntries ())
-            {
-              final List <String> aNotes = new ArrayList <String> ();
-              for (final InstructionNoteType aUBLNote : aUBLPaymentMeans.getInstructionNote ())
-              {
-                final String sNote = StringHelper.trim (aUBLNote.getValue ());
-                if (StringHelper.hasText (sNote))
-                  aNotes.add (sNote);
-              }
-              if (!aNotes.isEmpty ())
-                aEbiDirectDebit.setComment (StringHelper.getImploded ('\n', aNotes));
-            }
-
-            aEbiInvoice.setPaymentMethod (aEbiDirectDebit);
-
-            // Set due date (optional)
-            aEbiPaymentConditions.setDueDate (aUBLPaymentMeans.getPaymentDueDateValue ());
-
-            break;
-          }
-          else
-          {
-            aTransformationErrorList.addError ("PaymentMeans[" + nPaymentMeansIndex + "]",
-                                               EText.PAYMENTMEANS_CODE_INVALID.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                                       EPaymentMeansCode20._31.getID (),
-                                                                                                       EPaymentMeansCode20._49.getID ()));
-          }
-
-        ++nPaymentMeansIndex;
-      }
-    }
+    // Always no payment
+    final Ebi40NoPaymentType aEbiNoPayment = new Ebi40NoPaymentType ();
+    aEbiCreditNote.setPaymentMethod (aEbiNoPayment);
 
     if (m_bStrictERBMode)
     {
-      if (aEbiInvoice.getPaymentMethod () == null)
-        aTransformationErrorList.addError ("Invoice", EText.ERB_NO_PAYMENT_METHOD.getDisplayText (m_aDisplayLocale));
+      if (aEbiCreditNote.getPaymentMethod () == null)
+        aTransformationErrorList.addError ("CreditNote", EText.ERB_NO_PAYMENT_METHOD.getDisplayText (m_aDisplayLocale));
     }
 
-    // Payment terms
-    {
-      final List <String> aPaymentConditionsNotes = new ArrayList <String> ();
-      int nPaymentTermsIndex = 0;
-      for (final PaymentTermsType aUBLPaymentTerms : aUBLInvoice.getPaymentTerms ())
-      {
-        if (aUBLPaymentTerms.getSettlementDiscountPercent () != null)
-        {
-          if (aUBLPaymentTerms.getSettlementPeriod () == null ||
-              aUBLPaymentTerms.getSettlementPeriod ().getEndDate () == null)
-          {
-            aTransformationErrorList.addWarning ("PaymentTerms[" + nPaymentTermsIndex + "]/SettlementPeriod",
-                                                 EText.SETTLEMENT_PERIOD_MISSING.getDisplayText (m_aDisplayLocale));
-          }
-          else
-          {
-            // Add notes
-            for (final NoteType aUBLNote : aUBLPaymentTerms.getNote ())
-            {
-              final String sUBLNote = StringHelper.trim (aUBLNote.getValue ());
-              if (StringHelper.hasText (sUBLNote))
-                aPaymentConditionsNotes.add (sUBLNote);
-            }
-
-            final Ebi40DiscountType aEbiDiscount = new Ebi40DiscountType ();
-            aEbiDiscount.setPaymentDate (aUBLPaymentTerms.getSettlementPeriod ().getEndDateValue ());
-            aEbiDiscount.setPercentage (aUBLPaymentTerms.getSettlementDiscountPercentValue ());
-            // Optional amount value
-            aEbiDiscount.setAmount (aUBLPaymentTerms.getAmountValue ());
-            aEbiPaymentConditions.getDiscount ().add (aEbiDiscount);
-          }
-        }
-        else
-        {
-          aTransformationErrorList.addWarning ("PaymentTerms[" + nPaymentTermsIndex + "]",
-                                               EText.PENALTY_NOT_ALLOWED.getDisplayText (m_aDisplayLocale));
-        }
-
-        ++nPaymentTermsIndex;
-      }
-
-      if (!aPaymentConditionsNotes.isEmpty ())
-        aEbiPaymentConditions.setComment (StringHelper.getImploded ('\n', aPaymentConditionsNotes));
-    }
-
+    final Ebi40PaymentConditionsType aEbiPaymentConditions = new Ebi40PaymentConditionsType ();
     if (aEbiPaymentConditions.getDueDate () == null)
     {
       // ebInterface requires due date
@@ -1259,74 +906,20 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
     else
     {
       // Independent if discounts are present or not
-      aEbiInvoice.setPaymentConditions (aEbiPaymentConditions);
+      aEbiCreditNote.setPaymentConditions (aEbiPaymentConditions);
     }
 
     // Delivery
     final Ebi40DeliveryType aEbiDelivery = new Ebi40DeliveryType ();
     {
-      int nDeliveryIndex = 0;
-      for (final DeliveryType aUBLDelivery : aUBLInvoice.getDelivery ())
-      {
-        if (aUBLDelivery.getActualDeliveryDate () != null)
-        {
-          // Use the first delivery with a delivery date
-          aEbiDelivery.setDate (aUBLDelivery.getActualDeliveryDateValue ());
-
-          // Address
-          if (aUBLDelivery.getDeliveryLocation () != null && aUBLDelivery.getDeliveryLocation ().getAddress () != null)
-          {
-            final Ebi40AddressType aEbiAddress = new Ebi40AddressType ();
-            _setAddressData (aUBLDelivery.getDeliveryLocation ().getAddress (),
-                             aEbiAddress,
-                             "Delivery",
-                             aTransformationErrorList);
-
-            // Check delivery party
-            String sAddressName = null;
-            if (aUBLDelivery.getDeliveryParty () != null)
-              for (final PartyNameType aUBLPartyName : aUBLDelivery.getDeliveryParty ().getPartyName ())
-              {
-                sAddressName = StringHelper.trim (aUBLPartyName.getNameValue ());
-                if (StringHelper.hasText (sAddressName))
-                  break;
-              }
-
-            // As fallback use accounting customer party
-            if (StringHelper.hasNoText (sAddressName) &&
-                aUBLInvoice.getAccountingCustomerParty () != null &&
-                aUBLInvoice.getAccountingCustomerParty ().getParty () != null)
-            {
-              for (final PartyNameType aUBLPartyName : aUBLInvoice.getAccountingCustomerParty ()
-                                                                  .getParty ()
-                                                                  .getPartyName ())
-              {
-                sAddressName = StringHelper.trim (aUBLPartyName.getNameValue ());
-                if (StringHelper.hasText (sAddressName))
-                  break;
-              }
-            }
-            aEbiAddress.setName (sAddressName);
-
-            if (StringHelper.hasNoText (aEbiAddress.getName ()))
-              aTransformationErrorList.addError ("Delivery[" + nDeliveryIndex + "]/DeliveryParty",
-                                                 EText.DELIVERY_WITHOUT_NAME.getDisplayText (m_aDisplayLocale));
-
-            aEbiDelivery.setAddress (aEbiAddress);
-          }
-          break;
-        }
-        ++nDeliveryIndex;
-      }
-
       if (aEbiDelivery.getDate () == null)
       {
         // No delivery date is present - check for service period
-        final PeriodType aUBLInvoicePeriod = ContainerHelper.getSafe (aUBLInvoice.getInvoicePeriod (), 0);
-        if (aUBLInvoicePeriod != null)
+        final PeriodType aUBLCreditNotePeriod = ContainerHelper.getSafe (aUBLCreditNote.getInvoicePeriod (), 0);
+        if (aUBLCreditNotePeriod != null)
         {
-          final XMLGregorianCalendar aStartDate = aUBLInvoicePeriod.getStartDateValue ();
-          final XMLGregorianCalendar aEndDate = aUBLInvoicePeriod.getEndDateValue ();
+          final XMLGregorianCalendar aStartDate = aUBLCreditNotePeriod.getStartDateValue ();
+          final XMLGregorianCalendar aEndDate = aUBLCreditNotePeriod.getEndDateValue ();
           if (aStartDate != null)
           {
             if (aEndDate == null)
@@ -1350,12 +943,12 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
     if (m_bStrictERBMode)
     {
       if (aEbiDelivery.getDate () == null && aEbiDelivery.getPeriod () == null)
-        aTransformationErrorList.addError ("Invoice", EText.ERB_NO_DELIVERY_DATE.getDisplayText (m_aDisplayLocale));
+        aTransformationErrorList.addError ("CreditNote", EText.ERB_NO_DELIVERY_DATE.getDisplayText (m_aDisplayLocale));
     }
 
     if (aEbiDelivery.getDate () != null || aEbiDelivery.getPeriod () != null)
-      aEbiInvoice.setDelivery (aEbiDelivery);
+      aEbiCreditNote.setDelivery (aEbiDelivery);
 
-    return aEbiInvoice;
+    return aEbiCreditNote;
   }
 }

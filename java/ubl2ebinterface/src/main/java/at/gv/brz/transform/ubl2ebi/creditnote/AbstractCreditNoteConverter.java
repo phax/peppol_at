@@ -22,10 +22,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CustomizationIDType;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.InvoiceTypeCodeType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ProfileIDType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.UBLVersionIDType;
-import oasis.names.specification.ubl.schema.xsd.invoice_2.InvoiceType;
+import oasis.names.specification.ubl.schema.xsd.creditnote_2.CreditNoteType;
 import at.gv.brz.transform.ubl2ebi.AbstractConverter;
 import at.gv.brz.transform.ubl2ebi.CPeppolUBL;
 
@@ -65,14 +64,14 @@ public abstract class AbstractCreditNoteConverter extends AbstractConverter
   /**
    * Check if the passed UBL invoice is transformable
    * 
-   * @param aUBLInvoice
+   * @param aUBLCreditNote
    *        The UBL invoice to check
    */
-  protected final void _checkConsistency (@Nonnull final InvoiceType aUBLInvoice,
+  protected final void _checkConsistency (@Nonnull final CreditNoteType aUBLCreditNote,
                                           @Nonnull final ErrorList aTransformationErrorList)
   {
     // Check UBLVersionID
-    final UBLVersionIDType aUBLVersionID = aUBLInvoice.getUBLVersionID ();
+    final UBLVersionIDType aUBLVersionID = aUBLCreditNote.getUBLVersionID ();
     if (aUBLVersionID == null)
     {
       aTransformationErrorList.addError ("UBLVersionID",
@@ -93,7 +92,7 @@ public abstract class AbstractCreditNoteConverter extends AbstractConverter
 
     // Check ProfileID
     IPeppolPredefinedProcessIdentifier aProcID = null;
-    final ProfileIDType aProfileID = aUBLInvoice.getProfileID ();
+    final ProfileIDType aProfileID = aUBLCreditNote.getProfileID ();
     if (aProfileID == null)
     {
       aTransformationErrorList.addError ("ProfileID", EText.NO_PROFILE_ID.getDisplayText (m_aDisplayLocale));
@@ -114,7 +113,7 @@ public abstract class AbstractCreditNoteConverter extends AbstractConverter
     // I'm not quite sure whether the document ID or "PEPPOL" should be used!
     if (false)
     {
-      final CustomizationIDType aCustomizationID = aUBLInvoice.getCustomizationID ();
+      final CustomizationIDType aCustomizationID = aUBLCreditNote.getCustomizationID ();
       if (aCustomizationID == null)
         aTransformationErrorList.addError ("CustomizationID",
                                            EText.NO_CUSTOMIZATION_ID.getDisplayText (m_aDisplayLocale));
@@ -141,28 +140,6 @@ public abstract class AbstractCreditNoteConverter extends AbstractConverter
                                                  EText.INVALID_CUSTOMIZATION_ID.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                                         sCustomizationID));
           }
-    }
-
-    // Invoice type code
-    final InvoiceTypeCodeType aInvoiceTypeCode = aUBLInvoice.getInvoiceTypeCode ();
-    if (aInvoiceTypeCode == null)
-    {
-      // None present
-      aTransformationErrorList.addWarning ("InvoiceTypeCode",
-                                           EText.NO_INVOICE_TYPECODE.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                             INVOICE_TYPE_CODE));
-    }
-    else
-    {
-      // If one is present, it must match
-      final String sInvoiceTypeCode = StringHelper.trim (aInvoiceTypeCode.getValue ());
-      if (!INVOICE_TYPE_CODE.equals (sInvoiceTypeCode))
-      {
-        aTransformationErrorList.addError ("InvoiceTypeCode",
-                                           EText.INVALID_INVOICE_TYPECODE.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                                  sInvoiceTypeCode,
-                                                                                                  INVOICE_TYPE_CODE));
-      }
     }
   }
 }
