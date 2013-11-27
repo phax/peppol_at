@@ -245,7 +245,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
             break;
           }
 
-        if (aEbiAddress.getAddressIdentifier () == null)
+        if (aEbiAddress.hasNoAddressIdentifierEntries ())
           aTransformationErrorList.addWarning (sPartyType,
                                                EText.PARTY_UNSUPPORTED_ENDPOINT.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                                         sEndpointID,
@@ -254,7 +254,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
       }
     }
 
-    if (aEbiAddress.getAddressIdentifier () == null)
+    if (aEbiAddress.hasNoAddressIdentifierEntries ())
     {
       // check party identification
       int nPartyIdentificationIndex = 0;
