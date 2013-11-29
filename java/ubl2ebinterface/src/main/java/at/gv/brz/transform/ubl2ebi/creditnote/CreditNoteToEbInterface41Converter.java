@@ -368,6 +368,10 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
     if (aEbiCreditNote.getInvoiceDate () == null)
       aTransformationErrorList.addError ("IssueDate", EText.MISSING_INVOICE_DATE.getDisplayText (m_aDisplayLocale));
 
+    // Is duplicate/copy indicator?
+    if (aUBLCreditNote.getCopyIndicator () != null)
+      aEbiCreditNote.setIsDuplicate (Boolean.valueOf (aUBLCreditNote.getCopyIndicator ().isValue ()));
+
     // Biller/Supplier (creator of the invoice)
     {
       final SupplierPartyType aUBLSupplier = aUBLCreditNote.getAccountingSupplierParty ();

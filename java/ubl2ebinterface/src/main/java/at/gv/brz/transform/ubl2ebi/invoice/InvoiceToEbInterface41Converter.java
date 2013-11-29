@@ -134,8 +134,8 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
    *        <code>true</code> if ER>B specific checks should be performed
    */
   public InvoiceToEbInterface41Converter (@Nonnull final Locale aDisplayLocale,
-                                              @Nonnull final Locale aContentLocale,
-                                              final boolean bStrictERBMode)
+                                          @Nonnull final Locale aContentLocale,
+                                          final boolean bStrictERBMode)
   {
     super (aDisplayLocale, aContentLocale, bStrictERBMode);
   }
@@ -369,6 +369,10 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
     aEbiInvoice.setInvoiceDate (aUBLInvoice.getIssueDateValue ());
     if (aEbiInvoice.getInvoiceDate () == null)
       aTransformationErrorList.addError ("IssueDate", EText.MISSING_INVOICE_DATE.getDisplayText (m_aDisplayLocale));
+
+    // Is duplicate/copy indicator?
+    if (aUBLInvoice.getCopyIndicator () != null)
+      aEbiInvoice.setIsDuplicate (Boolean.valueOf (aUBLInvoice.getCopyIndicator ().isValue ()));
 
     // Biller/Supplier (creator of the invoice)
     {
