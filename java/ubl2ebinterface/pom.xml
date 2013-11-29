@@ -8,12 +8,12 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>at.peppol.oss</groupId>
   <artifactId>ubl2ebinterface</artifactId>
-  <version>1.6.1</version>
+  <version>1.6.2-SNAPSHOT</version>
   <name>ubl2ebinterface</name>
 
   <scm>
-    <developerConnection>scm:svn:https://joinup.ec.europa.eu/svn/peppol_at/tags/ubl2ebinterface-1.6.1</developerConnection>
-    <connection>scm:svn:https://joinup.ec.europa.eu/svn/peppol_at/tags/ubl2ebinterface-1.6.1</connection>
+    <developerConnection>scm:svn:https://joinup.ec.europa.eu/svn/peppol_at/trunk/java/ubl2ebinterface</developerConnection>
+    <connection>scm:svn:https://joinup.ec.europa.eu/svn/peppol_at/trunk/java/ubl2ebinterface</connection>
   </scm>
 
   <!-- Who are we in detail -->
