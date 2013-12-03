@@ -106,7 +106,7 @@
         <cbc:ID>O. Hansen</cbc:ID>
         <cbc:Telephone>46211230</cbc:Telephone>
         <cbc:Telefax>46211231</cbc:Telefax>
-        <cbc:ElectronicMail>support-erb@erb.gv.at</cbc:ElectronicMail>
+        <cbc:ElectronicMail>ubl2ebi@example.org</cbc:ElectronicMail>
       </cac:Contact>
       <cac:Person>
         <cbc:FirstName>Antonio</cbc:FirstName>
