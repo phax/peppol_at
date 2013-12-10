@@ -517,9 +517,11 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
             if (aUBLTaxAmount != null && aUBLTaxableAmount != null)
             {
               // Calculate percentage
-              aUBLPercentage = aUBLTaxAmount.multiply (CGlobal.BIGDEC_100).divide (aUBLTaxableAmount,
-                                                                                   SCALE_PERC,
-                                                                                   ROUNDING_MODE);
+              aUBLPercentage = MathHelper.isEqualToZero (aUBLTaxableAmount) ? BigDecimal.ZERO
+                                                                           : aUBLTaxAmount.multiply (CGlobal.BIGDEC_100)
+                                                                                          .divide (aUBLTaxableAmount,
+                                                                                                   SCALE_PERC,
+                                                                                                   ROUNDING_MODE);
             }
           }
 
@@ -527,9 +529,12 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
           if (aUBLTaxableAmount == null && aUBLPercentage != null)
           {
             // Calculate (inexact) subtotal
-            aUBLTaxableAmount = aUBLSubtotal.getTaxAmountValue ()
-                                            .multiply (CGlobal.BIGDEC_100)
-                                            .divide (aUBLPercentage, SCALE_PRICE_LINE, ROUNDING_MODE);
+            aUBLTaxableAmount = MathHelper.isEqualToZero (aUBLPercentage) ? BigDecimal.ZERO
+                                                                         : aUBLSubtotal.getTaxAmountValue ()
+                                                                                       .multiply (CGlobal.BIGDEC_100)
+                                                                                       .divide (aUBLPercentage,
+                                                                                                SCALE_PRICE_LINE,
+                                                                                                ROUNDING_MODE);
           }
 
           // Save item and put in map

@@ -130,8 +130,8 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
    *        <code>true</code> if ER>B specific checks should be performed
    */
   public InvoiceToEbInterface40Converter (@Nonnull final Locale aDisplayLocale,
-                                              @Nonnull final Locale aContentLocale,
-                                              final boolean bStrictERBMode)
+                                          @Nonnull final Locale aContentLocale,
+                                          final boolean bStrictERBMode)
   {
     super (aDisplayLocale, aContentLocale, bStrictERBMode);
   }
@@ -530,9 +530,11 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
             if (aUBLTaxAmount != null && aUBLTaxableAmount != null)
             {
               // Calculate percentage
-              aUBLPercentage = aUBLTaxAmount.multiply (CGlobal.BIGDEC_100).divide (aUBLTaxableAmount,
-                                                                                   SCALE_PERC,
-                                                                                   ROUNDING_MODE);
+              aUBLPercentage = MathHelper.isEqualToZero (aUBLTaxableAmount) ? BigDecimal.ZERO
+                                                                           : aUBLTaxAmount.multiply (CGlobal.BIGDEC_100)
+                                                                                          .divide (aUBLTaxableAmount,
+                                                                                                   SCALE_PERC,
+                                                                                                   ROUNDING_MODE);
             }
           }
 
@@ -540,9 +542,12 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
           if (aUBLTaxableAmount == null && aUBLPercentage != null)
           {
             // Calculate (inexact) subtotal
-            aUBLTaxableAmount = aUBLSubtotal.getTaxAmountValue ()
-                                            .multiply (CGlobal.BIGDEC_100)
-                                            .divide (aUBLPercentage, SCALE_PRICE_LINE, ROUNDING_MODE);
+            aUBLTaxableAmount = MathHelper.isEqualToZero (aUBLPercentage) ? BigDecimal.ZERO
+                                                                         : aUBLSubtotal.getTaxAmountValue ()
+                                                                                       .multiply (CGlobal.BIGDEC_100)
+                                                                                       .divide (aUBLPercentage,
+                                                                                                SCALE_PRICE_LINE,
+                                                                                                ROUNDING_MODE);
           }
 
           // Save item and put in map
