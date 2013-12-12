@@ -35,6 +35,7 @@ import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.Con
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.CreditNoteLineType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.CustomerPartyType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.DocumentReferenceType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.OrderLineReferenceType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.OrderReferenceType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PartyIdentificationType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PartyNameType;
@@ -77,6 +78,7 @@ import com.phloc.ebinterface.v40.Ebi40ItemListType;
 import com.phloc.ebinterface.v40.Ebi40ItemType;
 import com.phloc.ebinterface.v40.Ebi40ListLineItemType;
 import com.phloc.ebinterface.v40.Ebi40NoPaymentType;
+import com.phloc.ebinterface.v40.Ebi40OrderReferenceDetailType;
 import com.phloc.ebinterface.v40.Ebi40OrderReferenceType;
 import com.phloc.ebinterface.v40.Ebi40OtherTaxType;
 import com.phloc.ebinterface.v40.Ebi40PaymentConditionsType;
@@ -786,6 +788,47 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
         // Special handling in case no VAT item is present
         if (MathHelper.isEqualToZero (aUBLPercent))
           aTotalZeroPercLineExtensionAmount = aTotalZeroPercLineExtensionAmount.add (aUBLCreditNoteLine.getLineExtensionAmountValue ());
+
+        // Order reference per line (UBL 2.1 only)
+        for (final OrderLineReferenceType aUBLOrderLineReference : aUBLCreditNoteLine.getOrderLineReference ())
+          if (StringHelper.hasText (aUBLOrderLineReference.getLineIDValue ()))
+          {
+            final Ebi40OrderReferenceDetailType aEbiOrderRefDetail = new Ebi40OrderReferenceDetailType ();
+
+            // order reference
+            String sUBLLineOrderReferenceID = null;
+            if (aUBLOrderLineReference.getOrderReference () != null)
+              sUBLLineOrderReferenceID = StringHelper.trim (aUBLOrderLineReference.getOrderReference ().getIDValue ());
+            if (StringHelper.hasNoText (sUBLLineOrderReferenceID))
+            {
+              // Use the global order reference from header level
+              sUBLLineOrderReferenceID = sUBLOrderReferenceID;
+            }
+            aEbiOrderRefDetail.setOrderID (sUBLLineOrderReferenceID);
+
+            // Order position number
+            final String sOrderPosNumber = StringHelper.trim (aUBLOrderLineReference.getLineIDValue ());
+            if (sOrderPosNumber != null)
+            {
+              if (sOrderPosNumber.length () == 0)
+              {
+                aTransformationErrorList.addError ("CreditNoteLine[" +
+                                                       nCreditNoteLineIndex +
+                                                       "]/OrderLineReference/LineID",
+                                                   EText.ORDERLINE_REF_ID_EMPTY.getDisplayText (m_aDisplayLocale));
+              }
+              else
+              {
+                aEbiOrderRefDetail.setOrderPositionNumber (_makeAlphaNumType (sOrderPosNumber,
+                                                                              "CreditNoteLine[" +
+                                                                                  nCreditNoteLineIndex +
+                                                                                  "]/OrderLineReference/LineID",
+                                                                              aTransformationErrorList));
+              }
+            }
+            aEbiListLineItem.setInvoiceRecipientsOrderReference (aEbiOrderRefDetail);
+            break;
+          }
 
         // Add the item to the list
         aEbiItemList.getListLineItem ().add (aEbiListLineItem);
