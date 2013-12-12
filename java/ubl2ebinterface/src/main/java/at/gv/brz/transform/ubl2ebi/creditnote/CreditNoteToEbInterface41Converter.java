@@ -81,11 +81,11 @@ import com.phloc.ebinterface.v41.Ebi41PaymentMethodType;
 import com.phloc.ebinterface.v41.Ebi41PeriodType;
 import com.phloc.ebinterface.v41.Ebi41ReductionAndSurchargeDetailsType;
 import com.phloc.ebinterface.v41.Ebi41ReductionAndSurchargeType;
-import com.phloc.ebinterface.v41.Ebi41TaxRateType;
 import com.phloc.ebinterface.v41.Ebi41TaxType;
 import com.phloc.ebinterface.v41.Ebi41UnitPriceType;
 import com.phloc.ebinterface.v41.Ebi41UnitType;
 import com.phloc.ebinterface.v41.Ebi41VATItemType;
+import com.phloc.ebinterface.v41.Ebi41VATRateType;
 import com.phloc.ebinterface.v41.Ebi41VATType;
 import com.phloc.ebinterface.v41.ObjectFactory;
 import com.phloc.ubl20.codelist.EUnitOfMeasureCode20;
@@ -583,12 +583,12 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
                   // Base amount
                   aEbiVATItem.setTaxedAmount (aUBLTaxableAmount);
                   // tax rate
-                  final Ebi41TaxRateType aEbiVATTaxRate = new Ebi41TaxRateType ();
+                  final Ebi41VATRateType aEbiVATVATRate = new Ebi41VATRateType ();
                   // Optional
                   if (false)
-                    aEbiVATTaxRate.setTaxCode (sUBLTaxCategoryID);
-                  aEbiVATTaxRate.setValue (aUBLPercentage);
-                  aEbiVATItem.setTaxRate (aEbiVATTaxRate);
+                    aEbiVATVATRate.setTaxCode (sUBLTaxCategoryID);
+                  aEbiVATVATRate.setValue (aUBLPercentage);
+                  aEbiVATItem.setVATRate (aEbiVATVATRate);
                   // Tax amount (mandatory)
                   aEbiVATItem.setAmount (aUBLSubtotal.getTaxAmountValue ());
                   // Add to list
@@ -777,13 +777,13 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
         }
 
         // Tax rate (mandatory)
-        final Ebi41TaxRateType aEbiTaxRate = new Ebi41TaxRateType ();
-        aEbiTaxRate.setValue (aUBLPercent);
+        final Ebi41VATRateType aEbiVATRate = new Ebi41VATRateType ();
+        aEbiVATRate.setValue (aUBLPercent);
         if (aUBLTaxCategory != null)
           // Optional
           if (false)
-            aEbiTaxRate.setTaxCode (aUBLTaxCategory.getIDValue ());
-        aEbiListLineItem.setTaxRate (aEbiTaxRate);
+            aEbiVATRate.setTaxCode (aUBLTaxCategory.getIDValue ());
+        aEbiListLineItem.setVATRate (aEbiVATRate);
 
         // Line item amount (quantity * unit price +- reduction / surcharge)
         aEbiListLineItem.setLineItemAmount (aUBLCreditNoteLine.getLineExtensionAmountValue ());
@@ -808,9 +808,9 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
         // No default in this case
         final Ebi41VATItemType aEbiVATItem = new Ebi41VATItemType ();
         aEbiVATItem.setTaxedAmount (aTotalZeroPercLineExtensionAmount);
-        final Ebi41TaxRateType aEbiVATTaxRate = new Ebi41TaxRateType ();
-        aEbiVATTaxRate.setValue (BigDecimal.ZERO);
-        aEbiVATItem.setTaxRate (aEbiVATTaxRate);
+        final Ebi41VATRateType aEbiVATVATRate = new Ebi41VATRateType ();
+        aEbiVATVATRate.setValue (BigDecimal.ZERO);
+        aEbiVATItem.setVATRate (aEbiVATVATRate);
         aEbiVATItem.setAmount (aTotalZeroPercLineExtensionAmount);
         aEbiVAT.getVATItem ().add (aEbiVATItem);
       }
@@ -852,38 +852,38 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
           aEbiRSItem.setPercentage (bSwapSigns ? aPerc.negate () : aPerc);
         }
 
-        Ebi41TaxRateType aEbiTaxRate = null;
+        Ebi41VATRateType aEbiVATRate = null;
         for (final TaxCategoryType aUBLTaxCategory : aUBLAllowanceCharge.getTaxCategory ())
           if (aUBLTaxCategory.getPercent () != null)
           {
-            aEbiTaxRate = new Ebi41TaxRateType ();
-            aEbiTaxRate.setValue (aUBLTaxCategory.getPercentValue ());
+            aEbiVATRate = new Ebi41VATRateType ();
+            aEbiVATRate.setValue (aUBLTaxCategory.getPercentValue ());
             if (false)
-              aEbiTaxRate.setTaxCode (aUBLTaxCategory.getIDValue ());
+              aEbiVATRate.setTaxCode (aUBLTaxCategory.getIDValue ());
             break;
           }
-        if (aEbiTaxRate == null)
+        if (aEbiVATRate == null)
         {
           aTransformationErrorList.addError ("CreditNote/AllowanceCharge[" + nAllowanceChargeIndex + "]",
                                              EText.ALLOWANCE_CHARGE_NO_TAXRATE.getDisplayText (m_aDisplayLocale));
           // No default in this case
           if (false)
           {
-            aEbiTaxRate = new Ebi41TaxRateType ();
-            aEbiTaxRate.setValue (BigDecimal.ZERO);
-            aEbiTaxRate.setTaxCode (ETaxCode.NOT_TAXABLE.getID ());
+            aEbiVATRate = new Ebi41VATRateType ();
+            aEbiVATRate.setValue (BigDecimal.ZERO);
+            aEbiVATRate.setTaxCode (ETaxCode.NOT_TAXABLE.getID ());
           }
         }
-        aEbiRSItem.setTaxRate (aEbiTaxRate);
+        aEbiRSItem.setVATRate (aEbiVATRate);
 
         if (eSurcharge.isTrue ())
         {
-          aEbiRS.getReductionOrSurcharge ().add (new ObjectFactory ().createSurcharge (aEbiRSItem));
+          aEbiRS.getReductionOrSurchargeOrOtherVATableTax ().add (new ObjectFactory ().createSurcharge (aEbiRSItem));
           aEbiBaseAmount = aEbiBaseAmount.add (aEbiRSItem.getAmount ());
         }
         else
         {
-          aEbiRS.getReductionOrSurcharge ().add (new ObjectFactory ().createReduction (aEbiRSItem));
+          aEbiRS.getReductionOrSurchargeOrOtherVATableTax ().add (new ObjectFactory ().createReduction (aEbiRSItem));
           aEbiBaseAmount = aEbiBaseAmount.subtract (aEbiRSItem.getAmount ());
         }
         aEbiCreditNote.setReductionAndSurchargeDetails (aEbiRS);
