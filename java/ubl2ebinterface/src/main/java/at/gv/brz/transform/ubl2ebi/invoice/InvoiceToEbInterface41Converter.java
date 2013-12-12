@@ -760,9 +760,12 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
           // Unit price = lineExtensionAmount / quantity (mandatory)
           final BigDecimal aUBLLineExtensionAmount = aUBLInvoiceLine.getLineExtensionAmountValue ();
           final Ebi41UnitPriceType aEbiUnitPrice = new Ebi41UnitPriceType ();
-          aEbiUnitPrice.setValue (aUBLLineExtensionAmount.divide (aEbiQuantity.getValue (),
-                                                                  SCALE_PRICE_LINE,
-                                                                  ROUNDING_MODE));
+          if (MathHelper.isEqualToZero (aEbiQuantity.getValue ()))
+            aEbiUnitPrice.setValue (BigDecimal.ZERO);
+          else
+            aEbiUnitPrice.setValue (aUBLLineExtensionAmount.divide (aEbiQuantity.getValue (),
+                                                                    SCALE_PRICE_LINE,
+                                                                    ROUNDING_MODE));
           aEbiListLineItem.setUnitPrice (aEbiUnitPrice);
         }
 

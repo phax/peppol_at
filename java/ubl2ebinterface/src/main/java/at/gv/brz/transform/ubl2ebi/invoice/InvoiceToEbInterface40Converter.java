@@ -766,11 +766,14 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
           final BigDecimal aUBLPriceAmount = aUBLInvoiceLine.getPrice ().getPriceAmountValue ();
           // If no base quantity is present, assume 1 (optional)
           final BigDecimal aUBLBaseQuantity = aUBLInvoiceLine.getPrice ().getBaseQuantityValue ();
-          aEbiListLineItem.setUnitPrice (aUBLBaseQuantity == null ? aUBLPriceAmount
-                                                                 : MathHelper.isEqualToZero (aUBLBaseQuantity) ? BigDecimal.ZERO
-                                                                                                              : aUBLPriceAmount.divide (aUBLBaseQuantity,
-                                                                                                                                        SCALE_PRICE_LINE,
-                                                                                                                                        ROUNDING_MODE));
+          if (MathHelper.isEqualToZero (aEbiQuantity.getValue ()))
+            aEbiListLineItem.setUnitPrice (BigDecimal.ZERO);
+          else
+            aEbiListLineItem.setUnitPrice (aUBLBaseQuantity == null ? aUBLPriceAmount
+                                                                   : MathHelper.isEqualToZero (aUBLBaseQuantity) ? BigDecimal.ZERO
+                                                                                                                : aUBLPriceAmount.divide (aUBLBaseQuantity,
+                                                                                                                                          SCALE_PRICE_LINE,
+                                                                                                                                          ROUNDING_MODE));
         }
         else
         {

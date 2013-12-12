@@ -763,9 +763,12 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
         {
           // Unit price = lineExtensionAmount / quantity (mandatory)
           final BigDecimal aUBLLineExtensionAmount = aUBLCreditNoteLine.getLineExtensionAmountValue ();
-          aEbiListLineItem.setUnitPrice (aUBLLineExtensionAmount.divide (aEbiQuantity.getValue (),
-                                                                         SCALE_PRICE_LINE,
-                                                                         ROUNDING_MODE));
+          if (MathHelper.isEqualToZero (aEbiQuantity.getValue ()))
+            aEbiListLineItem.setUnitPrice (BigDecimal.ZERO);
+          else
+            aEbiListLineItem.setUnitPrice (aUBLLineExtensionAmount.divide (aEbiQuantity.getValue (),
+                                                                           SCALE_PRICE_LINE,
+                                                                           ROUNDING_MODE));
         }
 
         // Tax rate (mandatory)
