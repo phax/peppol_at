@@ -27,7 +27,7 @@ import java.util.Locale;
 import javax.annotation.Nonnull;
 import javax.xml.bind.Marshaller;
 
-import oasis.names.specification.ubl.schema.xsd.creditnote_2.CreditNoteType;
+import oasis.names.specification.ubl.schema.xsd.creditnote_21.CreditNoteType;
 
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -48,7 +48,7 @@ import com.phloc.commons.jaxb.JAXBMarshallerUtils;
 import com.phloc.commons.xml.serialize.XMLWriter;
 import com.phloc.ebinterface.EbInterface41Marshaller;
 import com.phloc.ebinterface.v41.Ebi41InvoiceType;
-import com.phloc.ubl.UBL20Reader;
+import com.phloc.ubl.UBL21Reader;
 import com.phloc.validation.error.ErrorList;
 
 import eu.europa.ec.cipa.test.ETestFileType;
@@ -80,7 +80,7 @@ public class CreditNoteToEbInterface41ConverterTest
       assertTrue (aRes.exists ());
 
       // Read UBL
-      final CreditNoteType aUBLCreditNote = UBL20Reader.readCreditNote (aRes);
+      final CreditNoteType aUBLCreditNote = UBL21Reader.readCreditNote (aRes);
       assertNotNull (aUBLCreditNote);
 
       // Convert to ebInterface
@@ -127,7 +127,7 @@ public class CreditNoteToEbInterface41ConverterTest
       assertTrue (aRes.exists ());
 
       // Read UBL
-      final CreditNoteType aUBLCreditNote = UBL20Reader.readCreditNote (aRes);
+      final CreditNoteType aUBLCreditNote = UBL21Reader.readCreditNote (aRes);
       assertNotNull (aUBLCreditNote);
 
       // Convert to ebInterface

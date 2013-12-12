@@ -21,10 +21,10 @@ import java.util.Locale;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CustomizationIDType;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ProfileIDType;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.UBLVersionIDType;
-import oasis.names.specification.ubl.schema.xsd.creditnote_2.CreditNoteType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.CustomizationIDType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.ProfileIDType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.UBLVersionIDType;
+import oasis.names.specification.ubl.schema.xsd.creditnote_21.CreditNoteType;
 import at.gv.brz.transform.ubl2ebi.AbstractConverter;
 import at.gv.brz.transform.ubl2ebi.CPeppolUBL;
 
@@ -36,7 +36,7 @@ import eu.europa.ec.cipa.peppol.identifier.process.IPeppolPredefinedProcessIdent
 import eu.europa.ec.cipa.peppol.identifier.process.PredefinedProcessIdentifierManager;
 
 /**
- * Base class for PEPPOL 2.0 to ebInterface converter
+ * Base class for UBL 2.1 CreditNote to ebInterface converter
  * 
  * @author philip
  */

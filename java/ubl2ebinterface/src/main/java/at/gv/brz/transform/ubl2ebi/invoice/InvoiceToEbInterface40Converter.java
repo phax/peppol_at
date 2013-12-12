@@ -29,34 +29,34 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.AddressType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.AllowanceChargeType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.ContactType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.CustomerPartyType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.DeliveryType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.DocumentReferenceType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.FinancialAccountType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.InvoiceLineType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.OrderLineReferenceType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.OrderReferenceType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyIdentificationType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyNameType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyTaxSchemeType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PaymentMeansType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PaymentTermsType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PeriodType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PersonType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.SupplierPartyType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.TaxCategoryType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.TaxSubtotalType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.TaxTotalType;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DescriptionType;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.InstructionNoteType;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.NameType;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.NoteType;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PaymentIDType;
-import oasis.names.specification.ubl.schema.xsd.invoice_2.InvoiceType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.AddressType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.AllowanceChargeType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.ContactType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.CustomerPartyType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.DeliveryType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.DocumentReferenceType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.FinancialAccountType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.InvoiceLineType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.OrderLineReferenceType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.OrderReferenceType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PartyIdentificationType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PartyNameType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PartyTaxSchemeType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PartyType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PaymentMeansType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PaymentTermsType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PeriodType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PersonType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.SupplierPartyType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.TaxCategoryType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.TaxSubtotalType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.TaxTotalType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.DescriptionType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.InstructionNoteType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.NameType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.NoteType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.PaymentIDType;
+import oasis.names.specification.ubl.schema.xsd.invoice_21.InvoiceType;
 import at.gv.brz.transform.ubl2ebi.helper.SchemedID;
 import at.gv.brz.transform.ubl2ebi.helper.TaxCategoryKey;
 
@@ -110,7 +110,7 @@ import com.phloc.validation.error.ErrorList;
 import eu.europa.ec.cipa.peppol.codelist.ETaxSchemeID;
 
 /**
- * Main converter between UBL 2.0 invoice and ebInterface 4.0 invoice.
+ * Main converter between UBL 2.1 invoice and ebInterface 4.0 invoice.
  * 
  * @author philip
  */
@@ -230,16 +230,18 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
     }
 
     // Person name
-    final PersonType aUBLPerson = aUBLParty.getPerson ();
-    if (aUBLPerson != null)
+    final List <String> ebContacts = new ArrayList <String> ();
+    for (final PersonType aUBLPerson : aUBLParty.getPerson ())
     {
-      aEbiAddress.setContact (StringHelper.getImplodedNonEmpty (' ',
-                                                                StringHelper.trim (aUBLPerson.getTitleValue ()),
-                                                                StringHelper.trim (aUBLPerson.getFirstNameValue ()),
-                                                                StringHelper.trim (aUBLPerson.getMiddleNameValue ()),
-                                                                StringHelper.trim (aUBLPerson.getFamilyNameValue ()),
-                                                                StringHelper.trim (aUBLPerson.getNameSuffixValue ())));
+      ebContacts.add (StringHelper.getImplodedNonEmpty (' ',
+                                                        StringHelper.trim (aUBLPerson.getTitleValue ()),
+                                                        StringHelper.trim (aUBLPerson.getFirstNameValue ()),
+                                                        StringHelper.trim (aUBLPerson.getMiddleNameValue ()),
+                                                        StringHelper.trim (aUBLPerson.getFamilyNameValue ()),
+                                                        StringHelper.trim (aUBLPerson.getNameSuffixValue ())));
     }
+    if (!ebContacts.isEmpty ())
+      aEbiAddress.setContact (StringHelper.getImplodedNonEmpty ('\n', ebContacts));
 
     // GLN and DUNS number
     if (aUBLParty.getEndpointID () != null)
@@ -737,7 +739,7 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
         {
           // Unit code is optional
           if (aUBLInvoiceLine.getInvoicedQuantity ().getUnitCode () != null)
-            aEbiQuantity.setUnit (StringHelper.trim (aUBLInvoiceLine.getInvoicedQuantity ().getUnitCode ().value ()));
+            aEbiQuantity.setUnit (StringHelper.trim (aUBLInvoiceLine.getInvoicedQuantity ().getUnitCode ()));
           aEbiQuantity.setValue (aUBLInvoiceLine.getInvoicedQuantityValue ());
         }
         if (aEbiQuantity.getUnit () == null)

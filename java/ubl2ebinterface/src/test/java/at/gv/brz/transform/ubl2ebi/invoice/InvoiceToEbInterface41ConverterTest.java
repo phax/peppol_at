@@ -27,7 +27,7 @@ import java.util.Locale;
 import javax.annotation.Nonnull;
 import javax.xml.bind.Marshaller;
 
-import oasis.names.specification.ubl.schema.xsd.invoice_2.InvoiceType;
+import oasis.names.specification.ubl.schema.xsd.invoice_21.InvoiceType;
 
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import at.gv.brz.transform.ubl2ebi.EbiNamespacePrefixMapper;
-import at.gv.brz.transform.ubl2ebi.invoice.InvoiceToEbInterface41Converter;
 
 import com.phloc.commons.error.EErrorLevel;
 import com.phloc.commons.io.IReadableResource;
@@ -49,7 +48,7 @@ import com.phloc.commons.jaxb.JAXBMarshallerUtils;
 import com.phloc.commons.xml.serialize.XMLWriter;
 import com.phloc.ebinterface.EbInterface41Marshaller;
 import com.phloc.ebinterface.v41.Ebi41InvoiceType;
-import com.phloc.ubl.UBL20Reader;
+import com.phloc.ubl.UBL21Reader;
 import com.phloc.validation.error.ErrorList;
 
 import eu.europa.ec.cipa.test.ETestFileType;
@@ -81,15 +80,13 @@ public class InvoiceToEbInterface41ConverterTest
       assertTrue (aRes.exists ());
 
       // Read UBL
-      final InvoiceType aUBLInvoice = UBL20Reader.readInvoice (aRes);
+      final InvoiceType aUBLInvoice = UBL21Reader.readInvoice (aRes);
       assertNotNull (aUBLInvoice);
 
       // Convert to ebInterface
       final ErrorList aErrorList = new ErrorList ();
-      final Ebi41InvoiceType aEbInvoice = new InvoiceToEbInterface41Converter (Locale.GERMANY,
-                                                                                   Locale.GERMANY,
-                                                                                   false).convertToEbInterface (aUBLInvoice,
-                                                                                                                aErrorList);
+      final Ebi41InvoiceType aEbInvoice = new InvoiceToEbInterface41Converter (Locale.GERMANY, Locale.GERMANY, false).convertToEbInterface (aUBLInvoice,
+                                                                                                                                            aErrorList);
       assertTrue (aRes.getPath () + ": " + aErrorList.toString (), aErrorList.isEmpty () ||
                                                                    aErrorList.getMostSevereErrorLevel ()
                                                                              .isLessSevereThan (EErrorLevel.ERROR));
@@ -130,13 +127,13 @@ public class InvoiceToEbInterface41ConverterTest
       assertTrue (aRes.exists ());
 
       // Read UBL
-      final InvoiceType aUBLInvoice = UBL20Reader.readInvoice (aRes);
+      final InvoiceType aUBLInvoice = UBL21Reader.readInvoice (aRes);
       assertNotNull (aUBLInvoice);
 
       // Convert to ebInterface
       final ErrorList aErrorList = new ErrorList ();
       final Ebi41InvoiceType aEbInvoice = new InvoiceToEbInterface41Converter (Locale.GERMANY, Locale.GERMANY, true).convertToEbInterface (aUBLInvoice,
-                                                                                                                                               aErrorList);
+                                                                                                                                           aErrorList);
       assertTrue (aRes.getPath () + ": " + aErrorList.toString (), aErrorList.getMostSevereErrorLevel ()
                                                                              .isLessSevereThan (EErrorLevel.ERROR));
       assertNotNull (aEbInvoice);

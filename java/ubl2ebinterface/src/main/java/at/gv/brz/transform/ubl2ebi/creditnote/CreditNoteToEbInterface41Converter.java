@@ -18,7 +18,9 @@ package at.gv.brz.transform.ubl2ebi.creditnote;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -27,26 +29,26 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.AddressType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.AllowanceChargeType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.ContactType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.CreditNoteLineType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.CustomerPartyType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.DocumentReferenceType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.OrderReferenceType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyIdentificationType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyNameType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyTaxSchemeType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PeriodType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PersonType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.SupplierPartyType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.TaxCategoryType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.TaxSubtotalType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.TaxTotalType;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DescriptionType;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.NameType;
-import oasis.names.specification.ubl.schema.xsd.creditnote_2.CreditNoteType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.AddressType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.AllowanceChargeType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.ContactType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.CreditNoteLineType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.CustomerPartyType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.DocumentReferenceType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.OrderReferenceType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PartyIdentificationType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PartyNameType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PartyTaxSchemeType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PartyType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PeriodType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PersonType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.SupplierPartyType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.TaxCategoryType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.TaxSubtotalType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.TaxTotalType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.DescriptionType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.NameType;
+import oasis.names.specification.ubl.schema.xsd.creditnote_21.CreditNoteType;
 import at.gv.brz.transform.ubl2ebi.helper.SchemedID;
 import at.gv.brz.transform.ubl2ebi.helper.TaxCategoryKey;
 
@@ -94,7 +96,7 @@ import com.phloc.validation.error.ErrorList;
 import eu.europa.ec.cipa.peppol.codelist.ETaxSchemeID;
 
 /**
- * Main converter between UBL 2.0 credit note and ebInterface 4.1 credit note.
+ * Main converter between UBL 2.1 credit note and ebInterface 4.1 credit note.
  * 
  * @author philip
  */
@@ -213,16 +215,18 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
     }
 
     // Person name
-    final PersonType aUBLPerson = aUBLParty.getPerson ();
-    if (aUBLPerson != null)
+    final List <String> ebContacts = new ArrayList <String> ();
+    for (final PersonType aUBLPerson : aUBLParty.getPerson ())
     {
-      aEbiAddress.setContact (StringHelper.getImplodedNonEmpty (' ',
-                                                                StringHelper.trim (aUBLPerson.getTitleValue ()),
-                                                                StringHelper.trim (aUBLPerson.getFirstNameValue ()),
-                                                                StringHelper.trim (aUBLPerson.getMiddleNameValue ()),
-                                                                StringHelper.trim (aUBLPerson.getFamilyNameValue ()),
-                                                                StringHelper.trim (aUBLPerson.getNameSuffixValue ())));
+      ebContacts.add (StringHelper.getImplodedNonEmpty (' ',
+                                                        StringHelper.trim (aUBLPerson.getTitleValue ()),
+                                                        StringHelper.trim (aUBLPerson.getFirstNameValue ()),
+                                                        StringHelper.trim (aUBLPerson.getMiddleNameValue ()),
+                                                        StringHelper.trim (aUBLPerson.getFamilyNameValue ()),
+                                                        StringHelper.trim (aUBLPerson.getNameSuffixValue ())));
     }
+    if (!ebContacts.isEmpty ())
+      aEbiAddress.setContact (StringHelper.getImplodedNonEmpty ('\n', ebContacts));
 
     // GLN and DUNS number
     if (aUBLParty.getEndpointID () != null)
@@ -726,7 +730,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
         {
           // Unit code is optional
           if (aUBLCreditNoteLine.getCreditedQuantity ().getUnitCode () != null)
-            aEbiQuantity.setUnit (StringHelper.trim (aUBLCreditNoteLine.getCreditedQuantity ().getUnitCode ().value ()));
+            aEbiQuantity.setUnit (StringHelper.trim (aUBLCreditNoteLine.getCreditedQuantity ().getUnitCode ()));
           aEbiQuantity.setValue (aUBLCreditNoteLine.getCreditedQuantityValue ());
         }
         if (aEbiQuantity.getUnit () == null)

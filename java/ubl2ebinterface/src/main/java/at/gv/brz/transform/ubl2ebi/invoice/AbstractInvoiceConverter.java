@@ -21,11 +21,11 @@ import java.util.Locale;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CustomizationIDType;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.InvoiceTypeCodeType;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ProfileIDType;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.UBLVersionIDType;
-import oasis.names.specification.ubl.schema.xsd.invoice_2.InvoiceType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.CustomizationIDType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.InvoiceTypeCodeType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.ProfileIDType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.UBLVersionIDType;
+import oasis.names.specification.ubl.schema.xsd.invoice_21.InvoiceType;
 import at.gv.brz.transform.ubl2ebi.AbstractConverter;
 import at.gv.brz.transform.ubl2ebi.CPeppolUBL;
 
@@ -37,7 +37,7 @@ import eu.europa.ec.cipa.peppol.identifier.process.IPeppolPredefinedProcessIdent
 import eu.europa.ec.cipa.peppol.identifier.process.PredefinedProcessIdentifierManager;
 
 /**
- * Base class for PEPPOL UBL 2.0 to ebInterface converter
+ * Base class for UBL 2.1 Invoice to ebInterface converter
  * 
  * @author philip
  */
