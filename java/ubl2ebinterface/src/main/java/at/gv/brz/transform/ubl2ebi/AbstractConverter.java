@@ -126,7 +126,8 @@ public abstract class AbstractConverter
   public static final int IBAN_MAX_LENGTH = 34;
   public static final String PAYMENT_CHANNEL_CODE_IBAN = "IBAN";
   public static final ETaxSchemeID SUPPORTED_TAX_SCHEME_ID = ETaxSchemeID.VALUE_ADDED_TAX;
-  public static final String EBI_GENERATING_SYSTEM = "UBL 2.0 to ebInterface 4.0 converter";
+  public static final String EBI_GENERATING_SYSTEM_40 = "UBL 2.1 to ebInterface 4.0 converter";
+  public static final String EBI_GENERATING_SYSTEM_41 = "UBL 2.1 to ebInterface 4.1 converter";
   public static final int SCALE_PERC = 2;
   public static final int SCALE_PRICE_LINE = 4;
   // Austria uses HALF_UP mode!

@@ -155,7 +155,7 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
 
     // Build ebInterface invoice
     final Ebi40InvoiceType aEbiDoc = new Ebi40InvoiceType ();
-    aEbiDoc.setGeneratingSystem (EBI_GENERATING_SYSTEM);
+    aEbiDoc.setGeneratingSystem (EBI_GENERATING_SYSTEM_40);
     aEbiDoc.setDocumentType (Ebi40DocumentTypeType.INVOICE);
 
     // Cannot set the language, because the 3letter code is expected but we only
