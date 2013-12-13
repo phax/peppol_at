@@ -319,7 +319,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
   /**
    * Main conversion method to convert from UBL 2.0 to ebInterface 4.0
    * 
-   * @param aUBLCreditNote
+   * @param aUBLDoc
    *        The UBL invoice to be converted
    * @param aTransformationErrorList
    *        Error list. Must be empty!
@@ -327,10 +327,10 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
    *         of a severe error.
    */
   @Nullable
-  public Ebi41InvoiceType convertToEbInterface (@Nonnull final CreditNoteType aUBLCreditNote,
+  public Ebi41InvoiceType convertToEbInterface (@Nonnull final CreditNoteType aUBLDoc,
                                                 @Nonnull final ErrorList aTransformationErrorList)
   {
-    if (aUBLCreditNote == null)
+    if (aUBLDoc == null)
       throw new NullPointerException ("UBLCreditNote");
     if (aTransformationErrorList == null)
       throw new NullPointerException ("TransformationErrorList");
@@ -338,7 +338,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
       throw new IllegalArgumentException ("TransformationErrorList must be empty!");
 
     // Consistency check before starting the conversion
-    _checkConsistency (aUBLCreditNote, aTransformationErrorList);
+    _checkConsistency (aUBLDoc, aTransformationErrorList);
     if (aTransformationErrorList.containsAtLeastOneError ())
       return null;
 
@@ -350,7 +350,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
     // Cannot set the language, because the 3letter code is expected but we only
     // have the 2letter code!
 
-    final String sUBLCurrencyCode = StringHelper.trim (aUBLCreditNote.getDocumentCurrencyCodeValue ());
+    final String sUBLCurrencyCode = StringHelper.trim (aUBLDoc.getDocumentCurrencyCodeValue ());
     try
     {
       aEbiCreditNote.setInvoiceCurrency (Ebi41CurrencyType.fromValue (sUBLCurrencyCode));
@@ -363,24 +363,24 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
     }
 
     // CreditNote Number
-    final String sCreditNoteNumber = StringHelper.trim (aUBLCreditNote.getIDValue ());
+    final String sCreditNoteNumber = StringHelper.trim (aUBLDoc.getIDValue ());
     if (StringHelper.hasNoText (sCreditNoteNumber))
       aTransformationErrorList.addError ("ID", EText.MISSING_INVOICE_NUMBER.getDisplayText (m_aDisplayLocale));
     else
       aEbiCreditNote.setInvoiceNumber (_makeAlphaNumType (sCreditNoteNumber, "ID", aTransformationErrorList));
 
     // Ignore the time!
-    aEbiCreditNote.setInvoiceDate (aUBLCreditNote.getIssueDateValue ());
+    aEbiCreditNote.setInvoiceDate (aUBLDoc.getIssueDateValue ());
     if (aEbiCreditNote.getInvoiceDate () == null)
       aTransformationErrorList.addError ("IssueDate", EText.MISSING_INVOICE_DATE.getDisplayText (m_aDisplayLocale));
 
     // Is duplicate/copy indicator?
-    if (aUBLCreditNote.getCopyIndicator () != null)
-      aEbiCreditNote.setIsDuplicate (Boolean.valueOf (aUBLCreditNote.getCopyIndicator ().isValue ()));
+    if (aUBLDoc.getCopyIndicator () != null)
+      aEbiCreditNote.setIsDuplicate (Boolean.valueOf (aUBLDoc.getCopyIndicator ().isValue ()));
 
     // Biller/Supplier (creator of the invoice)
     {
-      final SupplierPartyType aUBLSupplier = aUBLCreditNote.getAccountingSupplierParty ();
+      final SupplierPartyType aUBLSupplier = aUBLDoc.getAccountingSupplierParty ();
       final Ebi41BillerType aEbiBiller = new Ebi41BillerType ();
       // Find the tax scheme that uses VAT
       for (final PartyTaxSchemeType aUBLPartyTaxScheme : aUBLSupplier.getParty ().getPartyTaxScheme ())
@@ -417,7 +417,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
 
     // CreditNote recipient
     {
-      final CustomerPartyType aUBLCustomer = aUBLCreditNote.getAccountingCustomerParty ();
+      final CustomerPartyType aUBLCustomer = aUBLDoc.getAccountingCustomerParty ();
       final Ebi41InvoiceRecipientType aEbiRecipient = new Ebi41InvoiceRecipientType ();
       // Find the tax scheme that uses VAT
       for (final PartyTaxSchemeType aUBLPartyTaxScheme : aUBLCustomer.getParty ().getPartyTaxScheme ())
@@ -457,7 +457,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
     // Order reference of invoice recipient
     String sUBLOrderReferenceID = null;
     {
-      final OrderReferenceType aUBLOrderReference = aUBLCreditNote.getOrderReference ();
+      final OrderReferenceType aUBLOrderReference = aUBLDoc.getOrderReference ();
       if (aUBLOrderReference != null)
       {
         // Use directly from order reference
@@ -466,7 +466,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
       if (StringHelper.hasNoText (sUBLOrderReferenceID))
       {
         // Check if a contract reference is present
-        for (final DocumentReferenceType aDocumentReference : aUBLCreditNote.getContractDocumentReference ())
+        for (final DocumentReferenceType aDocumentReference : aUBLDoc.getContractDocumentReference ())
           if (StringHelper.hasTextAfterTrim (aDocumentReference.getIDValue ()))
           {
             sUBLOrderReferenceID = StringHelper.trim (aDocumentReference.getIDValue ());
@@ -505,7 +505,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
     final Ebi41VATType aEbiVAT = new Ebi41VATType ();
     {
       int nTaxTotalIndex = 0;
-      for (final TaxTotalType aUBLTaxTotal : aUBLCreditNote.getTaxTotal ())
+      for (final TaxTotalType aUBLTaxTotal : aUBLDoc.getTaxTotal ())
       {
         int nTaxSubtotalIndex = 0;
         for (final TaxSubtotalType aUBLSubtotal : aUBLTaxTotal.getTaxSubtotal ())
@@ -639,7 +639,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
       final Ebi41DetailsType aEbiDetails = new Ebi41DetailsType ();
       final Ebi41ItemListType aEbiItemList = new Ebi41ItemListType ();
       int nCreditNoteLineIndex = 0;
-      for (final CreditNoteLineType aUBLCreditNoteLine : aUBLCreditNote.getCreditNoteLine ())
+      for (final CreditNoteLineType aUBLCreditNoteLine : aUBLDoc.getCreditNoteLine ())
       {
         // Try to resolve tax category
         TaxCategoryType aUBLTaxCategory = ContainerHelper.getSafe (aUBLCreditNoteLine.getItem ()
@@ -863,17 +863,17 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
     }
 
     // Global reduction and surcharge
-    if (aUBLCreditNote.hasAllowanceChargeEntries ())
+    if (aUBLDoc.hasAllowanceChargeEntries ())
     {
       // Start with quantity*unitPrice for base amount
-      BigDecimal aEbiBaseAmount = aUBLCreditNote.getLegalMonetaryTotal ().getLineExtensionAmountValue ();
+      BigDecimal aEbiBaseAmount = aUBLDoc.getLegalMonetaryTotal ().getLineExtensionAmountValue ();
       final Ebi41ReductionAndSurchargeDetailsType aEbiRS = new Ebi41ReductionAndSurchargeDetailsType ();
 
       // ebInterface can handle only Reduction or only Surcharge
       ETriState eSurcharge = ETriState.UNDEFINED;
 
       int nAllowanceChargeIndex = 0;
-      for (final AllowanceChargeType aUBLAllowanceCharge : aUBLCreditNote.getAllowanceCharge ())
+      for (final AllowanceChargeType aUBLAllowanceCharge : aUBLDoc.getAllowanceCharge ())
       {
         final boolean bItemIsSurcharge = aUBLAllowanceCharge.getChargeIndicator ().isValue ();
         if (eSurcharge.isUndefined ())
@@ -938,17 +938,17 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
     }
 
     // PrepaidAmount is not supported!
-    if (aUBLCreditNote.getLegalMonetaryTotal ().getPrepaidAmount () != null &&
-        !MathHelper.isEqualToZero (aUBLCreditNote.getLegalMonetaryTotal ().getPrepaidAmountValue ()))
+    if (aUBLDoc.getLegalMonetaryTotal ().getPrepaidAmount () != null &&
+        !MathHelper.isEqualToZero (aUBLDoc.getLegalMonetaryTotal ().getPrepaidAmountValue ()))
     {
       aTransformationErrorList.addError ("CreditNote/LegalMonetaryTotal/PrepaidAmount",
                                          EText.PREPAID_NOT_SUPPORTED.getDisplayText (m_aDisplayLocale));
     }
 
     // Total gross amount
-    aEbiCreditNote.setTotalGrossAmount (aUBLCreditNote.getLegalMonetaryTotal ().getTaxInclusiveAmountValue ());
+    aEbiCreditNote.setTotalGrossAmount (aUBLDoc.getLegalMonetaryTotal ().getTaxInclusiveAmountValue ());
     // Payable amount
-    aEbiCreditNote.setPayableAmount (aUBLCreditNote.getLegalMonetaryTotal ().getPayableAmountValue ());
+    aEbiCreditNote.setPayableAmount (aUBLDoc.getLegalMonetaryTotal ().getPayableAmountValue ());
 
     // Always no payment
     final Ebi41PaymentMethodType aEbiPaymentMethod = new Ebi41PaymentMethodType ();
@@ -982,7 +982,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
       if (aEbiDelivery.getDate () == null)
       {
         // No delivery date is present - check for service period
-        final PeriodType aUBLCreditNotePeriod = ContainerHelper.getSafe (aUBLCreditNote.getInvoicePeriod (), 0);
+        final PeriodType aUBLCreditNotePeriod = ContainerHelper.getSafe (aUBLDoc.getInvoicePeriod (), 0);
         if (aUBLCreditNotePeriod != null)
         {
           final XMLGregorianCalendar aStartDate = aUBLCreditNotePeriod.getStartDateValue ();

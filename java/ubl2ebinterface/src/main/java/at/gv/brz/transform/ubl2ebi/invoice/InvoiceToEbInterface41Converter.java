@@ -318,7 +318,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
   /**
    * Main conversion method to convert from UBL 2.0 to ebInterface 4.1
    * 
-   * @param aUBLInvoice
+   * @param aUBLDoc
    *        The UBL invoice to be converted
    * @param aTransformationErrorList
    *        Error list. Must be empty!
@@ -326,10 +326,10 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
    *         of a severe error.
    */
   @Nullable
-  public Ebi41InvoiceType convertToEbInterface (@Nonnull final InvoiceType aUBLInvoice,
+  public Ebi41InvoiceType convertToEbInterface (@Nonnull final InvoiceType aUBLDoc,
                                                 @Nonnull final ErrorList aTransformationErrorList)
   {
-    if (aUBLInvoice == null)
+    if (aUBLDoc == null)
       throw new NullPointerException ("UBLInvoice");
     if (aTransformationErrorList == null)
       throw new NullPointerException ("TransformationErrorList");
@@ -337,7 +337,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
       throw new IllegalArgumentException ("TransformationErrorList must be empty!");
 
     // Consistency check before starting the conversion
-    _checkConsistency (aUBLInvoice, aTransformationErrorList);
+    _checkConsistency (aUBLDoc, aTransformationErrorList);
     if (aTransformationErrorList.containsAtLeastOneError ())
       return null;
 
@@ -349,7 +349,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
     // Cannot set the language, because the 3letter code is expected but we only
     // have the 2letter code!
 
-    final String sUBLCurrencyCode = StringHelper.trim (aUBLInvoice.getDocumentCurrencyCodeValue ());
+    final String sUBLCurrencyCode = StringHelper.trim (aUBLDoc.getDocumentCurrencyCodeValue ());
     try
     {
       aEbiInvoice.setInvoiceCurrency (Ebi41CurrencyType.fromValue (sUBLCurrencyCode));
@@ -362,23 +362,23 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
     }
 
     // Invoice Number
-    final String sInvoiceNumber = StringHelper.trim (aUBLInvoice.getIDValue ());
+    final String sInvoiceNumber = StringHelper.trim (aUBLDoc.getIDValue ());
     if (StringHelper.hasNoText (sInvoiceNumber))
       aTransformationErrorList.addError ("ID", EText.MISSING_INVOICE_NUMBER.getDisplayText (m_aDisplayLocale));
     aEbiInvoice.setInvoiceNumber (sInvoiceNumber);
 
     // Ignore the time!
-    aEbiInvoice.setInvoiceDate (aUBLInvoice.getIssueDateValue ());
+    aEbiInvoice.setInvoiceDate (aUBLDoc.getIssueDateValue ());
     if (aEbiInvoice.getInvoiceDate () == null)
       aTransformationErrorList.addError ("IssueDate", EText.MISSING_INVOICE_DATE.getDisplayText (m_aDisplayLocale));
 
     // Is duplicate/copy indicator?
-    if (aUBLInvoice.getCopyIndicator () != null)
-      aEbiInvoice.setIsDuplicate (Boolean.valueOf (aUBLInvoice.getCopyIndicator ().isValue ()));
+    if (aUBLDoc.getCopyIndicator () != null)
+      aEbiInvoice.setIsDuplicate (Boolean.valueOf (aUBLDoc.getCopyIndicator ().isValue ()));
 
     // Biller/Supplier (creator of the invoice)
     {
-      final SupplierPartyType aUBLSupplier = aUBLInvoice.getAccountingSupplierParty ();
+      final SupplierPartyType aUBLSupplier = aUBLDoc.getAccountingSupplierParty ();
       final Ebi41BillerType aEbiBiller = new Ebi41BillerType ();
       // Find the tax scheme that uses VAT
       for (final PartyTaxSchemeType aUBLPartyTaxScheme : aUBLSupplier.getParty ().getPartyTaxScheme ())
@@ -415,7 +415,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
 
     // Invoice recipient
     {
-      final CustomerPartyType aUBLCustomer = aUBLInvoice.getAccountingCustomerParty ();
+      final CustomerPartyType aUBLCustomer = aUBLDoc.getAccountingCustomerParty ();
       final Ebi41InvoiceRecipientType aEbiRecipient = new Ebi41InvoiceRecipientType ();
       // Find the tax scheme that uses VAT
       for (final PartyTaxSchemeType aUBLPartyTaxScheme : aUBLCustomer.getParty ().getPartyTaxScheme ())
@@ -447,7 +447,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
     // Order reference of invoice recipient
     String sUBLOrderReferenceID = null;
     {
-      final OrderReferenceType aUBLOrderReference = aUBLInvoice.getOrderReference ();
+      final OrderReferenceType aUBLOrderReference = aUBLDoc.getOrderReference ();
       if (aUBLOrderReference != null)
       {
         // Use directly from order reference
@@ -476,7 +476,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
       aEbiInvoice.getInvoiceRecipient ().setOrderReference (aEbiOrderReference);
 
       // Add contract reference as further identification
-      for (final DocumentReferenceType aDocumentReference : aUBLInvoice.getContractDocumentReference ())
+      for (final DocumentReferenceType aDocumentReference : aUBLDoc.getContractDocumentReference ())
         if (StringHelper.hasTextAfterTrim (aDocumentReference.getIDValue ()))
         {
           final Ebi41FurtherIdentificationType aEbiFurtherIdentification = new Ebi41FurtherIdentificationType ();
@@ -493,7 +493,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
     final Ebi41VATType aEbiVAT = new Ebi41VATType ();
     {
       int nTaxTotalIndex = 0;
-      for (final TaxTotalType aUBLTaxTotal : aUBLInvoice.getTaxTotal ())
+      for (final TaxTotalType aUBLTaxTotal : aUBLDoc.getTaxTotal ())
       {
         int nTaxSubtotalIndex = 0;
         for (final TaxSubtotalType aUBLSubtotal : aUBLTaxTotal.getTaxSubtotal ())
@@ -627,7 +627,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
       final Ebi41DetailsType aEbiDetails = new Ebi41DetailsType ();
       final Ebi41ItemListType aEbiItemList = new Ebi41ItemListType ();
       int nInvoiceLineIndex = 0;
-      for (final InvoiceLineType aUBLInvoiceLine : aUBLInvoice.getInvoiceLine ())
+      for (final InvoiceLineType aUBLInvoiceLine : aUBLDoc.getInvoiceLine ())
       {
         // Try to resolve tax category
         TaxCategoryType aUBLTaxCategory = ContainerHelper.getSafe (aUBLInvoiceLine.getItem ()
@@ -904,14 +904,14 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
     }
 
     // Global reduction and surcharge
-    if (aUBLInvoice.hasAllowanceChargeEntries ())
+    if (aUBLDoc.hasAllowanceChargeEntries ())
     {
       // Start with quantity*unitPrice for base amount
-      BigDecimal aEbiBaseAmount = aUBLInvoice.getLegalMonetaryTotal ().getLineExtensionAmountValue ();
+      BigDecimal aEbiBaseAmount = aUBLDoc.getLegalMonetaryTotal ().getLineExtensionAmountValue ();
       final Ebi41ReductionAndSurchargeDetailsType aEbiRS = new Ebi41ReductionAndSurchargeDetailsType ();
 
       int nAllowanceChargeIndex = 0;
-      for (final AllowanceChargeType aUBLAllowanceCharge : aUBLInvoice.getAllowanceCharge ())
+      for (final AllowanceChargeType aUBLAllowanceCharge : aUBLDoc.getAllowanceCharge ())
       {
         final boolean bItemIsSurcharge = aUBLAllowanceCharge.getChargeIndicator ().isValue ();
 
@@ -973,24 +973,24 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
     }
 
     // PrepaidAmount is not supported!
-    if (aUBLInvoice.getLegalMonetaryTotal ().getPrepaidAmount () != null &&
-        !MathHelper.isEqualToZero (aUBLInvoice.getLegalMonetaryTotal ().getPrepaidAmountValue ()))
+    if (aUBLDoc.getLegalMonetaryTotal ().getPrepaidAmount () != null &&
+        !MathHelper.isEqualToZero (aUBLDoc.getLegalMonetaryTotal ().getPrepaidAmountValue ()))
     {
       aTransformationErrorList.addError ("Invoice/LegalMonetaryTotal/PrepaidAmount",
                                          EText.PREPAID_NOT_SUPPORTED.getDisplayText (m_aDisplayLocale));
     }
 
     // Total gross amount
-    aEbiInvoice.setTotalGrossAmount (aUBLInvoice.getLegalMonetaryTotal ().getTaxInclusiveAmountValue ());
+    aEbiInvoice.setTotalGrossAmount (aUBLDoc.getLegalMonetaryTotal ().getTaxInclusiveAmountValue ());
     // Payable amount
-    aEbiInvoice.setPayableAmount (aUBLInvoice.getLegalMonetaryTotal ().getPayableAmountValue ());
+    aEbiInvoice.setPayableAmount (aUBLDoc.getLegalMonetaryTotal ().getPayableAmountValue ());
 
     // Payment method
     final Ebi41PaymentMethodType aEbiPaymentMethod = new Ebi41PaymentMethodType ();
     final Ebi41PaymentConditionsType aEbiPaymentConditions = new Ebi41PaymentConditionsType ();
     {
       int nPaymentMeansIndex = 0;
-      for (final PaymentMeansType aUBLPaymentMeans : aUBLInvoice.getPaymentMeans ())
+      for (final PaymentMeansType aUBLPaymentMeans : aUBLDoc.getPaymentMeans ())
       {
         final String sPaymentMeansCode = StringHelper.trim (aUBLPaymentMeans.getPaymentMeansCodeValue ());
         final EPaymentMeansCode21 ePaymentMeans = EPaymentMeansCode21.getFromIDOrNull (sPaymentMeansCode);
@@ -1066,8 +1066,8 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
             // Bank Account Owner - no field present - check PayeePart or
             // SupplierPartyName
             String sBankAccountOwnerName = null;
-            if (aUBLInvoice.getPayeeParty () != null)
-              for (final PartyNameType aPartyName : aUBLInvoice.getPayeeParty ().getPartyName ())
+            if (aUBLDoc.getPayeeParty () != null)
+              for (final PartyNameType aPartyName : aUBLDoc.getPayeeParty ().getPartyName ())
               {
                 sBankAccountOwnerName = StringHelper.trim (aPartyName.getNameValue ());
                 if (StringHelper.hasText (sBankAccountOwnerName))
@@ -1075,7 +1075,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
               }
             if (StringHelper.hasNoText (sBankAccountOwnerName))
             {
-              final PartyType aSupplierParty = aUBLInvoice.getAccountingSupplierParty ().getParty ();
+              final PartyType aSupplierParty = aUBLDoc.getAccountingSupplierParty ().getParty ();
               if (aSupplierParty != null)
                 for (final PartyNameType aPartyName : aSupplierParty.getPartyName ())
                 {
@@ -1162,7 +1162,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
     {
       final List <String> aPaymentConditionsNotes = new ArrayList <String> ();
       int nPaymentTermsIndex = 0;
-      for (final PaymentTermsType aUBLPaymentTerms : aUBLInvoice.getPaymentTerms ())
+      for (final PaymentTermsType aUBLPaymentTerms : aUBLDoc.getPaymentTerms ())
       {
         if (aUBLPaymentTerms.getSettlementDiscountPercent () != null)
         {
@@ -1220,7 +1220,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
     final Ebi41DeliveryType aEbiDelivery = new Ebi41DeliveryType ();
     {
       int nDeliveryIndex = 0;
-      for (final DeliveryType aUBLDelivery : aUBLInvoice.getDelivery ())
+      for (final DeliveryType aUBLDelivery : aUBLDoc.getDelivery ())
       {
         if (aUBLDelivery.getActualDeliveryDate () != null)
         {
@@ -1248,12 +1248,12 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
 
             // As fallback use accounting customer party
             if (StringHelper.hasNoText (sAddressName) &&
-                aUBLInvoice.getAccountingCustomerParty () != null &&
-                aUBLInvoice.getAccountingCustomerParty ().getParty () != null)
+                aUBLDoc.getAccountingCustomerParty () != null &&
+                aUBLDoc.getAccountingCustomerParty ().getParty () != null)
             {
-              for (final PartyNameType aUBLPartyName : aUBLInvoice.getAccountingCustomerParty ()
-                                                                  .getParty ()
-                                                                  .getPartyName ())
+              for (final PartyNameType aUBLPartyName : aUBLDoc.getAccountingCustomerParty ()
+                                                              .getParty ()
+                                                              .getPartyName ())
               {
                 sAddressName = StringHelper.trim (aUBLPartyName.getNameValue ());
                 if (StringHelper.hasText (sAddressName))
@@ -1276,7 +1276,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
       if (aEbiDelivery.getDate () == null)
       {
         // No delivery date is present - check for service period
-        final PeriodType aUBLInvoicePeriod = ContainerHelper.getSafe (aUBLInvoice.getInvoicePeriod (), 0);
+        final PeriodType aUBLInvoicePeriod = ContainerHelper.getSafe (aUBLDoc.getInvoicePeriod (), 0);
         if (aUBLInvoicePeriod != null)
         {
           final XMLGregorianCalendar aStartDate = aUBLInvoicePeriod.getStartDateValue ();
