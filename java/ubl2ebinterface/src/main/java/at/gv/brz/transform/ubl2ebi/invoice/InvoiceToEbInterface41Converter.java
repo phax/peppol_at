@@ -824,6 +824,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
       {
         final String sPaymentMeansCode = StringHelper.trim (aUBLPaymentMeans.getPaymentMeansCodeValue ());
         final EPaymentMeansCode21 ePaymentMeans = EPaymentMeansCode21.getFromIDOrNull (sPaymentMeansCode);
+        // Debit transfer
         if (ePaymentMeans == EPaymentMeansCode21._31)
         {
           // Is a payment channel code present?
@@ -945,6 +946,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
                                                                                                                   sPaymentChannelCode));
         }
         else
+          // Direct debit
           if (ePaymentMeans == EPaymentMeansCode21._49)
           {
             final Ebi41DirectDebitType aEbiDirectDebit = new Ebi41DirectDebitType ();
@@ -974,6 +976,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
           {
             aTransformationErrorList.addError ("PaymentMeans[" + nPaymentMeansIndex + "]",
                                                EText.PAYMENTMEANS_CODE_INVALID.getDisplayTextWithArgs (m_aDisplayLocale,
+                                                                                                       ePaymentMeans.getID (),
                                                                                                        EPaymentMeansCode21._31.getID (),
                                                                                                        EPaymentMeansCode21._49.getID ()));
           }

@@ -82,7 +82,7 @@ public abstract class AbstractConverter
     DETAILS_INVALID_QUANTITY ("Die Rechnungszeile hat keine Menge. Verwende den Standardwert ''{0}''.", "The UBL invoice line has no quantity. Defaulting to ''{0}''."),
     VAT_ITEM_MISSING ("Keine einzige Steuersumme gefunden", "No single VAT item found."),
     ALLOWANCE_CHARGE_NO_TAXRATE ("Die Steuerprozentrate für den globalen Zuschlag/Abschlag konnte nicht ermittelt werden.", "Failed to resolve tax rate percentage for global AllowanceCharge."),
-    PAYMENTMEANS_CODE_INVALID ("Der PaymentMeansCode ist ungültig. Für Überweisungen muss {0} verwenden werden und für Lastschriftverfahren {1}.", "The PaymentMeansCode is invalid. For debit transfer use {0} and for direct debit use {1}."),
+    PAYMENTMEANS_CODE_INVALID ("Der PaymentMeansCode ''{0}'' ist ungültig. Für Überweisungen muss {1} verwenden werden und für Lastschriftverfahren {2}.", "The PaymentMeansCode ''{0}'' is invalid. For debit transfer use {1} and for direct debit use {2}."),
     PAYMENT_ID_NOT_NUMERIC ("Die Zahlungsreferenz ''{0}'' ist nicht numerisch und wird ignoriert.", "The payment reference ''{0}'' is not numeric and therefore ignored."),
     PAYMENT_ID_CHECKSUM_INVALID ("Die Checksumme ''{0}'' der Zahlungsreferenz ist ungültig wird ignoriert.", "The payment reference checksum ''{0}'' is invalid and therefore ignored."),
     PAYMENT_ID_TOO_LONG_IGNORED ("Die Zahlungsreferenz ''{0}'' ist zu lang und wird ignoriert.", "The payment reference ''{0}'' is too long and therefore ignored."),
