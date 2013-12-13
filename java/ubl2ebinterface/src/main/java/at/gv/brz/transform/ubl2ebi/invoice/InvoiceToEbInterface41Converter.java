@@ -626,16 +626,16 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
     {
       final Ebi41DetailsType aEbiDetails = new Ebi41DetailsType ();
       final Ebi41ItemListType aEbiItemList = new Ebi41ItemListType ();
-      int nInvoiceLineIndex = 0;
-      for (final InvoiceLineType aUBLInvoiceLine : aUBLDoc.getInvoiceLine ())
+      int nLineIndex = 0;
+      for (final InvoiceLineType aUBLLine : aUBLDoc.getInvoiceLine ())
       {
         // Try to resolve tax category
-        TaxCategoryType aUBLTaxCategory = ContainerHelper.getSafe (aUBLInvoiceLine.getItem ()
+        TaxCategoryType aUBLTaxCategory = ContainerHelper.getSafe (aUBLLine.getItem ()
                                                                                   .getClassifiedTaxCategory (), 0);
         if (aUBLTaxCategory == null)
-        {
+        { 
           // No direct tax category -> check if it is somewhere in the tax total
-          outer: for (final TaxTotalType aUBLTaxTotal : aUBLInvoiceLine.getTaxTotal ())
+          outer: for (final TaxTotalType aUBLTaxTotal : aUBLLine.getTaxTotal ())
             for (final TaxSubtotalType aUBLTaxSubTotal : aUBLTaxTotal.getTaxSubtotal ())
             {
               // Only handle VAT items
@@ -680,7 +680,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
         if (aUBLPercent == null)
         {
           aUBLPercent = BigDecimal.ZERO;
-          aTransformationErrorList.addWarning ("InvoiceLine[" + nInvoiceLineIndex + "]/Item/ClassifiedTaxCategory",
+          aTransformationErrorList.addWarning ("InvoiceLine[" + nLineIndex + "]/Item/ClassifiedTaxCategory",
                                                EText.DETAILS_TAX_PERCENTAGE_NOT_FOUND.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                                               aUBLPercent));
         }
@@ -689,12 +689,12 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
         final Ebi41ListLineItemType aEbiListLineItem = new Ebi41ListLineItemType ();
 
         // Invoice line number
-        final String sUBLPositionNumber = StringHelper.trim (aUBLInvoiceLine.getIDValue ());
+        final String sUBLPositionNumber = StringHelper.trim (aUBLLine.getIDValue ());
         BigInteger aUBLPositionNumber = StringParser.parseBigInteger (sUBLPositionNumber);
         if (aUBLPositionNumber == null)
         {
-          aUBLPositionNumber = BigInteger.valueOf (nInvoiceLineIndex + 1);
-          aTransformationErrorList.addWarning ("InvoiceLine[" + nInvoiceLineIndex + "]/ID",
+          aUBLPositionNumber = BigInteger.valueOf (nLineIndex + 1);
+          aTransformationErrorList.addWarning ("InvoiceLine[" + nLineIndex + "]/ID",
                                                EText.DETAILS_INVALID_POSITION.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                                       sUBLPositionNumber,
                                                                                                       aUBLPositionNumber));
@@ -702,51 +702,51 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
         aEbiListLineItem.setPositionNumber (aUBLPositionNumber);
 
         // Descriptions
-        for (final DescriptionType aUBLDescription : aUBLInvoiceLine.getItem ().getDescription ())
+        for (final DescriptionType aUBLDescription : aUBLLine.getItem ().getDescription ())
           aEbiListLineItem.getDescription ().add (StringHelper.trim (aUBLDescription.getValue ()));
         if (aEbiListLineItem.getDescription ().isEmpty ())
         {
           // Use item name as description
-          final NameType aUBLName = aUBLInvoiceLine.getItem ().getName ();
+          final NameType aUBLName = aUBLLine.getItem ().getName ();
           if (aUBLName != null)
             aEbiListLineItem.getDescription ().add (StringHelper.trim (aUBLName.getValue ()));
         }
 
         // Quantity
         final Ebi41UnitType aEbiQuantity = new Ebi41UnitType ();
-        if (aUBLInvoiceLine.getInvoicedQuantity () != null)
+        if (aUBLLine.getInvoicedQuantity () != null)
         {
           // Unit code is optional
-          if (aUBLInvoiceLine.getInvoicedQuantity ().getUnitCode () != null)
-            aEbiQuantity.setUnit (StringHelper.trim (aUBLInvoiceLine.getInvoicedQuantity ().getUnitCode ()));
-          aEbiQuantity.setValue (aUBLInvoiceLine.getInvoicedQuantityValue ());
+          if (aUBLLine.getInvoicedQuantity ().getUnitCode () != null)
+            aEbiQuantity.setUnit (StringHelper.trim (aUBLLine.getInvoicedQuantity ().getUnitCode ()));
+          aEbiQuantity.setValue (aUBLLine.getInvoicedQuantityValue ());
         }
         if (aEbiQuantity.getUnit () == null)
         {
           // ebInterface requires a quantity!
           aEbiQuantity.setUnit (EUnitOfMeasureCode21.C62.getID ());
-          aTransformationErrorList.addWarning ("InvoiceLine[" + nInvoiceLineIndex + "]/InvoicedQuantity/UnitCode",
+          aTransformationErrorList.addWarning ("InvoiceLine[" + nLineIndex + "]/InvoicedQuantity/UnitCode",
                                                EText.DETAILS_INVALID_UNIT.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                                   aEbiQuantity.getUnit ()));
         }
         if (aEbiQuantity.getValue () == null)
         {
           aEbiQuantity.setValue (BigDecimal.ONE);
-          aTransformationErrorList.addWarning ("InvoiceLine[" + nInvoiceLineIndex + "]/InvoicedQuantity",
+          aTransformationErrorList.addWarning ("InvoiceLine[" + nLineIndex + "]/InvoicedQuantity",
                                                EText.DETAILS_INVALID_QUANTITY.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                                       aEbiQuantity.getValue ()));
         }
         aEbiListLineItem.setQuantity (aEbiQuantity);
 
         // Unit price
-        if (aUBLInvoiceLine.getPrice () != null)
+        if (aUBLLine.getPrice () != null)
         {
           final Ebi41UnitPriceType aEbiUnitPrice = new Ebi41UnitPriceType ();
           // Unit price = priceAmount/baseQuantity (mandatory)
-          final BigDecimal aUBLPriceAmount = aUBLInvoiceLine.getPrice ().getPriceAmountValue ();
+          final BigDecimal aUBLPriceAmount = aUBLLine.getPrice ().getPriceAmountValue ();
           aEbiUnitPrice.setValue (aUBLPriceAmount);
           // If no base quantity is present, assume 1 (optional)
-          final BigDecimal aUBLBaseQuantity = aUBLInvoiceLine.getPrice ().getBaseQuantityValue ();
+          final BigDecimal aUBLBaseQuantity = aUBLLine.getPrice ().getBaseQuantityValue ();
           if (aUBLBaseQuantity != null)
           {
             aEbiUnitPrice.setBaseQuantity (aUBLBaseQuantity);
@@ -758,7 +758,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
         else
         {
           // Unit price = lineExtensionAmount / quantity (mandatory)
-          final BigDecimal aUBLLineExtensionAmount = aUBLInvoiceLine.getLineExtensionAmountValue ();
+          final BigDecimal aUBLLineExtensionAmount = aUBLLine.getLineExtensionAmountValue ();
           final Ebi41UnitPriceType aEbiUnitPrice = new Ebi41UnitPriceType ();
           if (MathHelper.isEqualToZero (aEbiQuantity.getValue ()))
             aEbiUnitPrice.setValue (BigDecimal.ZERO);
@@ -785,14 +785,14 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
         aEbiListLineItem.setVATRate (aEbiVATRate);
 
         // Line item amount (quantity * unit price +- reduction / surcharge)
-        aEbiListLineItem.setLineItemAmount (aUBLInvoiceLine.getLineExtensionAmountValue ());
+        aEbiListLineItem.setLineItemAmount (aUBLLine.getLineExtensionAmountValue ());
 
         // Special handling in case no VAT item is present
         if (MathHelper.isEqualToZero (aUBLPercent))
-          aTotalZeroPercLineExtensionAmount = aTotalZeroPercLineExtensionAmount.add (aUBLInvoiceLine.getLineExtensionAmountValue ());
+          aTotalZeroPercLineExtensionAmount = aTotalZeroPercLineExtensionAmount.add (aUBLLine.getLineExtensionAmountValue ());
 
         // Order reference per line
-        for (final OrderLineReferenceType aUBLOrderLineReference : aUBLInvoiceLine.getOrderLineReference ())
+        for (final OrderLineReferenceType aUBLOrderLineReference : aUBLLine.getOrderLineReference ())
           if (StringHelper.hasText (aUBLOrderLineReference.getLineIDValue ()))
           {
             final Ebi41OrderReferenceDetailType aEbiOrderRefDetail = new Ebi41OrderReferenceDetailType ();
@@ -814,7 +814,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
             {
               if (sOrderPosNumber.length () == 0)
               {
-                aTransformationErrorList.addError ("InvoiceLine[" + nInvoiceLineIndex + "]/OrderLineReference/LineID",
+                aTransformationErrorList.addError ("InvoiceLine[" + nLineIndex + "]/OrderLineReference/LineID",
                                                    EText.ORDERLINE_REF_ID_EMPTY.getDisplayText (m_aDisplayLocale));
               }
               else
@@ -827,7 +827,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
           }
 
         // Reduction and surcharge
-        if (aUBLInvoiceLine.hasAllowanceChargeEntries ())
+        if (aUBLLine.hasAllowanceChargeEntries ())
         {
           // Start with quantity*unitPrice for base amount
           BigDecimal aEbiBaseAmount = aEbiListLineItem.getQuantity ().getValue ().multiply (aEbiUnitPriceValue);
@@ -835,7 +835,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
 
           // ebInterface can handle only Reduction or only Surcharge
           ETriState eSurcharge = ETriState.UNDEFINED;
-          for (final AllowanceChargeType aUBLAllowanceCharge : aUBLInvoiceLine.getAllowanceCharge ())
+          for (final AllowanceChargeType aUBLAllowanceCharge : aUBLLine.getAllowanceCharge ())
           {
             final boolean bItemIsSurcharge = aUBLAllowanceCharge.getChargeIndicator ().isValue ();
 
@@ -881,7 +881,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
 
         // Add the item to the list
         aEbiItemList.getListLineItem ().add (aEbiListLineItem);
-        nInvoiceLineIndex++;
+        nLineIndex++;
       }
       aEbiDetails.getItemList ().add (aEbiItemList);
       aEbiDoc.setDetails (aEbiDetails);
@@ -1219,6 +1219,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
     // Delivery
     final Ebi41DeliveryType aEbiDelivery = new Ebi41DeliveryType ();
     {
+      // Delivery address
       int nDeliveryIndex = 0;
       for (final DeliveryType aUBLDelivery : aUBLDoc.getDelivery ())
       {
