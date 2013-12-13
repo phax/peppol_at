@@ -79,6 +79,7 @@ import com.phloc.ebinterface.v41.Ebi41InvoiceRecipientType;
 import com.phloc.ebinterface.v41.Ebi41InvoiceType;
 import com.phloc.ebinterface.v41.Ebi41ItemListType;
 import com.phloc.ebinterface.v41.Ebi41ListLineItemType;
+import com.phloc.ebinterface.v41.Ebi41NoPaymentType;
 import com.phloc.ebinterface.v41.Ebi41OrderReferenceDetailType;
 import com.phloc.ebinterface.v41.Ebi41OrderReferenceType;
 import com.phloc.ebinterface.v41.Ebi41OtherTaxType;
@@ -202,6 +203,16 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
     // Is duplicate/copy indicator?
     if (aUBLDoc.getCopyIndicator () != null)
       aEbiDoc.setIsDuplicate (Boolean.valueOf (aUBLDoc.getCopyIndicator ().isValue ()));
+
+    // Global comment
+    {
+      final List <String> aEbiComment = new ArrayList <String> ();
+      for (final NoteType aNote : aUBLDoc.getNote ())
+        if (StringHelper.hasText (aNote.getValue ()))
+          aEbiComment.add (aNote.getValue ());
+      if (!aEbiComment.isEmpty ())
+        aEbiDoc.setComment (StringHelper.getImplodedNonEmpty ('\n', aEbiComment));
+    }
 
     // Biller/Supplier (creator of the invoice)
     {
@@ -974,6 +985,15 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
           }
           else
           {
+            // No supported payment means code
+            if (MathHelper.isEqualToZero (aEbiDoc.getPayableAmount ()))
+            {
+              // As nothing is to be paid we can safely use NoPayment
+              final Ebi41NoPaymentType aEbiNoPayment = new Ebi41NoPaymentType ();
+              aEbiPaymentMethod.setNoPayment (aEbiNoPayment);
+              break;
+            }
+
             aTransformationErrorList.addError ("PaymentMeans[" + nPaymentMeansIndex + "]",
                                                EText.PAYMENTMEANS_CODE_INVALID.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                                        ePaymentMeans.getID (),

@@ -79,6 +79,7 @@ import com.phloc.ebinterface.v40.Ebi40InvoiceType;
 import com.phloc.ebinterface.v40.Ebi40ItemListType;
 import com.phloc.ebinterface.v40.Ebi40ItemType;
 import com.phloc.ebinterface.v40.Ebi40ListLineItemType;
+import com.phloc.ebinterface.v40.Ebi40NoPaymentType;
 import com.phloc.ebinterface.v40.Ebi40OrderReferenceDetailType;
 import com.phloc.ebinterface.v40.Ebi40OrderReferenceType;
 import com.phloc.ebinterface.v40.Ebi40OtherTaxType;
@@ -1012,6 +1013,15 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
           }
           else
           {
+            // No supported payment means code
+            if (MathHelper.isEqualToZero (aEbiDoc.getTotalGrossAmount ()))
+            {
+              // As nothing is to be paid we can safely use NoPayment
+              final Ebi40NoPaymentType aEbiNoPayment = new Ebi40NoPaymentType ();
+              aEbiDoc.setPaymentMethod (aEbiNoPayment);
+              break;
+            }
+
             aTransformationErrorList.addError ("PaymentMeans[" + nPaymentMeansIndex + "]",
                                                EText.PAYMENTMEANS_CODE_INVALID.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                                        ePaymentMeans.getID (),

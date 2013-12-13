@@ -18,7 +18,9 @@ package at.gv.brz.transform.ubl2ebi.creditnote;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -43,6 +45,7 @@ import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.Tax
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.TaxTotalType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.DescriptionType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.NameType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.NoteType;
 import oasis.names.specification.ubl.schema.xsd.creditnote_21.CreditNoteType;
 import at.gv.brz.transform.ubl2ebi.EbInterface41Helper;
 import at.gv.brz.transform.ubl2ebi.helper.SchemedID;
@@ -185,6 +188,16 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
     // Is duplicate/copy indicator?
     if (aUBLDoc.getCopyIndicator () != null)
       aEbiDoc.setIsDuplicate (Boolean.valueOf (aUBLDoc.getCopyIndicator ().isValue ()));
+
+    // Global comment
+    {
+      final List <String> aEbiComment = new ArrayList <String> ();
+      for (final NoteType aNote : aUBLDoc.getNote ())
+        if (StringHelper.hasText (aNote.getValue ()))
+          aEbiComment.add (aNote.getValue ());
+      if (!aEbiComment.isEmpty ())
+        aEbiDoc.setComment (StringHelper.getImplodedNonEmpty ('\n', aEbiComment));
+    }
 
     // Biller/Supplier (creator of the invoice)
     {
