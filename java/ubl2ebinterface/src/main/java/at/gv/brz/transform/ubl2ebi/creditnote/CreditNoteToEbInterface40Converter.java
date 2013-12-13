@@ -55,7 +55,6 @@ import at.gv.brz.transform.ubl2ebi.helper.TaxCategoryKey;
 import com.phloc.commons.CGlobal;
 import com.phloc.commons.collections.ContainerHelper;
 import com.phloc.commons.math.MathHelper;
-import com.phloc.commons.regex.RegExHelper;
 import com.phloc.commons.state.ETriState;
 import com.phloc.commons.string.StringHelper;
 import com.phloc.commons.string.StringParser;
@@ -118,33 +117,6 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
     super (aDisplayLocale, aContentLocale, bStrictERBMode);
   }
 
-  public static boolean _isValidPaymentReferenceChecksum (@Nullable final String sChecksum)
-  {
-    if (StringHelper.getLength (sChecksum) == 1)
-    {
-      final char c = sChecksum.charAt (0);
-      return (c >= '0' && c <= '9') || c == 'X';
-    }
-    return false;
-  }
-
-  @Nullable
-  private String _makeAlphaNumType (@Nullable final String sText,
-                                    @Nonnull final String sContext,
-                                    @Nonnull final ErrorList aTransformationErrorList)
-  {
-    if (sText != null && !RegExHelper.stringMatchesPattern ("[0-9 | A-Z | a-z | -_äöüÄÖÜß]+", sText))
-    {
-      final String ret = RegExHelper.stringReplacePattern ("[^0-9 | A-Z | a-z | -_äöüÄÖÜß]", sText, "_");
-      aTransformationErrorList.addWarning (sContext,
-                                           EText.ALPHANUM_ID_TYPE_CHANGE.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                                 sText,
-                                                                                                 ret));
-      return ret;
-    }
-    return sText;
-  }
-
   /**
    * Main conversion method to convert from UBL 2.0 to ebInterface 4.0
    * 
@@ -196,7 +168,10 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
     if (StringHelper.hasNoText (sCreditNoteNumber))
       aTransformationErrorList.addError ("ID", EText.MISSING_INVOICE_NUMBER.getDisplayText (m_aDisplayLocale));
     else
-      aEbiDoc.setInvoiceNumber (_makeAlphaNumType (sCreditNoteNumber, "ID", aTransformationErrorList));
+      aEbiDoc.setInvoiceNumber (EbInterface40Helper.makeAlphaNumType (sCreditNoteNumber,
+                                                                      "ID",
+                                                                      aTransformationErrorList,
+                                                                      m_aDisplayLocale));
 
     // Ignore the time!
     aEbiDoc.setInvoiceDate (aUBLDoc.getIssueDateValue ());
@@ -319,7 +294,10 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
           sUBLOrderReferenceID = sUBLOrderReferenceID.substring (0, ORDER_REFERENCE_MAX_LENGTH);
         }
 
-        sUBLOrderReferenceID = _makeAlphaNumType (sUBLOrderReferenceID, "OrderReference/ID", aTransformationErrorList);
+        sUBLOrderReferenceID = EbInterface40Helper.makeAlphaNumType (sUBLOrderReferenceID,
+                                                                     "OrderReference/ID",
+                                                                     aTransformationErrorList,
+                                                                     m_aDisplayLocale);
       }
 
       final Ebi40OrderReferenceType aEbiOrderReference = new Ebi40OrderReferenceType ();
@@ -656,11 +634,12 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
               }
               else
               {
-                aEbiOrderRefDetail.setOrderPositionNumber (_makeAlphaNumType (sOrderPosNumber,
-                                                                              "CreditNoteLine[" +
-                                                                                  nCreditNoteLineIndex +
-                                                                                  "]/OrderLineReference/LineID",
-                                                                              aTransformationErrorList));
+                aEbiOrderRefDetail.setOrderPositionNumber (EbInterface40Helper.makeAlphaNumType (sOrderPosNumber,
+                                                                                                 "CreditNoteLine[" +
+                                                                                                     nCreditNoteLineIndex +
+                                                                                                     "]/OrderLineReference/LineID",
+                                                                                                 aTransformationErrorList,
+                                                                                                 m_aDisplayLocale));
               }
             }
             aEbiListLineItem.setInvoiceRecipientsOrderReference (aEbiOrderRefDetail);

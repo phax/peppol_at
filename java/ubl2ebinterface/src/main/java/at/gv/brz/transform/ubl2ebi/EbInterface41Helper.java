@@ -33,50 +33,21 @@ import at.gv.brz.transform.ubl2ebi.AbstractConverter.EText;
 
 import com.phloc.commons.collections.ContainerHelper;
 import com.phloc.commons.locale.country.CountryCache;
-import com.phloc.commons.regex.RegExHelper;
 import com.phloc.commons.string.StringHelper;
-import com.phloc.ebinterface.v40.Ebi40AddressIdentifierType;
-import com.phloc.ebinterface.v40.Ebi40AddressIdentifierTypeType;
-import com.phloc.ebinterface.v40.Ebi40AddressType;
-import com.phloc.ebinterface.v40.Ebi40CountryCodeType;
-import com.phloc.ebinterface.v40.Ebi40CountryType;
+import com.phloc.ebinterface.v41.Ebi41AddressIdentifierType;
+import com.phloc.ebinterface.v41.Ebi41AddressIdentifierTypeType;
+import com.phloc.ebinterface.v41.Ebi41AddressType;
+import com.phloc.ebinterface.v41.Ebi41CountryCodeType;
+import com.phloc.ebinterface.v41.Ebi41CountryType;
 import com.phloc.validation.error.ErrorList;
 
-public final class EbInterface40Helper
+public final class EbInterface41Helper
 {
-  private EbInterface40Helper ()
+  private EbInterface41Helper ()
   {}
 
-  @Nullable
-  public static String makeAlphaNumType (@Nullable final String sText,
-                                         @Nonnull final String sContext,
-                                         @Nonnull final ErrorList aTransformationErrorList,
-                                         @Nonnull final Locale aDisplayLocale)
-  {
-    if (sText != null && !RegExHelper.stringMatchesPattern ("[0-9 | A-Z | a-z | -_äöüÄÖÜß]+", sText))
-    {
-      final String ret = RegExHelper.stringReplacePattern ("[^0-9 | A-Z | a-z | -_äöüÄÖÜß]", sText, "_");
-      aTransformationErrorList.addWarning (sContext,
-                                           EText.ALPHANUM_ID_TYPE_CHANGE.getDisplayTextWithArgs (aDisplayLocale,
-                                                                                                 sText,
-                                                                                                 ret));
-      return ret;
-    }
-    return sText;
-  }
-
-  public static boolean isValidPaymentReferenceChecksum (@Nullable final String sChecksum)
-  {
-    if (StringHelper.getLength (sChecksum) == 1)
-    {
-      final char c = sChecksum.charAt (0);
-      return (c >= '0' && c <= '9') || c == 'X';
-    }
-    return false;
-  }
-
   public static void setAddressData (@Nullable final AddressType aUBLAddress,
-                                     @Nonnull final Ebi40AddressType aEbiAddress,
+                                     @Nonnull final Ebi41AddressType aEbiAddress,
                                      @Nonnull final String sPartyType,
                                      @Nonnull final ErrorList aTransformationErrorList,
                                      @Nonnull final Locale aContentLocale,
@@ -97,12 +68,12 @@ public final class EbInterface40Helper
       // Country
       if (aUBLAddress.getCountry () != null)
       {
-        final Ebi40CountryType aEbiCountry = new Ebi40CountryType ();
+        final Ebi41CountryType aEbiCountry = new Ebi41CountryType ();
         final String sCountryCode = StringHelper.trim (aUBLAddress.getCountry ().getIdentificationCodeValue ());
-        Ebi40CountryCodeType eEbiCountryCode = null;
+        Ebi41CountryCodeType eEbiCountryCode = null;
         try
         {
-          eEbiCountryCode = Ebi40CountryCodeType.fromValue (sCountryCode);
+          eEbiCountryCode = Ebi41CountryCodeType.fromValue (sCountryCode);
         }
         catch (final IllegalArgumentException ex)
         {
@@ -141,13 +112,13 @@ public final class EbInterface40Helper
   }
 
   @Nonnull
-  public static Ebi40AddressType convertParty (@Nonnull final PartyType aUBLParty,
+  public static Ebi41AddressType convertParty (@Nonnull final PartyType aUBLParty,
                                                @Nonnull final String sPartyType,
                                                @Nonnull final ErrorList aTransformationErrorList,
                                                @Nonnull final Locale aContentLocale,
                                                @Nonnull final Locale aDisplayLocale)
   {
-    final Ebi40AddressType aEbiAddress = new Ebi40AddressType ();
+    final Ebi41AddressType aEbiAddress = new Ebi41AddressType ();
 
     if (aUBLParty.getPartyNameCount () > 1)
       aTransformationErrorList.addWarning (sPartyType + "/PartyName",
@@ -202,17 +173,16 @@ public final class EbInterface40Helper
         // Check all identifier types
         final String sSchemeIDToSearch = StringHelper.trim (aUBLParty.getEndpointID ().getSchemeID ());
 
-        for (final Ebi40AddressIdentifierTypeType eType : Ebi40AddressIdentifierTypeType.values ())
+        for (final Ebi41AddressIdentifierTypeType eType : Ebi41AddressIdentifierTypeType.values ())
           if (eType.value ().equalsIgnoreCase (sSchemeIDToSearch))
           {
-            final Ebi40AddressIdentifierType aEbiType = new Ebi40AddressIdentifierType ();
+            final Ebi41AddressIdentifierType aEbiType = new Ebi41AddressIdentifierType ();
             aEbiType.setAddressIdentifierType (eType);
-            aEbiType.setContent (sEndpointID);
-            aEbiAddress.setAddressIdentifier (aEbiType);
-            break;
+            aEbiType.setValue (sEndpointID);
+            aEbiAddress.getAddressIdentifier ().add (aEbiType);
           }
 
-        if (aEbiAddress.getAddressIdentifier () == null)
+        if (aEbiAddress.hasNoAddressIdentifierEntries ())
           aTransformationErrorList.addWarning (sPartyType,
                                                EText.PARTY_UNSUPPORTED_ENDPOINT.getDisplayTextWithArgs (aDisplayLocale,
                                                                                                         sEndpointID,
@@ -221,28 +191,28 @@ public final class EbInterface40Helper
       }
     }
 
-    if (aEbiAddress.getAddressIdentifier () == null)
+    if (aEbiAddress.hasNoAddressIdentifierEntries ())
     {
       // check party identification
       int nPartyIdentificationIndex = 0;
-      outer: for (final PartyIdentificationType aUBLPartyID : aUBLParty.getPartyIdentification ())
+      for (final PartyIdentificationType aUBLPartyID : aUBLParty.getPartyIdentification ())
       {
         final String sUBLPartyID = StringHelper.trim (aUBLPartyID.getIDValue ());
-        for (final Ebi40AddressIdentifierTypeType eType : Ebi40AddressIdentifierTypeType.values ())
+        for (final Ebi41AddressIdentifierTypeType eType : Ebi41AddressIdentifierTypeType.values ())
           if (eType.value ().equalsIgnoreCase (aUBLPartyID.getID ().getSchemeID ()))
           {
             // Add GLN/DUNS number
-            final Ebi40AddressIdentifierType aEbiType = new Ebi40AddressIdentifierType ();
+            final Ebi41AddressIdentifierType aEbiType = new Ebi41AddressIdentifierType ();
             aEbiType.setAddressIdentifierType (eType);
-            aEbiType.setContent (sUBLPartyID);
-            aEbiAddress.setAddressIdentifier (aEbiType);
-            break outer;
+            aEbiType.setValue (sUBLPartyID);
+            aEbiAddress.getAddressIdentifier ().add (aEbiType);
           }
-        aTransformationErrorList.addWarning (sPartyType + "/PartyIdentification[" + nPartyIdentificationIndex + "]",
-                                             EText.PARTY_UNSUPPORTED_ADDRESS_IDENTIFIER.getDisplayTextWithArgs (aDisplayLocale,
-                                                                                                                sUBLPartyID,
-                                                                                                                aUBLPartyID.getID ()
-                                                                                                                           .getSchemeID ()));
+        if (aEbiAddress.hasNoAddressIdentifierEntries ())
+          aTransformationErrorList.addWarning (sPartyType + "/PartyIdentification[" + nPartyIdentificationIndex + "]",
+                                               EText.PARTY_UNSUPPORTED_ADDRESS_IDENTIFIER.getDisplayTextWithArgs (aDisplayLocale,
+                                                                                                                  sUBLPartyID,
+                                                                                                                  aUBLPartyID.getID ()
+                                                                                                                             .getSchemeID ()));
         ++nPartyIdentificationIndex;
       }
     }

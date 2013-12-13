@@ -109,7 +109,6 @@ import eu.europa.ec.cipa.peppol.codelist.ETaxSchemeID;
 @Immutable
 public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConverter
 {
-
   /**
    * Constructor
    * 
@@ -126,33 +125,6 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
                                           final boolean bStrictERBMode)
   {
     super (aDisplayLocale, aContentLocale, bStrictERBMode);
-  }
-
-  public static boolean _isValidPaymentReferenceChecksum (@Nullable final String sChecksum)
-  {
-    if (StringHelper.getLength (sChecksum) == 1)
-    {
-      final char c = sChecksum.charAt (0);
-      return (c >= '0' && c <= '9') || c == 'X';
-    }
-    return false;
-  }
-
-  @Nullable
-  private String _makeAlphaNumType (@Nullable final String sText,
-                                    @Nonnull final String sContext,
-                                    @Nonnull final ErrorList aTransformationErrorList)
-  {
-    if (sText != null && !RegExHelper.stringMatchesPattern ("[0-9 | A-Z | a-z | -_äöüÄÖÜß]+", sText))
-    {
-      final String ret = RegExHelper.stringReplacePattern ("[^0-9 | A-Z | a-z | -_äöüÄÖÜß]", sText, "_");
-      aTransformationErrorList.addWarning (sContext,
-                                           EText.ALPHANUM_ID_TYPE_CHANGE.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                                 sText,
-                                                                                                 ret));
-      return ret;
-    }
-    return sText;
   }
 
   /**
@@ -206,7 +178,10 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
     if (StringHelper.hasNoText (sInvoiceNumber))
       aTransformationErrorList.addError ("ID", EText.MISSING_INVOICE_NUMBER.getDisplayText (m_aDisplayLocale));
     else
-      aEbiDoc.setInvoiceNumber (_makeAlphaNumType (sInvoiceNumber, "ID", aTransformationErrorList));
+      aEbiDoc.setInvoiceNumber (EbInterface40Helper.makeAlphaNumType (sInvoiceNumber,
+                                                                      "ID",
+                                                                      aTransformationErrorList,
+                                                                      m_aDisplayLocale));
 
     // Ignore the time!
     aEbiDoc.setInvoiceDate (aUBLDoc.getIssueDateValue ());
@@ -329,7 +304,10 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
           sUBLOrderReferenceID = sUBLOrderReferenceID.substring (0, ORDER_REFERENCE_MAX_LENGTH);
         }
 
-        sUBLOrderReferenceID = _makeAlphaNumType (sUBLOrderReferenceID, "OrderReference/ID", aTransformationErrorList);
+        sUBLOrderReferenceID = EbInterface40Helper.makeAlphaNumType (sUBLOrderReferenceID,
+                                                                     "OrderReference/ID",
+                                                                     aTransformationErrorList,
+                                                                     m_aDisplayLocale);
       }
 
       final Ebi40OrderReferenceType aEbiOrderReference = new Ebi40OrderReferenceType ();
@@ -660,11 +638,12 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
               }
               else
               {
-                aEbiOrderRefDetail.setOrderPositionNumber (_makeAlphaNumType (sOrderPosNumber,
-                                                                              "InvoiceLine[" +
-                                                                                  nInvoiceLineIndex +
-                                                                                  "]/OrderLineReference/LineID",
-                                                                              aTransformationErrorList));
+                aEbiOrderRefDetail.setOrderPositionNumber (EbInterface40Helper.makeAlphaNumType (sOrderPosNumber,
+                                                                                                 "InvoiceLine[" +
+                                                                                                     nInvoiceLineIndex +
+                                                                                                     "]/OrderLineReference/LineID",
+                                                                                                 aTransformationErrorList,
+                                                                                                 m_aDisplayLocale));
               }
             }
             aEbiListLineItem.setInvoiceRecipientsOrderReference (aEbiOrderRefDetail);
@@ -888,7 +867,7 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
                   else
                   {
                     // Checksum is optional
-                    if (sChecksum != null && !_isValidPaymentReferenceChecksum (sChecksum))
+                    if (sChecksum != null && !EbInterface40Helper.isValidPaymentReferenceChecksum (sChecksum))
                     {
                       aTransformationErrorList.addWarning ("PaymentMeans[" +
                                                                nPaymentMeansIndex +

@@ -29,9 +29,7 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.AddressType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.AllowanceChargeType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.ContactType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.CustomerPartyType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.DeliveryType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.DocumentReferenceType;
@@ -39,14 +37,12 @@ import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.Fin
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.InvoiceLineType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.OrderLineReferenceType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.OrderReferenceType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PartyIdentificationType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PartyNameType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PartyTaxSchemeType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PartyType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PaymentMeansType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PaymentTermsType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PeriodType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PersonType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.SupplierPartyType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.TaxCategoryType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.TaxSubtotalType;
@@ -57,12 +53,12 @@ import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.NameTyp
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.NoteType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.PaymentIDType;
 import oasis.names.specification.ubl.schema.xsd.invoice_21.InvoiceType;
+import at.gv.brz.transform.ubl2ebi.EbInterface41Helper;
 import at.gv.brz.transform.ubl2ebi.helper.SchemedID;
 import at.gv.brz.transform.ubl2ebi.helper.TaxCategoryKey;
 
 import com.phloc.commons.CGlobal;
 import com.phloc.commons.collections.ContainerHelper;
-import com.phloc.commons.locale.country.CountryCache;
 import com.phloc.commons.math.MathHelper;
 import com.phloc.commons.regex.RegExHelper;
 import com.phloc.commons.state.ETriState;
@@ -70,12 +66,8 @@ import com.phloc.commons.string.StringHelper;
 import com.phloc.commons.string.StringParser;
 import com.phloc.ebinterface.codelist.ETaxCode;
 import com.phloc.ebinterface.v41.Ebi41AccountType;
-import com.phloc.ebinterface.v41.Ebi41AddressIdentifierType;
-import com.phloc.ebinterface.v41.Ebi41AddressIdentifierTypeType;
 import com.phloc.ebinterface.v41.Ebi41AddressType;
 import com.phloc.ebinterface.v41.Ebi41BillerType;
-import com.phloc.ebinterface.v41.Ebi41CountryCodeType;
-import com.phloc.ebinterface.v41.Ebi41CountryType;
 import com.phloc.ebinterface.v41.Ebi41CurrencyType;
 import com.phloc.ebinterface.v41.Ebi41DeliveryType;
 import com.phloc.ebinterface.v41.Ebi41DetailsType;
@@ -138,171 +130,6 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
                                           final boolean bStrictERBMode)
   {
     super (aDisplayLocale, aContentLocale, bStrictERBMode);
-  }
-
-  private void _setAddressData (@Nullable final AddressType aUBLAddress,
-                                @Nonnull final Ebi41AddressType aEbiAddress,
-                                @Nonnull final String sPartyType,
-                                @Nonnull final ErrorList aTransformationErrorList)
-  {
-    boolean bCountryErrorMsgEmitted = false;
-
-    // Convert main address
-    if (aUBLAddress != null)
-    {
-      aEbiAddress.setStreet (StringHelper.getImplodedNonEmpty (' ',
-                                                               StringHelper.trim (aUBLAddress.getStreetNameValue ()),
-                                                               StringHelper.trim (aUBLAddress.getBuildingNumberValue ())));
-      aEbiAddress.setPOBox (StringHelper.trim (aUBLAddress.getPostboxValue ()));
-      aEbiAddress.setTown (StringHelper.trim (aUBLAddress.getCityNameValue ()));
-      aEbiAddress.setZIP (StringHelper.trim (aUBLAddress.getPostalZoneValue ()));
-
-      // Country
-      if (aUBLAddress.getCountry () != null)
-      {
-        final Ebi41CountryType aEbiCountry = new Ebi41CountryType ();
-        final String sCountryCode = StringHelper.trim (aUBLAddress.getCountry ().getIdentificationCodeValue ());
-        Ebi41CountryCodeType eEbiCountryCode = null;
-        try
-        {
-          eEbiCountryCode = Ebi41CountryCodeType.fromValue (sCountryCode);
-        }
-        catch (final IllegalArgumentException ex)
-        {
-          aTransformationErrorList.addError (sPartyType + "/PostalAddress/Country/IdentificationCode",
-                                             EText.ADDRESS_INVALID_COUNTRY.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                                   sCountryCode));
-          bCountryErrorMsgEmitted = true;
-        }
-        aEbiCountry.setCountryCode (eEbiCountryCode);
-
-        final String sCountryName = StringHelper.trim (aUBLAddress.getCountry ().getNameValue ());
-        aEbiCountry.setContent (sCountryName);
-        if (StringHelper.hasNoText (sCountryName) && eEbiCountryCode != null)
-        {
-          // Write locale of country in content locale
-          final Locale aLocale = CountryCache.getCountry (eEbiCountryCode.value ());
-          if (aLocale != null)
-            aEbiCountry.setContent (aLocale.getDisplayCountry (m_aContentLocale));
-        }
-        aEbiAddress.setCountry (aEbiCountry);
-      }
-    }
-
-    if (aEbiAddress.getStreet () == null)
-      aTransformationErrorList.addError (sPartyType + "/PostalAddress/StreetName",
-                                         EText.ADDRESS_NO_STREET.getDisplayText (m_aDisplayLocale));
-    if (aEbiAddress.getTown () == null)
-      aTransformationErrorList.addError (sPartyType + "/PostalAddress/CityName",
-                                         EText.ADDRESS_NO_CITY.getDisplayText (m_aDisplayLocale));
-    if (aEbiAddress.getZIP () == null)
-      aTransformationErrorList.addError (sPartyType + "/PostalAddress/PostalZone",
-                                         EText.ADDRESS_NO_ZIPCODE.getDisplayText (m_aDisplayLocale));
-    if (aEbiAddress.getCountry () == null && !bCountryErrorMsgEmitted)
-      aTransformationErrorList.addError (sPartyType + "/PostalAddress/Country/IdentificationCode",
-                                         EText.ADDRESS_NO_COUNTRY.getDisplayText (m_aDisplayLocale));
-  }
-
-  @Nonnull
-  private Ebi41AddressType _convertParty (@Nonnull final PartyType aUBLParty,
-                                          @Nonnull final String sPartyType,
-                                          @Nonnull final ErrorList aTransformationErrorList)
-  {
-    final Ebi41AddressType aEbiAddress = new Ebi41AddressType ();
-
-    if (aUBLParty.getPartyNameCount () > 1)
-      aTransformationErrorList.addWarning (sPartyType + "/PartyName",
-                                           EText.MULTIPLE_PARTIES.getDisplayText (m_aDisplayLocale));
-
-    // Convert name
-    final PartyNameType aUBLPartyName = ContainerHelper.getSafe (aUBLParty.getPartyName (), 0);
-    if (aUBLPartyName != null)
-      aEbiAddress.setName (StringHelper.trim (aUBLPartyName.getNameValue ()));
-
-    if (aEbiAddress.getName () == null)
-      aTransformationErrorList.addError (sPartyType, EText.PARTY_NO_NAME.getDisplayText (m_aDisplayLocale));
-
-    // Convert main address
-    _setAddressData (aUBLParty.getPostalAddress (), aEbiAddress, sPartyType, aTransformationErrorList);
-
-    // Contact
-    final ContactType aUBLContact = aUBLParty.getContact ();
-    if (aUBLContact != null)
-    {
-      aEbiAddress.setPhone (StringHelper.trim (aUBLContact.getTelephoneValue ()));
-      aEbiAddress.setEmail (StringHelper.trim (aUBLContact.getElectronicMailValue ()));
-    }
-
-    // Person name
-    final List <String> ebContacts = new ArrayList <String> ();
-    for (final PersonType aUBLPerson : aUBLParty.getPerson ())
-    {
-      ebContacts.add (StringHelper.getImplodedNonEmpty (' ',
-                                                        StringHelper.trim (aUBLPerson.getTitleValue ()),
-                                                        StringHelper.trim (aUBLPerson.getFirstNameValue ()),
-                                                        StringHelper.trim (aUBLPerson.getMiddleNameValue ()),
-                                                        StringHelper.trim (aUBLPerson.getFamilyNameValue ()),
-                                                        StringHelper.trim (aUBLPerson.getNameSuffixValue ())));
-    }
-    if (!ebContacts.isEmpty ())
-      aEbiAddress.setContact (StringHelper.getImplodedNonEmpty ('\n', ebContacts));
-
-    // GLN and DUNS number
-    if (aUBLParty.getEndpointID () != null)
-    {
-      final String sEndpointID = StringHelper.trim (aUBLParty.getEndpointIDValue ());
-      if (StringHelper.hasText (sEndpointID))
-      {
-        // We have an endpoint ID
-
-        // Check all identifier types
-        final String sSchemeIDToSearch = StringHelper.trim (aUBLParty.getEndpointID ().getSchemeID ());
-
-        for (final Ebi41AddressIdentifierTypeType eType : Ebi41AddressIdentifierTypeType.values ())
-          if (eType.value ().equalsIgnoreCase (sSchemeIDToSearch))
-          {
-            final Ebi41AddressIdentifierType aEbiType = new Ebi41AddressIdentifierType ();
-            aEbiType.setAddressIdentifierType (eType);
-            aEbiType.setValue (sEndpointID);
-            aEbiAddress.getAddressIdentifier ().add (aEbiType);
-          }
-
-        if (aEbiAddress.hasNoAddressIdentifierEntries ())
-          aTransformationErrorList.addWarning (sPartyType,
-                                               EText.PARTY_UNSUPPORTED_ENDPOINT.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                                        sEndpointID,
-                                                                                                        aUBLParty.getEndpointID ()
-                                                                                                                 .getSchemeID ()));
-      }
-    }
-
-    if (aEbiAddress.hasNoAddressIdentifierEntries ())
-    {
-      // check party identification
-      int nPartyIdentificationIndex = 0;
-      for (final PartyIdentificationType aUBLPartyID : aUBLParty.getPartyIdentification ())
-      {
-        final String sUBLPartyID = StringHelper.trim (aUBLPartyID.getIDValue ());
-        for (final Ebi41AddressIdentifierTypeType eType : Ebi41AddressIdentifierTypeType.values ())
-          if (eType.value ().equalsIgnoreCase (aUBLPartyID.getID ().getSchemeID ()))
-          {
-            // Add GLN/DUNS number
-            final Ebi41AddressIdentifierType aEbiType = new Ebi41AddressIdentifierType ();
-            aEbiType.setAddressIdentifierType (eType);
-            aEbiType.setValue (sUBLPartyID);
-            aEbiAddress.getAddressIdentifier ().add (aEbiType);
-          }
-        if (aEbiAddress.hasNoAddressIdentifierEntries ())
-          aTransformationErrorList.addWarning (sPartyType + "/PartyIdentification[" + nPartyIdentificationIndex + "]",
-                                               EText.PARTY_UNSUPPORTED_ADDRESS_IDENTIFIER.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                                                  sUBLPartyID,
-                                                                                                                  aUBLPartyID.getID ()
-                                                                                                                             .getSchemeID ()));
-        ++nPartyIdentificationIndex;
-      }
-    }
-
-    return aEbiAddress;
   }
 
   public static boolean _isValidPaymentReferenceChecksum (@Nullable final String sChecksum)
@@ -407,9 +234,11 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
                                              EText.ERB_CUSTOMER_ASSIGNED_ACCOUNTID_MISSING.getDisplayText (m_aDisplayLocale));
         }
       }
-      aEbiBiller.setAddress (_convertParty (aUBLSupplier.getParty (),
-                                            "AccountingSupplierParty",
-                                            aTransformationErrorList));
+      aEbiBiller.setAddress (EbInterface41Helper.convertParty (aUBLSupplier.getParty (),
+                                                               "AccountingSupplierParty",
+                                                               aTransformationErrorList,
+                                                               m_aContentLocale,
+                                                               m_aDisplayLocale));
       aEbiDoc.setBiller (aEbiBiller);
     }
 
@@ -438,9 +267,11 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
         aEbiRecipient.setBillersInvoiceRecipientID (StringHelper.trim (aUBLCustomer.getSupplierAssignedAccountIDValue ()));
       }
       // BillersInvoiceRecipientID is no longer mandatory in ebi 4.1
-      aEbiRecipient.setAddress (_convertParty (aUBLCustomer.getParty (),
-                                               "AccountingCustomerParty",
-                                               aTransformationErrorList));
+      aEbiRecipient.setAddress (EbInterface41Helper.convertParty (aUBLCustomer.getParty (),
+                                                                  "AccountingCustomerParty",
+                                                                  aTransformationErrorList,
+                                                                  m_aContentLocale,
+                                                                  m_aDisplayLocale));
       aEbiDoc.setInvoiceRecipient (aEbiRecipient);
     }
 
@@ -630,10 +461,9 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
       for (final InvoiceLineType aUBLLine : aUBLDoc.getInvoiceLine ())
       {
         // Try to resolve tax category
-        TaxCategoryType aUBLTaxCategory = ContainerHelper.getSafe (aUBLLine.getItem ()
-                                                                                  .getClassifiedTaxCategory (), 0);
+        TaxCategoryType aUBLTaxCategory = ContainerHelper.getSafe (aUBLLine.getItem ().getClassifiedTaxCategory (), 0);
         if (aUBLTaxCategory == null)
-        { 
+        {
           // No direct tax category -> check if it is somewhere in the tax total
           outer: for (final TaxTotalType aUBLTaxTotal : aUBLLine.getTaxTotal ())
             for (final TaxSubtotalType aUBLTaxSubTotal : aUBLTaxTotal.getTaxSubtotal ())
@@ -1232,10 +1062,12 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
           if (aUBLDelivery.getDeliveryLocation () != null && aUBLDelivery.getDeliveryLocation ().getAddress () != null)
           {
             final Ebi41AddressType aEbiAddress = new Ebi41AddressType ();
-            _setAddressData (aUBLDelivery.getDeliveryLocation ().getAddress (),
-                             aEbiAddress,
-                             "Delivery",
-                             aTransformationErrorList);
+            EbInterface41Helper.setAddressData (aUBLDelivery.getDeliveryLocation ().getAddress (),
+                                                aEbiAddress,
+                                                "Delivery",
+                                                aTransformationErrorList,
+                                                m_aContentLocale,
+                                                m_aDisplayLocale);
 
             // Check delivery party
             String sAddressName = null;
