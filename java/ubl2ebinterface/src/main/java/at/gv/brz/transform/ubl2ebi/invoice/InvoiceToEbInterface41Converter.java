@@ -106,8 +106,8 @@ import com.phloc.ebinterface.v41.Ebi41VATItemType;
 import com.phloc.ebinterface.v41.Ebi41VATRateType;
 import com.phloc.ebinterface.v41.Ebi41VATType;
 import com.phloc.ebinterface.v41.ObjectFactory;
-import com.phloc.ubl20.codelist.EPaymentMeansCode20;
-import com.phloc.ubl20.codelist.EUnitOfMeasureCode20;
+import com.phloc.ubl21.codelist.EPaymentMeansCode21;
+import com.phloc.ubl21.codelist.EUnitOfMeasureCode21;
 import com.phloc.validation.error.ErrorList;
 
 import eu.europa.ec.cipa.peppol.codelist.ETaxSchemeID;
@@ -724,7 +724,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
         if (aEbiQuantity.getUnit () == null)
         {
           // ebInterface requires a quantity!
-          aEbiQuantity.setUnit (EUnitOfMeasureCode20.C62.getID ());
+          aEbiQuantity.setUnit (EUnitOfMeasureCode21.C62.getID ());
           aTransformationErrorList.addWarning ("InvoiceLine[" + nInvoiceLineIndex + "]/InvoicedQuantity/UnitCode",
                                                EText.DETAILS_INVALID_UNIT.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                                   aEbiQuantity.getUnit ()));
@@ -993,8 +993,8 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
       for (final PaymentMeansType aUBLPaymentMeans : aUBLInvoice.getPaymentMeans ())
       {
         final String sPaymentMeansCode = StringHelper.trim (aUBLPaymentMeans.getPaymentMeansCodeValue ());
-        final EPaymentMeansCode20 ePaymentMeans = EPaymentMeansCode20.getFromIDOrNull (sPaymentMeansCode);
-        if (ePaymentMeans == EPaymentMeansCode20._31)
+        final EPaymentMeansCode21 ePaymentMeans = EPaymentMeansCode21.getFromIDOrNull (sPaymentMeansCode);
+        if (ePaymentMeans == EPaymentMeansCode21._31)
         {
           // Is a payment channel code present?
           final String sPaymentChannelCode = StringHelper.trim (aUBLPaymentMeans.getPaymentChannelCodeValue ());
@@ -1115,7 +1115,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
                                                                                                                   sPaymentChannelCode));
         }
         else
-          if (ePaymentMeans == EPaymentMeansCode20._49)
+          if (ePaymentMeans == EPaymentMeansCode21._49)
           {
             final Ebi41DirectDebitType aEbiDirectDebit = new Ebi41DirectDebitType ();
 
@@ -1144,8 +1144,8 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
           {
             aTransformationErrorList.addError ("PaymentMeans[" + nPaymentMeansIndex + "]",
                                                EText.PAYMENTMEANS_CODE_INVALID.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                                       EPaymentMeansCode20._31.getID (),
-                                                                                                       EPaymentMeansCode20._49.getID ()));
+                                                                                                       EPaymentMeansCode21._31.getID (),
+                                                                                                       EPaymentMeansCode21._49.getID ()));
           }
 
         ++nPaymentMeansIndex;

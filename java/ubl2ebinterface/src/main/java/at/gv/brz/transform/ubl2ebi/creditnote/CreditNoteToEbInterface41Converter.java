@@ -92,7 +92,7 @@ import com.phloc.ebinterface.v41.Ebi41VATItemType;
 import com.phloc.ebinterface.v41.Ebi41VATRateType;
 import com.phloc.ebinterface.v41.Ebi41VATType;
 import com.phloc.ebinterface.v41.ObjectFactory;
-import com.phloc.ubl20.codelist.EUnitOfMeasureCode20;
+import com.phloc.ubl21.codelist.EUnitOfMeasureCode21;
 import com.phloc.validation.error.ErrorList;
 
 import eu.europa.ec.cipa.peppol.codelist.ETaxSchemeID;
@@ -738,7 +738,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
         if (aEbiQuantity.getUnit () == null)
         {
           // ebInterface requires a quantity!
-          aEbiQuantity.setUnit (EUnitOfMeasureCode20.C62.getID ());
+          aEbiQuantity.setUnit (EUnitOfMeasureCode21.C62.getID ());
           aTransformationErrorList.addWarning ("CreditNoteLine[" +
                                                    nCreditNoteLineIndex +
                                                    "]/CreditNotedQuantity/UnitCode",
