@@ -316,7 +316,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
   }
 
   /**
-   * Main conversion method to convert from UBL 2.0 to ebInterface 4.1
+   * Main conversion method to convert from UBL to ebInterface 4.1
    * 
    * @param aUBLDoc
    *        The UBL invoice to be converted
@@ -342,9 +342,9 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
       return null;
 
     // Build ebInterface invoice
-    final Ebi41InvoiceType aEbiInvoice = new Ebi41InvoiceType ();
-    aEbiInvoice.setGeneratingSystem (EBI_GENERATING_SYSTEM);
-    aEbiInvoice.setDocumentType (Ebi41DocumentTypeType.INVOICE);
+    final Ebi41InvoiceType aEbiDoc = new Ebi41InvoiceType ();
+    aEbiDoc.setGeneratingSystem (EBI_GENERATING_SYSTEM);
+    aEbiDoc.setDocumentType (Ebi41DocumentTypeType.INVOICE);
 
     // Cannot set the language, because the 3letter code is expected but we only
     // have the 2letter code!
@@ -352,7 +352,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
     final String sUBLCurrencyCode = StringHelper.trim (aUBLDoc.getDocumentCurrencyCodeValue ());
     try
     {
-      aEbiInvoice.setInvoiceCurrency (Ebi41CurrencyType.fromValue (sUBLCurrencyCode));
+      aEbiDoc.setInvoiceCurrency (Ebi41CurrencyType.fromValue (sUBLCurrencyCode));
     }
     catch (final IllegalArgumentException ex)
     {
@@ -365,16 +365,16 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
     final String sInvoiceNumber = StringHelper.trim (aUBLDoc.getIDValue ());
     if (StringHelper.hasNoText (sInvoiceNumber))
       aTransformationErrorList.addError ("ID", EText.MISSING_INVOICE_NUMBER.getDisplayText (m_aDisplayLocale));
-    aEbiInvoice.setInvoiceNumber (sInvoiceNumber);
+    aEbiDoc.setInvoiceNumber (sInvoiceNumber);
 
     // Ignore the time!
-    aEbiInvoice.setInvoiceDate (aUBLDoc.getIssueDateValue ());
-    if (aEbiInvoice.getInvoiceDate () == null)
+    aEbiDoc.setInvoiceDate (aUBLDoc.getIssueDateValue ());
+    if (aEbiDoc.getInvoiceDate () == null)
       aTransformationErrorList.addError ("IssueDate", EText.MISSING_INVOICE_DATE.getDisplayText (m_aDisplayLocale));
 
     // Is duplicate/copy indicator?
     if (aUBLDoc.getCopyIndicator () != null)
-      aEbiInvoice.setIsDuplicate (Boolean.valueOf (aUBLDoc.getCopyIndicator ().isValue ()));
+      aEbiDoc.setIsDuplicate (Boolean.valueOf (aUBLDoc.getCopyIndicator ().isValue ()));
 
     // Biller/Supplier (creator of the invoice)
     {
@@ -410,7 +410,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
       aEbiBiller.setAddress (_convertParty (aUBLSupplier.getParty (),
                                             "AccountingSupplierParty",
                                             aTransformationErrorList));
-      aEbiInvoice.setBiller (aEbiBiller);
+      aEbiDoc.setBiller (aEbiBiller);
     }
 
     // Invoice recipient
@@ -441,7 +441,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
       aEbiRecipient.setAddress (_convertParty (aUBLCustomer.getParty (),
                                                "AccountingCustomerParty",
                                                aTransformationErrorList));
-      aEbiInvoice.setInvoiceRecipient (aEbiRecipient);
+      aEbiDoc.setInvoiceRecipient (aEbiRecipient);
     }
 
     // Order reference of invoice recipient
@@ -473,7 +473,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
 
       final Ebi41OrderReferenceType aEbiOrderReference = new Ebi41OrderReferenceType ();
       aEbiOrderReference.setOrderID (sUBLOrderReferenceID);
-      aEbiInvoice.getInvoiceRecipient ().setOrderReference (aEbiOrderReference);
+      aEbiDoc.getInvoiceRecipient ().setOrderReference (aEbiOrderReference);
 
       // Add contract reference as further identification
       for (final DocumentReferenceType aDocumentReference : aUBLDoc.getContractDocumentReference ())
@@ -482,7 +482,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
           final Ebi41FurtherIdentificationType aEbiFurtherIdentification = new Ebi41FurtherIdentificationType ();
           aEbiFurtherIdentification.setIdentificationType ("Contract");
           aEbiFurtherIdentification.setValue (StringHelper.trim (aDocumentReference.getIDValue ()));
-          aEbiInvoice.getInvoiceRecipient ().getFurtherIdentification ().add (aEbiFurtherIdentification);
+          aEbiDoc.getInvoiceRecipient ().getFurtherIdentification ().add (aEbiFurtherIdentification);
         }
     }
 
@@ -618,7 +618,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
       }
 
       aEbiTax.setVAT (aEbiVAT);
-      aEbiInvoice.setTax (aEbiTax);
+      aEbiDoc.setTax (aEbiTax);
     }
 
     // Line items
@@ -884,7 +884,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
         nInvoiceLineIndex++;
       }
       aEbiDetails.getItemList ().add (aEbiItemList);
-      aEbiInvoice.setDetails (aEbiDetails);
+      aEbiDoc.setDetails (aEbiDetails);
     }
 
     if (aEbiVAT.hasNoVATItemEntries ())
@@ -967,7 +967,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
           aEbiRS.getReductionOrSurchargeOrOtherVATableTax ().add (new ObjectFactory ().createReduction (aEbiRSItem));
           aEbiBaseAmount = aEbiBaseAmount.subtract (aEbiRSItem.getAmount ());
         }
-        aEbiInvoice.setReductionAndSurchargeDetails (aEbiRS);
+        aEbiDoc.setReductionAndSurchargeDetails (aEbiRS);
         ++nAllowanceChargeIndex;
       }
     }
@@ -981,9 +981,9 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
     }
 
     // Total gross amount
-    aEbiInvoice.setTotalGrossAmount (aUBLDoc.getLegalMonetaryTotal ().getTaxInclusiveAmountValue ());
+    aEbiDoc.setTotalGrossAmount (aUBLDoc.getLegalMonetaryTotal ().getTaxInclusiveAmountValue ());
     // Payable amount
-    aEbiInvoice.setPayableAmount (aUBLDoc.getLegalMonetaryTotal ().getPayableAmountValue ());
+    aEbiDoc.setPayableAmount (aUBLDoc.getLegalMonetaryTotal ().getPayableAmountValue ());
 
     // Payment method
     final Ebi41PaymentMethodType aEbiPaymentMethod = new Ebi41PaymentMethodType ();
@@ -1102,7 +1102,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
 
             aEbiUBTMethod.getBeneficiaryAccount ().add (aEbiAccount);
             aEbiPaymentMethod.setUniversalBankTransaction (aEbiUBTMethod);
-            aEbiInvoice.setPaymentMethod (aEbiPaymentMethod);
+            aEbiDoc.setPaymentMethod (aEbiPaymentMethod);
 
             // Set due date (optional)
             aEbiPaymentConditions.setDueDate (aUBLPaymentMeans.getPaymentDueDateValue ());
@@ -1133,7 +1133,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
             }
 
             aEbiPaymentMethod.setDirectDebit (aEbiDirectDebit);
-            aEbiInvoice.setPaymentMethod (aEbiPaymentMethod);
+            aEbiDoc.setPaymentMethod (aEbiPaymentMethod);
 
             // Set due date (optional)
             aEbiPaymentConditions.setDueDate (aUBLPaymentMeans.getPaymentDueDateValue ());
@@ -1154,7 +1154,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
 
     if (m_bStrictERBMode)
     {
-      if (aEbiInvoice.getPaymentMethod () == null)
+      if (aEbiDoc.getPaymentMethod () == null)
         aTransformationErrorList.addError ("Invoice", EText.ERB_NO_PAYMENT_METHOD.getDisplayText (m_aDisplayLocale));
     }
 
@@ -1213,7 +1213,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
     else
     {
       // Independent if discounts are present or not
-      aEbiInvoice.setPaymentConditions (aEbiPaymentConditions);
+      aEbiDoc.setPaymentConditions (aEbiPaymentConditions);
     }
 
     // Delivery
@@ -1308,8 +1308,8 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
     }
 
     if (aEbiDelivery.getDate () != null || aEbiDelivery.getPeriod () != null)
-      aEbiInvoice.setDelivery (aEbiDelivery);
+      aEbiDoc.setDelivery (aEbiDelivery);
 
-    return aEbiInvoice;
+    return aEbiDoc;
   }
 }

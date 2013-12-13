@@ -356,9 +356,9 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
       return null;
 
     // Build ebInterface invoice
-    final Ebi40InvoiceType aEbiInvoice = new Ebi40InvoiceType ();
-    aEbiInvoice.setGeneratingSystem (EBI_GENERATING_SYSTEM);
-    aEbiInvoice.setDocumentType (Ebi40DocumentTypeType.INVOICE);
+    final Ebi40InvoiceType aEbiDoc = new Ebi40InvoiceType ();
+    aEbiDoc.setGeneratingSystem (EBI_GENERATING_SYSTEM);
+    aEbiDoc.setDocumentType (Ebi40DocumentTypeType.INVOICE);
 
     // Cannot set the language, because the 3letter code is expected but we only
     // have the 2letter code!
@@ -366,7 +366,7 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
     final String sUBLCurrencyCode = StringHelper.trim (aUBLDoc.getDocumentCurrencyCodeValue ());
     try
     {
-      aEbiInvoice.setInvoiceCurrency (Ebi40CurrencyType.fromValue (sUBLCurrencyCode));
+      aEbiDoc.setInvoiceCurrency (Ebi40CurrencyType.fromValue (sUBLCurrencyCode));
     }
     catch (final IllegalArgumentException ex)
     {
@@ -380,11 +380,11 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
     if (StringHelper.hasNoText (sInvoiceNumber))
       aTransformationErrorList.addError ("ID", EText.MISSING_INVOICE_NUMBER.getDisplayText (m_aDisplayLocale));
     else
-      aEbiInvoice.setInvoiceNumber (_makeAlphaNumType (sInvoiceNumber, "ID", aTransformationErrorList));
+      aEbiDoc.setInvoiceNumber (_makeAlphaNumType (sInvoiceNumber, "ID", aTransformationErrorList));
 
     // Ignore the time!
-    aEbiInvoice.setInvoiceDate (aUBLDoc.getIssueDateValue ());
-    if (aEbiInvoice.getInvoiceDate () == null)
+    aEbiDoc.setInvoiceDate (aUBLDoc.getIssueDateValue ());
+    if (aEbiDoc.getInvoiceDate () == null)
       aTransformationErrorList.addError ("IssueDate", EText.MISSING_INVOICE_DATE.getDisplayText (m_aDisplayLocale));
 
     // Biller/Supplier (creator of the invoice)
@@ -421,7 +421,7 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
       aEbiBiller.setAddress (_convertParty (aUBLSupplier.getParty (),
                                             "AccountingSupplierParty",
                                             aTransformationErrorList));
-      aEbiInvoice.setBiller (aEbiBiller);
+      aEbiDoc.setBiller (aEbiBiller);
     }
 
     // Invoice recipient
@@ -460,7 +460,7 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
       aEbiRecipient.setAddress (_convertParty (aUBLCustomer.getParty (),
                                                "AccountingCustomerParty",
                                                aTransformationErrorList));
-      aEbiInvoice.setInvoiceRecipient (aEbiRecipient);
+      aEbiDoc.setInvoiceRecipient (aEbiRecipient);
     }
 
     // Order reference of invoice recipient
@@ -504,7 +504,7 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
 
       final Ebi40OrderReferenceType aEbiOrderReference = new Ebi40OrderReferenceType ();
       aEbiOrderReference.setOrderID (sUBLOrderReferenceID);
-      aEbiInvoice.getInvoiceRecipient ().setOrderReference (aEbiOrderReference);
+      aEbiDoc.getInvoiceRecipient ().setOrderReference (aEbiOrderReference);
     }
 
     // Tax totals
@@ -639,7 +639,7 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
       }
 
       aEbiTax.setVAT (aEbiVAT);
-      aEbiInvoice.setTax (aEbiTax);
+      aEbiDoc.setTax (aEbiTax);
     }
 
     // Line items
@@ -900,7 +900,7 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
         nInvoiceLineIndex++;
       }
       aEbiDetails.getItemList ().add (aEbiItemList);
-      aEbiInvoice.setDetails (aEbiDetails);
+      aEbiDoc.setDetails (aEbiDetails);
     }
 
     if (aEbiVAT.hasNoItemEntries ())
@@ -989,7 +989,7 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
           aEbiRS.getReductionOrSurcharge ().add (new ObjectFactory ().createReduction (aEbiRSItem));
           aEbiBaseAmount = aEbiBaseAmount.subtract (aEbiRSItem.getAmount ());
         }
-        aEbiInvoice.setReductionAndSurchargeDetails (aEbiRS);
+        aEbiDoc.setReductionAndSurchargeDetails (aEbiRS);
         ++nAllowanceChargeIndex;
       }
     }
@@ -1003,7 +1003,7 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
     }
 
     // Total gross amount
-    aEbiInvoice.setTotalGrossAmount (aUBLDoc.getLegalMonetaryTotal ().getPayableAmountValue ());
+    aEbiDoc.setTotalGrossAmount (aUBLDoc.getLegalMonetaryTotal ().getPayableAmountValue ());
 
     // Payment method
     final Ebi40PaymentConditionsType aEbiPaymentConditions = new Ebi40PaymentConditionsType ();
@@ -1163,7 +1163,7 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
             }
 
             aEbiUBTMethod.getBeneficiaryAccount ().add (aEbiAccount);
-            aEbiInvoice.setPaymentMethod (aEbiUBTMethod);
+            aEbiDoc.setPaymentMethod (aEbiUBTMethod);
 
             // Set due date (optional)
             aEbiPaymentConditions.setDueDate (aUBLPaymentMeans.getPaymentDueDateValue ());
@@ -1193,7 +1193,7 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
                 aEbiDirectDebit.setComment (StringHelper.getImploded ('\n', aNotes));
             }
 
-            aEbiInvoice.setPaymentMethod (aEbiDirectDebit);
+            aEbiDoc.setPaymentMethod (aEbiDirectDebit);
 
             // Set due date (optional)
             aEbiPaymentConditions.setDueDate (aUBLPaymentMeans.getPaymentDueDateValue ());
@@ -1214,7 +1214,7 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
 
     if (m_bStrictERBMode)
     {
-      if (aEbiInvoice.getPaymentMethod () == null)
+      if (aEbiDoc.getPaymentMethod () == null)
         aTransformationErrorList.addError ("Invoice", EText.ERB_NO_PAYMENT_METHOD.getDisplayText (m_aDisplayLocale));
     }
 
@@ -1273,7 +1273,7 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
     else
     {
       // Independent if discounts are present or not
-      aEbiInvoice.setPaymentConditions (aEbiPaymentConditions);
+      aEbiDoc.setPaymentConditions (aEbiPaymentConditions);
     }
 
     // Delivery
@@ -1368,8 +1368,8 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
     }
 
     if (aEbiDelivery.getDate () != null || aEbiDelivery.getPeriod () != null)
-      aEbiInvoice.setDelivery (aEbiDelivery);
+      aEbiDoc.setDelivery (aEbiDelivery);
 
-    return aEbiInvoice;
+    return aEbiDoc;
   }
 }
