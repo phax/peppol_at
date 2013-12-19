@@ -182,7 +182,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
     {
       aEbiDoc.setInvoiceCurrency (Ebi41CurrencyType.fromValue (sUBLCurrencyCode));
     }
-    catch (final IllegalArgumentException ex)
+    catch (final Exception ex)
     {
       aTransformationErrorList.addError ("DocumentCurrencyCode",
                                          EText.INVALID_CURRENCY_CODE.getDisplayTextWithArgs (m_aDisplayLocale,

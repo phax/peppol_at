@@ -156,7 +156,7 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
     {
       aEbiDoc.setInvoiceCurrency (Ebi40CurrencyType.fromValue (sUBLCurrencyCode));
     }
-    catch (final IllegalArgumentException ex)
+    catch (final Exception ex)
     {
       aTransformationErrorList.addError ("DocumentCurrencyCode",
                                          EText.INVALID_CURRENCY_CODE.getDisplayTextWithArgs (m_aDisplayLocale,
