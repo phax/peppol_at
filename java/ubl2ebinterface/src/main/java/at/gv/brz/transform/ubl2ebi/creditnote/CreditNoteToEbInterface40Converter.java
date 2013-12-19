@@ -34,6 +34,7 @@ import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.Cre
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.CustomerPartyType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.DeliveryType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.DocumentReferenceType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.MonetaryTotalType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.OrderLineReferenceType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.OrderReferenceType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PartyNameType;
@@ -799,15 +800,16 @@ public final class CreditNoteToEbInterface40Converter extends AbstractCreditNote
     }
 
     // PrepaidAmount is not supported!
-    if (aUBLDoc.getLegalMonetaryTotal ().getPrepaidAmount () != null &&
-        !MathHelper.isEqualToZero (aUBLDoc.getLegalMonetaryTotal ().getPrepaidAmountValue ()))
+    final MonetaryTotalType aUBLMonetaryTotal = aUBLDoc.getLegalMonetaryTotal ();
+    if (aUBLMonetaryTotal.getPrepaidAmount () != null &&
+        !MathHelper.isEqualToZero (aUBLMonetaryTotal.getPrepaidAmountValue ()))
     {
       aTransformationErrorList.addError ("CreditNote/LegalMonetaryTotal/PrepaidAmount",
                                          EText.PREPAID_NOT_SUPPORTED.getDisplayText (m_aDisplayLocale));
     }
 
     // Total gross amount
-    aEbiDoc.setTotalGrossAmount (aUBLDoc.getLegalMonetaryTotal ().getPayableAmountValue ());
+    aEbiDoc.setTotalGrossAmount (aUBLMonetaryTotal.getPayableAmountValue ());
 
     // Always no payment
     final Ebi40PaymentConditionsType aEbiPaymentConditions = new Ebi40PaymentConditionsType ();
