@@ -1072,10 +1072,11 @@ public final class InvoiceToEbInterface40Converter extends AbstractInvoiceConver
           }
         }
         else
-        {
-          aTransformationErrorList.addWarning ("PaymentTerms[" + nPaymentTermsIndex + "]",
-                                               EText.PENALTY_NOT_ALLOWED.getDisplayText (m_aDisplayLocale));
-        }
+          if (aUBLPaymentTerms.getPenaltySurchargePercent () != null)
+          {
+            aTransformationErrorList.addWarning ("PaymentTerms[" + nPaymentTermsIndex + "]",
+                                                 EText.PENALTY_NOT_ALLOWED.getDisplayText (m_aDisplayLocale));
+          }
 
         ++nPaymentTermsIndex;
       }
