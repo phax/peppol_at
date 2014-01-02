@@ -69,7 +69,7 @@
     <dependency>
       <groupId>com.phloc</groupId>
       <artifactId>phloc-commons</artifactId>
-      <version>4.1.0-SNAPSHOT</version>
+      <version>4.1.0</version>
     </dependency>
     <dependency>
       <groupId>com.phloc</groupId>
@@ -89,7 +89,7 @@
     <dependency>
       <groupId>com.phloc</groupId>
       <artifactId>phloc-datetime</artifactId>
-      <version>3.0.6</version>
+      <version>3.1.0</version>
     </dependency>
     <dependency>
       <groupId>com.phloc</groupId>
@@ -99,7 +99,7 @@
     <dependency>
       <groupId>com.phloc</groupId>
       <artifactId>phloc-validation</artifactId>
-      <version>3.1.0</version>
+      <version>3.1.1</version>
     </dependency>
     <dependency>
       <groupId>eu.europa.ec.cipa</groupId>
