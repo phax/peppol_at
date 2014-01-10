@@ -119,24 +119,14 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
     super (aDisplayLocale, aContentLocale, bStrictERBMode);
   }
 
-  public static boolean _isValidPaymentReferenceChecksum (@Nullable final String sChecksum)
-  {
-    if (StringHelper.getLength (sChecksum) == 1)
-    {
-      final char c = sChecksum.charAt (0);
-      return (c >= '0' && c <= '9') || c == 'X';
-    }
-    return StringHelper.getLength (sChecksum) <= 4;
-  }
-
   /**
-   * Main conversion method to convert from UBL to ebInterface 4.0
+   * Main conversion method to convert from UBL to ebInterface 4.1
    * 
    * @param aUBLDoc
    *        The UBL invoice to be converted
    * @param aTransformationErrorList
    *        Error list. Must be empty!
-   * @return The created ebInterface 4.0 document or <code>null</code> in case
+   * @return The created ebInterface 4.1 document or <code>null</code> in case
    *         of a severe error.
    */
   @Nullable
@@ -222,15 +212,15 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
         // The customer's internal identifier for the supplier.
         aEbiBiller.setInvoiceRecipientsBillerID (StringHelper.trim (aUBLSupplier.getCustomerAssignedAccountIDValue ()));
       }
-      if (StringHelper.hasNoText (aEbiBiller.getInvoiceRecipientsBillerID ()))
-      {
-        if (m_bStrictERBMode)
+
+      // Disabled because field is optional
+      if (false)
+        if (m_bStrictERBMode && StringHelper.hasNoText (aEbiBiller.getInvoiceRecipientsBillerID ()))
         {
           // Mandatory field
           aTransformationErrorList.addError ("AccountingSupplierParty/CustomerAssignedAccountID",
                                              EText.ERB_CUSTOMER_ASSIGNED_ACCOUNTID_MISSING.getDisplayText (m_aDisplayLocale));
         }
-      }
       aEbiBiller.setAddress (EbInterface41Helper.convertParty (aUBLSupplier.getParty (),
                                                                "AccountingSupplierParty",
                                                                aTransformationErrorList,
@@ -830,12 +820,6 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
     final Ebi41NoPaymentType aEbiNoPayment = new Ebi41NoPaymentType ();
     aEbiPaymentMethod.setNoPayment (aEbiNoPayment);
     aEbiDoc.setPaymentMethod (aEbiPaymentMethod);
-
-    if (m_bStrictERBMode)
-    {
-      if (aEbiDoc.getPaymentMethod () == null)
-        aTransformationErrorList.addError ("CreditNote", EText.ERB_NO_PAYMENT_METHOD.getDisplayText (m_aDisplayLocale));
-    }
 
     final Ebi41PaymentConditionsType aEbiPaymentConditions = new Ebi41PaymentConditionsType ();
     if (aEbiPaymentConditions.getDueDate () == null)

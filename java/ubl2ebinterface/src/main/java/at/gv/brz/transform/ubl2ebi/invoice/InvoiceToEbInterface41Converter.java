@@ -134,14 +134,21 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
     super (aDisplayLocale, aContentLocale, bStrictERBMode);
   }
 
-  public static boolean _isValidPaymentReferenceChecksum (@Nullable final String sChecksum)
+  private static void _setPaymentMeansComment (@Nonnull final PaymentMeansType aUBLPaymentMeans,
+                                               @Nonnull final Ebi41PaymentMethodType aEbiPaymentMethod)
   {
-    if (StringHelper.getLength (sChecksum) == 1)
+    if (aUBLPaymentMeans.hasInstructionNoteEntries ())
     {
-      final char c = sChecksum.charAt (0);
-      return (c >= '0' && c <= '9') || c == 'X';
+      final List <String> aNotes = new ArrayList <String> ();
+      for (final InstructionNoteType aUBLNote : aUBLPaymentMeans.getInstructionNote ())
+      {
+        final String sNote = StringHelper.trim (aUBLNote.getValue ());
+        if (StringHelper.hasText (sNote))
+          aNotes.add (sNote);
+      }
+      if (!aNotes.isEmpty ())
+        aEbiPaymentMethod.setComment (StringHelper.getImploded ('\n', aNotes));
     }
-    return StringHelper.getLength (sChecksum) <= 4;
   }
 
   /**
@@ -237,15 +244,15 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
         // The customer's internal identifier for the supplier.
         aEbiBiller.setInvoiceRecipientsBillerID (StringHelper.trim (aUBLSupplier.getCustomerAssignedAccountIDValue ()));
       }
-      if (StringHelper.hasNoText (aEbiBiller.getInvoiceRecipientsBillerID ()))
-      {
-        if (m_bStrictERBMode)
+
+      // Disabled because field is optional
+      if (false)
+        if (m_bStrictERBMode && StringHelper.hasNoText (aEbiBiller.getInvoiceRecipientsBillerID ()))
         {
           // Mandatory field
           aTransformationErrorList.addError ("AccountingSupplierParty/CustomerAssignedAccountID",
                                              EText.ERB_CUSTOMER_ASSIGNED_ACCOUNTID_MISSING.getDisplayText (m_aDisplayLocale));
         }
-      }
       aEbiBiller.setAddress (EbInterface41Helper.convertParty (aUBLSupplier.getParty (),
                                                                "AccountingSupplierParty",
                                                                aTransformationErrorList,
@@ -847,6 +854,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
           final String sPaymentChannelCode = StringHelper.trim (aUBLPaymentMeans.getPaymentChannelCodeValue ());
           if (PAYMENT_CHANNEL_CODE_IBAN.equals (sPaymentChannelCode))
           {
+            _setPaymentMeansComment (aUBLPaymentMeans, aEbiPaymentMethod);
             final Ebi41UniversalBankTransactionType aEbiUBTMethod = new Ebi41UniversalBankTransactionType ();
 
             // Find payment reference
@@ -933,20 +941,6 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
             }
             aEbiAccount.setBankAccountOwner (sBankAccountOwnerName);
 
-            // Comments
-            if (aUBLPaymentMeans.hasInstructionNoteEntries ())
-            {
-              final List <String> aNotes = new ArrayList <String> ();
-              for (final InstructionNoteType aUBLNote : aUBLPaymentMeans.getInstructionNote ())
-              {
-                final String sNote = StringHelper.trim (aUBLNote.getValue ());
-                if (StringHelper.hasText (sNote))
-                  aNotes.add (sNote);
-              }
-              if (!aNotes.isEmpty ())
-                aEbiPaymentMethod.setComment (StringHelper.getImploded ('\n', aNotes));
-            }
-
             aEbiUBTMethod.getBeneficiaryAccount ().add (aEbiAccount);
             aEbiPaymentMethod.setUniversalBankTransaction (aEbiUBTMethod);
             aEbiDoc.setPaymentMethod (aEbiPaymentMethod);
@@ -965,21 +959,8 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
           // Direct debit
           if (ePaymentMeans == EPaymentMeansCode21._49)
           {
+            _setPaymentMeansComment (aUBLPaymentMeans, aEbiPaymentMethod);
             final Ebi41DirectDebitType aEbiDirectDebit = new Ebi41DirectDebitType ();
-
-            if (aUBLPaymentMeans.hasInstructionNoteEntries ())
-            {
-              final List <String> aNotes = new ArrayList <String> ();
-              for (final InstructionNoteType aUBLNote : aUBLPaymentMeans.getInstructionNote ())
-              {
-                final String sNote = StringHelper.trim (aUBLNote.getValue ());
-                if (StringHelper.hasText (sNote))
-                  aNotes.add (sNote);
-              }
-              if (!aNotes.isEmpty ())
-                aEbiPaymentMethod.setComment (StringHelper.getImploded ('\n', aNotes));
-            }
-
             aEbiPaymentMethod.setDirectDebit (aEbiDirectDebit);
             aEbiDoc.setPaymentMethod (aEbiPaymentMethod);
 
@@ -994,6 +975,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
             if (MathHelper.isEqualToZero (aEbiDoc.getPayableAmount ()))
             {
               // As nothing is to be paid we can safely use NoPayment
+              _setPaymentMeansComment (aUBLPaymentMeans, aEbiPaymentMethod);
               final Ebi41NoPaymentType aEbiNoPayment = new Ebi41NoPaymentType ();
               aEbiPaymentMethod.setNoPayment (aEbiNoPayment);
               break;
