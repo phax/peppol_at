@@ -363,6 +363,17 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
                                                                                  .getSchemeID ());
           final String sUBLTaxSchemeID = StringHelper.trim (aUBLTaxCategory.getTaxScheme ().getIDValue ());
 
+          if (aUBLTaxCategory.getID () == null)
+          {
+            aTransformationErrorList.addError ("TaxTotal[" +
+                                                   nTaxTotalIndex +
+                                                   "]/TaxSubtotal[" +
+                                                   nTaxSubtotalIndex +
+                                                   "]/TaxCategory",
+                                               EText.MISSING_TAXCATEGORY_ID.getDisplayText (m_aDisplayLocale));
+            break;
+          }
+
           final String sUBLTaxCategorySchemeID = StringHelper.trim (aUBLTaxCategory.getID ().getSchemeID ());
           final String sUBLTaxCategoryID = StringHelper.trim (aUBLTaxCategory.getID ().getValue ());
 
