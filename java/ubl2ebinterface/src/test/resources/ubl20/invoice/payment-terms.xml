@@ -207,6 +207,7 @@
     <cbc:PaymentMeansCode listAgencyID="NES" listID="UN/ECE 4461 Subset">31</cbc:PaymentMeansCode>
     <cbc:PaymentDueDate>2009-12-31</cbc:PaymentDueDate>
     <cbc:PaymentChannelCode>IBAN</cbc:PaymentChannelCode>
+    <cbc:InstructionNote>To be paid as soon as possible</cbc:InstructionNote>
     <cbc:PaymentID>Payref1</cbc:PaymentID>
     <cac:PayeeFinancialAccount>
       <cbc:ID schemeID="IBAN">NO9386011117947</cbc:ID>
