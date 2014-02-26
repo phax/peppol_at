@@ -326,14 +326,14 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
         {
           // Tax category is a mandatory element
           final TaxCategoryType aUBLTaxCategory = aUBLSubtotal.getTaxCategory ();
+          BigDecimal aUBLTaxAmount = aUBLSubtotal.getTaxAmountValue ();
+          BigDecimal aUBLTaxableAmount = aUBLSubtotal.getTaxableAmountValue ();
 
           // Is the percentage value directly specified
           BigDecimal aUBLPercentage = aUBLTaxCategory.getPercentValue ();
           if (aUBLPercentage == null)
           {
             // no it is not :(
-            final BigDecimal aUBLTaxAmount = aUBLSubtotal.getTaxAmountValue ();
-            final BigDecimal aUBLTaxableAmount = aUBLSubtotal.getTaxableAmountValue ();
             if (aUBLTaxAmount != null && aUBLTaxableAmount != null)
             {
               // Calculate percentage
@@ -345,16 +345,30 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
             }
           }
 
-          BigDecimal aUBLTaxableAmount = aUBLSubtotal.getTaxableAmountValue ();
-          if (aUBLTaxableAmount == null && aUBLPercentage != null)
+          if (aUBLPercentage != null)
           {
-            // Calculate (inexact) subtotal
-            aUBLTaxableAmount = MathHelper.isEqualToZero (aUBLPercentage) ? BigDecimal.ZERO
-                                                                         : aUBLSubtotal.getTaxAmountValue ()
-                                                                                       .multiply (CGlobal.BIGDEC_100)
-                                                                                       .divide (aUBLPercentage,
-                                                                                                SCALE_PRICE_LINE,
-                                                                                                ROUNDING_MODE);
+            // We have at least the percentage
+            if (aUBLTaxableAmount == null && aUBLTaxAmount != null)
+            {
+              // Cannot "back" calculate the taxable amount from 0 percentage!
+              if (MathHelper.isNotEqualToZero (aUBLPercentage))
+              {
+                // Calculate (inexact) subtotal
+                aUBLTaxableAmount = aUBLTaxAmount.multiply (CGlobal.BIGDEC_100).divide (aUBLPercentage,
+                                                                                        SCALE_PRICE_LINE,
+                                                                                        ROUNDING_MODE);
+              }
+            }
+            else
+              if (aUBLTaxableAmount != null && aUBLTaxAmount == null)
+              {
+                // Calculate (inexact) subtotal
+                aUBLTaxAmount = MathHelper.isEqualToZero (aUBLPercentage) ? BigDecimal.ZERO
+                                                                         : aUBLTaxableAmount.multiply (aUBLPercentage)
+                                                                                            .divide (CGlobal.BIGDEC_100,
+                                                                                                     SCALE_PRICE_LINE,
+                                                                                                     ROUNDING_MODE);
+              }
           }
 
           // Save item and put in map
@@ -421,7 +435,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
                   aEbiVATVATRate.setValue (aUBLPercentage);
                   aEbiVATItem.setVATRate (aEbiVATVATRate);
                   // Tax amount (mandatory)
-                  aEbiVATItem.setAmount (aUBLSubtotal.getTaxAmountValue ());
+                  aEbiVATItem.setAmount (aUBLTaxAmount);
                   // Add to list
                   aEbiVAT.getVATItem ().add (aEbiVATItem);
                 }
@@ -433,7 +447,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
                 // As no comment is present, use the scheme ID
                 aOtherTax.setComment (sUBLTaxSchemeID);
                 // Tax amount (mandatory)
-                aOtherTax.setAmount (aUBLSubtotal.getTaxAmountValue ());
+                aOtherTax.setAmount (aUBLTaxAmount);
                 aEbiTax.getOtherTax ().add (aOtherTax);
               }
             }
