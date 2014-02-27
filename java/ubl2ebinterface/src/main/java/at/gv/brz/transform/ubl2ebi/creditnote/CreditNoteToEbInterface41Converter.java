@@ -729,6 +729,68 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
           aEbiListLineItem.setReductionAndSurchargeListLineItemDetails (aEbiRSDetails);
         }
 
+        // Delivery per line item
+        if (aUBLLine.getDeliveryCount () > 0)
+        {
+          // Delivery address
+          final int nDeliveryIndex = 0;
+          final DeliveryType aUBLDelivery = aUBLLine.getDeliveryAtIndex (0);
+
+          if (aUBLDelivery.getActualDeliveryDate () != null)
+          {
+            final Ebi41DeliveryType aEbiDelivery = new Ebi41DeliveryType ();
+
+            aEbiDelivery.setDate (aUBLDelivery.getActualDeliveryDateValue ());
+
+            // Address present?
+            if (aUBLDelivery.getDeliveryLocation () != null &&
+                aUBLDelivery.getDeliveryLocation ().getAddress () != null)
+            {
+              final Ebi41AddressType aEbiAddress = new Ebi41AddressType ();
+              EbInterface41Helper.setAddressData (aUBLDelivery.getDeliveryLocation ().getAddress (),
+                                                  aEbiAddress,
+                                                  "Delivery",
+                                                  aTransformationErrorList,
+                                                  m_aContentLocale,
+                                                  m_aDisplayLocale);
+
+              // Check delivery party
+              String sAddressName = null;
+              if (aUBLDelivery.getDeliveryParty () != null)
+                for (final PartyNameType aUBLPartyName : aUBLDelivery.getDeliveryParty ().getPartyName ())
+                {
+                  sAddressName = StringHelper.trim (aUBLPartyName.getNameValue ());
+                  if (StringHelper.hasText (sAddressName))
+                    break;
+                }
+
+              // As fallback use accounting customer party
+              if (StringHelper.hasNoText (sAddressName) &&
+                  aUBLDoc.getAccountingCustomerParty () != null &&
+                  aUBLDoc.getAccountingCustomerParty ().getParty () != null)
+              {
+                for (final PartyNameType aUBLPartyName : aUBLDoc.getAccountingCustomerParty ()
+                                                                .getParty ()
+                                                                .getPartyName ())
+                {
+                  sAddressName = StringHelper.trim (aUBLPartyName.getNameValue ());
+                  if (StringHelper.hasText (sAddressName))
+                    break;
+                }
+              }
+              aEbiAddress.setName (sAddressName);
+
+              if (StringHelper.hasNoText (aEbiAddress.getName ()))
+                aTransformationErrorList.addError ("Delivery[" + nDeliveryIndex + "]/DeliveryParty",
+                                                   EText.DELIVERY_WITHOUT_NAME.getDisplayText (m_aDisplayLocale));
+
+              aEbiDelivery.setAddress (aEbiAddress);
+            }
+
+            aEbiListLineItem.setDelivery (aEbiDelivery);
+          }
+        }
+
         // Add the item to the list
         aEbiItemList.getListLineItem ().add (aEbiListLineItem);
         nLineIndex++;
