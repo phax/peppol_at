@@ -23,20 +23,11 @@
   xmlns:qdt="urn:oasis:names:specification:ubl:schema:xsd:QualifiedDatatypes-2" xmlns:udt="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2"
   xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2 UBL-Invoice-2.0.xsd">
-  <cec:UBLExtensions xmlns:cec="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
-    <cec:UBLExtension>
-      <cec:ExtensionContent>
-        <ERB xmlns="http://erb.eproc.brz.gv.at/ublext">
-          <ResponseURL>https://test.example.org</ResponseURL>
-        </ERB>
-      </cec:ExtensionContent>
-    </cec:UBLExtension>
-  </cec:UBLExtensions>
   <cbc:UBLVersionID>2.0</cbc:UBLVersionID>
   <cbc:CustomizationID>urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0</cbc:CustomizationID>
   <cbc:ProfileID>urn:www.cenbii.eu:profile:bii04:ver1.0</cbc:ProfileID>
   <cbc:ID>TOSL108</cbc:ID>
-  <cbc:IssueDate>2009-12-15</cbc:IssueDate>
+  <cbc:IssueDate>2014-01-01</cbc:IssueDate>
   <cbc:InvoiceTypeCode listAgencyID="6" listID="UN/ECE 1001 Subset">380</cbc:InvoiceTypeCode>
   <cbc:Note languageID="en">Ordered in our booth at the convention.</cbc:Note>
   <cbc:TaxPointDate>2009-11-30</cbc:TaxPointDate>
@@ -73,7 +64,7 @@
   <cac:AccountingSupplierParty>
     <cbc:CustomerAssignedAccountID>1234567890</cbc:CustomerAssignedAccountID>
     <cac:Party>
-      <cbc:EndpointID schemeAgencyID="9" schemeID="GLN">6291041500213</cbc:EndpointID>
+      <cbc:EndpointID schemeAgencyID="9" schemeID="GLN">0000000000000</cbc:EndpointID>
       <cac:PartyIdentification>
         <cbc:ID schemeID="ZZZ">Supp123</cbc:ID>
       </cac:PartyIdentification>
@@ -81,7 +72,7 @@
         <cbc:Name>Salescompany ltd.</cbc:Name>
       </cac:PartyName>
       <cac:PostalAddress>
-        <cbc:ID schemeAgencyID="9" schemeID="GLN">6291041500213</cbc:ID>
+        <cbc:ID schemeAgencyID="9" schemeID="GLN">0000000000000</cbc:ID>
         <cbc:Postbox>5467</cbc:Postbox>
         <cbc:StreetName>Main street</cbc:StreetName>
         <cbc:AdditionalStreetName>Suite 123</cbc:AdditionalStreetName>
@@ -102,7 +93,7 @@
       </cac:PartyTaxScheme>
       <cac:PartyLegalEntity>
         <cbc:RegistrationName>The Sellercompany Incorporated</cbc:RegistrationName>
-        <cbc:CompanyID schemeAgencyID="ZZZ" schemeID="CVR">ATU00000000</cbc:CompanyID>
+        <cbc:CompanyID schemeAgencyID="ZZZ" schemeID="CVR">999999999</cbc:CompanyID>
         <cac:RegistrationAddress>
           <cbc:CityName>Big city</cbc:CityName>
           <cbc:CountrySubentity>RegionA</cbc:CountrySubentity>
@@ -115,7 +106,7 @@
         <cbc:ID>O. Hansen</cbc:ID>
         <cbc:Telephone>46211230</cbc:Telephone>
         <cbc:Telefax>46211231</cbc:Telefax>
-        <cbc:ElectronicMail>ubl2ebi@example.org</cbc:ElectronicMail>
+        <cbc:ElectronicMail>antonio@salescompany.dk</cbc:ElectronicMail>
       </cac:Contact>
       <cac:Person>
         <cbc:FirstName>Antonio</cbc:FirstName>
@@ -127,7 +118,7 @@
   </cac:AccountingSupplierParty>
   <cac:AccountingCustomerParty>
     <cac:Party>
-      <cbc:EndpointID schemeAgencyID="9" schemeID="GLN">6291041500213</cbc:EndpointID>
+      <cbc:EndpointID schemeAgencyID="9" schemeID="GLN">0000000000000</cbc:EndpointID>
       <cac:PartyIdentification>
         <cbc:ID schemeID="ZZZ">345KS5324</cbc:ID>
       </cac:PartyIdentification>
@@ -135,7 +126,7 @@
         <cbc:Name>Buyercompany ltd</cbc:Name>
       </cac:PartyName>
       <cac:PostalAddress>
-        <cbc:ID schemeAgencyID="9" schemeID="GLN">6291041500213</cbc:ID>
+        <cbc:ID schemeAgencyID="9" schemeID="GLN">0000000000000</cbc:ID>
         <cbc:Postbox>123</cbc:Postbox>
         <cbc:StreetName>Anystreet</cbc:StreetName>
         <cbc:AdditionalStreetName>Back door</cbc:AdditionalStreetName>
@@ -181,7 +172,7 @@
   </cac:AccountingCustomerParty>
   <cac:PayeeParty>
     <cac:PartyIdentification>
-      <cbc:ID schemeAgencyID="9" schemeID="GLN">6291041500213</cbc:ID>
+      <cbc:ID schemeAgencyID="9" schemeID="GLN">0000000000000</cbc:ID>
     </cac:PartyIdentification>
     <cac:PartyName>
       <cbc:Name>Ebeneser Scrooge Inc.</cbc:Name>
@@ -193,7 +184,7 @@
   <cac:Delivery>
     <cbc:ActualDeliveryDate>2009-12-15</cbc:ActualDeliveryDate>
     <cac:DeliveryLocation>
-      <cbc:ID schemeAgencyID="9" schemeID="GLN">6291041500213</cbc:ID>
+      <cbc:ID schemeAgencyID="9" schemeID="GLN">0000000000000</cbc:ID>
       <cac:Address>
         <cbc:StreetName>Deliverystreet</cbc:StreetName>
         <cbc:AdditionalStreetName>Side door</cbc:AdditionalStreetName>
@@ -213,9 +204,10 @@
     </cac:DeliveryParty>
   </cac:Delivery>
   <cac:PaymentMeans>
-    <cbc:PaymentMeansCode listAgencyID="NES" listID="UN/ECE 4461 Subset">49</cbc:PaymentMeansCode>
-    <cbc:PaymentDueDate>2009-12-31</cbc:PaymentDueDate>
-    <cbc:PaymentChannelCode>SW</cbc:PaymentChannelCode>
+    <cbc:PaymentMeansCode listAgencyID="NES" listID="UN/ECE 4461 Subset">31</cbc:PaymentMeansCode>
+    <cbc:PaymentDueDate>2014-01-30</cbc:PaymentDueDate>
+    <cbc:PaymentChannelCode>IBAN</cbc:PaymentChannelCode>
+    <cbc:InstructionNote>To be paid as soon as possible</cbc:InstructionNote>
     <cbc:PaymentID>Payref1</cbc:PaymentID>
     <cac:PayeeFinancialAccount>
       <cbc:ID schemeID="IBAN">NO9386011117947</cbc:ID>
@@ -228,8 +220,14 @@
     </cac:PayeeFinancialAccount>
   </cac:PaymentMeans>
   <cac:PaymentTerms>
+    <cbc:ID>1</cbc:ID>
     <cbc:Note>Penalty percentage 10% from due date</cbc:Note>
-  </cac:PaymentTerms>
+    <cbc:SettlementDiscountPercent>10.00</cbc:SettlementDiscountPercent>
+    <cac:SettlementPeriod>
+      <cbc:StartDate>2014-01-01</cbc:StartDate>
+      <cbc:EndDate>2014-01-10</cbc:EndDate>
+    </cac:SettlementPeriod>
+  </cac:PaymentTerms> 
   <cac:AllowanceCharge>
     <cbc:ChargeIndicator>true</cbc:ChargeIndicator>
     <cbc:AllowanceChargeReason>Packing cost</cbc:AllowanceChargeReason>
@@ -255,7 +253,7 @@
     </cac:TaxCategory>
   </cac:AllowanceCharge>
   <cac:TaxTotal>
-    <cbc:TaxAmount currencyID="EUR">292.20</cbc:TaxAmount>
+    <cbc:TaxAmount currencyID="EUR">364.73</cbc:TaxAmount>
     <cac:TaxSubtotal>
       <cbc:TaxableAmount currencyID="EUR">1458.5</cbc:TaxableAmount>
       <cbc:TaxAmount currencyID="EUR">364.63</cbc:TaxAmount>
@@ -294,13 +292,9 @@
     </cac:TaxSubtotal>
   </cac:TaxTotal>
   <cac:LegalMonetaryTotal>
-    <cbc:LineExtensionAmount currencyID="EUR">1434.5</cbc:LineExtensionAmount>
-    <cbc:TaxExclusiveAmount currencyID="EUR">1434.5</cbc:TaxExclusiveAmount>
+    <cbc:LineExtensionAmount currencyID="EUR">1436.5</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="EUR">1436.5</cbc:TaxExclusiveAmount>
     <cbc:TaxInclusiveAmount currencyID="EUR">1799.23</cbc:TaxInclusiveAmount>
-    <cbc:AllowanceTotalAmount currencyID="EUR">100</cbc:AllowanceTotalAmount>
-    <cbc:ChargeTotalAmount currencyID="EUR">100</cbc:ChargeTotalAmount>
-    <cbc:PrepaidAmount currencyID="EUR">0</cbc:PrepaidAmount>
-    <cbc:PayableRoundingAmount currencyID="EUR">0.30</cbc:PayableRoundingAmount>
     <cbc:PayableAmount currencyID="EUR">1799.23</cbc:PayableAmount>
   </cac:LegalMonetaryTotal>
   <cac:InvoiceLine>
@@ -312,6 +306,28 @@
     <cac:OrderLineReference>
       <cbc:LineID>1</cbc:LineID>
     </cac:OrderLineReference>
+    <cac:Delivery>
+      <cbc:ActualDeliveryDate>2009-12-15</cbc:ActualDeliveryDate>
+      <cac:DeliveryLocation>
+        <cbc:ID schemeAgencyID="9" schemeID="GLN">0000000000000</cbc:ID>
+        <cac:Address>
+          <cbc:StreetName>Deliverystreet</cbc:StreetName>
+          <cbc:AdditionalStreetName>Side door</cbc:AdditionalStreetName>
+          <cbc:BuildingNumber>12</cbc:BuildingNumber>
+          <cbc:CityName>DeliveryCity</cbc:CityName>
+          <cbc:PostalZone>523427</cbc:PostalZone>
+          <cbc:CountrySubentity>RegionC</cbc:CountrySubentity>
+          <cac:Country>
+            <cbc:IdentificationCode>BE</cbc:IdentificationCode>
+          </cac:Country>
+        </cac:Address>
+      </cac:DeliveryLocation>
+      <cac:DeliveryParty>
+        <cac:PartyName>
+          <cbc:Name>Bank Account Owner</cbc:Name>
+        </cac:PartyName>
+      </cac:DeliveryParty>
+    </cac:Delivery>
     <cac:AllowanceCharge>
       <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
       <cbc:AllowanceChargeReason>Damage</cbc:AllowanceChargeReason>
@@ -370,7 +386,7 @@
   <cac:InvoiceLine>
     <cbc:ID>2</cbc:ID>
     <cbc:Note>Cover is slightly damaged.</cbc:Note>
-    <cbc:InvoicedQuantity unitCode="NAR">1</cbc:InvoicedQuantity>
+    <cbc:InvoicedQuantity unitCode="NAR">-1</cbc:InvoicedQuantity>
     <cbc:LineExtensionAmount currencyID="EUR">-3.96</cbc:LineExtensionAmount>
     <cbc:AccountingCost>BookingCode002</cbc:AccountingCost>
     <cac:OrderLineReference>
@@ -404,7 +420,7 @@
       </cac:ClassifiedTaxCategory>
     </cac:Item>
     <cac:Price>
-      <cbc:PriceAmount currencyID="EUR">-3.96</cbc:PriceAmount>
+      <cbc:PriceAmount currencyID="EUR">3.96</cbc:PriceAmount>
       <cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
     </cac:Price>
   </cac:InvoiceLine>
@@ -457,7 +473,7 @@
   </cac:InvoiceLine>
   <cac:InvoiceLine>
     <cbc:ID>4</cbc:ID>
-    <cbc:InvoicedQuantity unitCode="NAR">1</cbc:InvoicedQuantity>
+    <cbc:InvoicedQuantity unitCode="NAR">-1</cbc:InvoicedQuantity>
     <cbc:LineExtensionAmount currencyID="EUR">-25</cbc:LineExtensionAmount>
     <cbc:AccountingCost>BookingCode004</cbc:AccountingCost>
     <cac:OrderLineReference>
@@ -491,7 +507,7 @@
       </cac:ClassifiedTaxCategory>
     </cac:Item>
     <cac:Price>
-      <cbc:PriceAmount currencyID="EUR">-25</cbc:PriceAmount>
+      <cbc:PriceAmount currencyID="EUR">25</cbc:PriceAmount>
       <cbc:BaseQuantity unitCode="C62">1</cbc:BaseQuantity>
     </cac:Price>
   </cac:InvoiceLine>
@@ -522,12 +538,12 @@
         <cbc:ItemClassificationCode listAgencyID="2" listID="CPV">65434564
         </cbc:ItemClassificationCode>
       </cac:CommodityClassification>
-      <cac:ClassifiedTaxCategory>
+      <cac:ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
         <cbc:ID schemeAgencyID="6" schemeID="UN/ECE 5305">S</cbc:ID>
         <cbc:Percent>25</cbc:Percent>
-        <cac:TaxScheme>
+        <TaxScheme>
           <cbc:ID schemeAgencyID="6" schemeID="UN/ECE 5153">VAT</cbc:ID>
-        </cac:TaxScheme>
+        </TaxScheme>
       </cac:ClassifiedTaxCategory>
       <cac:AdditionalItemProperty>
         <cbc:Name>Type</cbc:Name>
