@@ -26,8 +26,8 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public final class CPeppolUBL
 {
-  /** The UBL version to use */
-  public static final String UBL_VERSION = "2.0";
+  public static final String UBL_VERSION_20 = "2.0";
+  public static final String UBL_VERSION_21 = "2.1";
 
   /** The UBL customization ID to use */
   public static final String CUSTOMIZATION_SCHEMEID = "PEPPOL";

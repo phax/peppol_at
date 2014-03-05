@@ -78,17 +78,19 @@ public abstract class AbstractInvoiceConverter extends AbstractConverter
     {
       aTransformationErrorList.addError ("UBLVersionID",
                                          EText.NO_UBL_VERSION_ID.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                         CPeppolUBL.UBL_VERSION));
+                                                                                         CPeppolUBL.UBL_VERSION_20,
+                                                                                         CPeppolUBL.UBL_VERSION_21));
     }
     else
     {
       final String sUBLVersionID = StringHelper.trim (aUBLVersionID.getValue ());
-      if (!CPeppolUBL.UBL_VERSION.equals (sUBLVersionID))
+      if (!CPeppolUBL.UBL_VERSION_20.equals (sUBLVersionID) && !CPeppolUBL.UBL_VERSION_21.equals (sUBLVersionID))
       {
         aTransformationErrorList.addError ("UBLVersionID",
                                            EText.INVALID_UBL_VERSION_ID.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                                 sUBLVersionID,
-                                                                                                CPeppolUBL.UBL_VERSION));
+                                                                                                CPeppolUBL.UBL_VERSION_20,
+                                                                                                CPeppolUBL.UBL_VERSION_21));
       }
     }
 

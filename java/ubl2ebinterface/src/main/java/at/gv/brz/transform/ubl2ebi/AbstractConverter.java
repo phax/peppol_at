@@ -44,8 +44,8 @@ public abstract class AbstractConverter
   @Translatable
   public static enum EText implements IHasDisplayText, IHasDisplayTextWithArgs
   {
-    NO_UBL_VERSION_ID ("Die UBLVersionID fehlt. Es wird der Wert ''{0}'' erwartet.", "No UBLVersionID present. It must be ''{0}''."),
-    INVALID_UBL_VERSION_ID ("Die UBLVersionID ''{0}'' ist ungültig. Diese muss den Wert ''{1}'' haben.", "Invalid UBLVersionID value ''{0}'' present. It must be ''{1}''."),
+    NO_UBL_VERSION_ID ("Die UBLVersionID fehlt. Es wird der Wert ''{0}'' oder ''{1}'' erwartet.", "No UBLVersionID present. It must be ''{0}'' or ''{1}''."),
+    INVALID_UBL_VERSION_ID ("Die UBLVersionID ''{0}'' ist ungültig. Diese muss den Wert ''{1}'' oder ''{2}'' haben.", "Invalid UBLVersionID value ''{0}'' present. It must be ''{1}'' or ''{2}''."),
     NO_PROFILE_ID ("Die ProfileID fehlt", "No ProfileID present."),
     INVALID_PROFILE_ID ("Die ProfileID ''{0}'' ist ungültig.", "Invalid ProfileID value ''{0}'' present."),
     NO_CUSTOMIZATION_ID ("Die CustomizationID fehlt", "No CustomizationID present."),
@@ -124,7 +124,6 @@ public abstract class AbstractConverter
   public static final int IBAN_MAX_LENGTH = 34;
   public static final String PAYMENT_CHANNEL_CODE_IBAN = "IBAN";
   public static final ETaxSchemeID SUPPORTED_TAX_SCHEME_ID = ETaxSchemeID.VALUE_ADDED_TAX;
-  public static final String EBI_GENERATING_SYSTEM_40 = "UBL 2.1 to ebInterface 4.0 converter";
   public static final String EBI_GENERATING_SYSTEM_41 = "UBL 2.1 to ebInterface 4.1 converter";
   public static final int SCALE_PERC = 2;
   public static final int SCALE_PRICE_LINE = 4;
