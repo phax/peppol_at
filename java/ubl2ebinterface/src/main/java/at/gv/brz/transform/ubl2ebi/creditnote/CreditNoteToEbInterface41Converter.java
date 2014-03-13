@@ -820,6 +820,16 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
     {
       // Start with quantity*unitPrice for base amount
       BigDecimal aEbiBaseAmount = aUBLDoc.getLegalMonetaryTotal ().getLineExtensionAmountValue ();
+      if (aEbiBaseAmount == null)
+      {
+        // No global LineExtensionAmount is present - sum all rows
+        BigDecimal tmp = BigDecimal.ZERO;
+        for (final Ebi41ItemListType aEbiItemList : aEbiDoc.getDetails ().getItemList ())
+          for (final Ebi41ListLineItemType aEbiListLineItem : aEbiItemList.getListLineItem ())
+            tmp = tmp.add (aEbiListLineItem.getLineItemAmount ());
+        aEbiBaseAmount = tmp;
+      }
+
       final Ebi41ReductionAndSurchargeDetailsType aEbiRS = new Ebi41ReductionAndSurchargeDetailsType ();
 
       int nAllowanceChargeIndex = 0;
