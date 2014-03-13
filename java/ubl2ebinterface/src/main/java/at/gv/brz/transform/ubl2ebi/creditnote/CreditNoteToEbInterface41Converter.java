@@ -254,14 +254,6 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
         final String sBillersInvoiceRecipientID = StringHelper.trim (aUBLCustomer.getSupplierAssignedAccountIDValue ());
         aEbiRecipient.setBillersInvoiceRecipientID (sBillersInvoiceRecipientID);
       }
-      if (StringHelper.hasNoText (aEbiRecipient.getBillersInvoiceRecipientID ()))
-      {
-        // Mandatory field
-        aTransformationErrorList.addWarning ("AccountingCustomerParty/SupplierAssignedAccountID",
-                                             EText.SUPPLIER_ASSIGNED_ACCOUNTID_MISSING.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                                               DEFAULT_BILLERS_INVOICERECIPIENT_ID));
-        aEbiRecipient.setBillersInvoiceRecipientID (DEFAULT_BILLERS_INVOICERECIPIENT_ID);
-      }
       aEbiRecipient.setAddress (EbInterface41Helper.convertParty (aUBLCustomer.getParty (),
                                                                   "AccountingCustomerParty",
                                                                   aTransformationErrorList,
