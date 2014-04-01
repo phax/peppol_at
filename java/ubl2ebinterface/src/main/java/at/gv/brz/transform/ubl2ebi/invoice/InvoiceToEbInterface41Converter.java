@@ -83,6 +83,7 @@ import com.phloc.ebinterface.v41.Ebi41ListLineItemType;
 import com.phloc.ebinterface.v41.Ebi41NoPaymentType;
 import com.phloc.ebinterface.v41.Ebi41OrderReferenceDetailType;
 import com.phloc.ebinterface.v41.Ebi41OrderReferenceType;
+import com.phloc.ebinterface.v41.Ebi41OrderingPartyType;
 import com.phloc.ebinterface.v41.Ebi41OtherTaxType;
 import com.phloc.ebinterface.v41.Ebi41PaymentConditionsType;
 import com.phloc.ebinterface.v41.Ebi41PaymentMethodType;
@@ -108,7 +109,7 @@ import eu.europa.ec.cipa.peppol.codelist.ETaxSchemeID;
 
 /**
  * Main converter between UBL 2.1 invoice and ebInterface 4.1 invoice.
- * 
+ *
  * @author philip
  */
 @Immutable
@@ -118,7 +119,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
 
   /**
    * Constructor
-   * 
+   *
    * @param aDisplayLocale
    *        The locale for error messages. May not be <code>null</code>.
    * @param aContentLocale
@@ -153,7 +154,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
 
   /**
    * Main conversion method to convert from UBL to ebInterface 4.1
-   * 
+   *
    * @param aUBLDoc
    *        The UBL invoice to be converted
    * @param aTransformationErrorList
@@ -292,6 +293,32 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
                                                                   m_aContentLocale,
                                                                   m_aDisplayLocale));
       aEbiDoc.setInvoiceRecipient (aEbiRecipient);
+    }
+
+    // Ordering party
+    final CustomerPartyType aUBLBuyer = aUBLDoc.getBuyerCustomerParty ();
+    if (aUBLBuyer != null)
+    {
+      final Ebi41OrderingPartyType aEbiOrderingParty = new Ebi41OrderingPartyType ();
+      // Find the tax scheme that uses VAT
+      for (final PartyTaxSchemeType aUBLPartyTaxScheme : aUBLBuyer.getParty ().getPartyTaxScheme ())
+        if (SUPPORTED_TAX_SCHEME_ID.getID ().equals (aUBLPartyTaxScheme.getTaxScheme ().getIDValue ()))
+        {
+          aEbiOrderingParty.setVATIdentificationNumber (StringHelper.trim (aUBLPartyTaxScheme.getCompanyIDValue ()));
+          break;
+        }
+      if (StringHelper.hasNoText (aEbiOrderingParty.getVATIdentificationNumber ()))
+      {
+        // Required by ebInterface 4.1
+        aTransformationErrorList.addError ("BuyerCustomerParty/PartyTaxScheme",
+                                           EText.SUPPLIER_VAT_MISSING.getDisplayText (m_aDisplayLocale));
+      }
+      aEbiOrderingParty.setAddress (EbInterface41Helper.convertParty (aUBLBuyer.getParty (),
+                                                                      "BuyerCustomerParty",
+                                                                      aTransformationErrorList,
+                                                                      m_aContentLocale,
+                                                                      m_aDisplayLocale));
+      aEbiDoc.setOrderingParty (aEbiOrderingParty);
     }
 
     // Order reference of invoice recipient

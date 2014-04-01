@@ -73,6 +73,7 @@ import com.phloc.ebinterface.v41.Ebi41ListLineItemType;
 import com.phloc.ebinterface.v41.Ebi41NoPaymentType;
 import com.phloc.ebinterface.v41.Ebi41OrderReferenceDetailType;
 import com.phloc.ebinterface.v41.Ebi41OrderReferenceType;
+import com.phloc.ebinterface.v41.Ebi41OrderingPartyType;
 import com.phloc.ebinterface.v41.Ebi41OtherTaxType;
 import com.phloc.ebinterface.v41.Ebi41PaymentConditionsType;
 import com.phloc.ebinterface.v41.Ebi41PaymentMethodType;
@@ -95,7 +96,7 @@ import eu.europa.ec.cipa.peppol.codelist.ETaxSchemeID;
 
 /**
  * Main converter between UBL 2.1 credit note and ebInterface 4.1 credit note.
- * 
+ *
  * @author philip
  */
 @Immutable
@@ -103,7 +104,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
 {
   /**
    * Constructor
-   * 
+   *
    * @param aDisplayLocale
    *        The locale for error messages. May not be <code>null</code>.
    * @param aContentLocale
@@ -121,7 +122,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
 
   /**
    * Main conversion method to convert from UBL to ebInterface 4.1
-   * 
+   *
    * @param aUBLDoc
    *        The UBL invoice to be converted
    * @param aTransformationErrorList
@@ -262,6 +263,32 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
       aEbiDoc.setInvoiceRecipient (aEbiRecipient);
     }
 
+    // Ordering party
+    final CustomerPartyType aUBLBuyer = aUBLDoc.getBuyerCustomerParty ();
+    if (aUBLBuyer != null)
+    {
+      final Ebi41OrderingPartyType aEbiOrderingParty = new Ebi41OrderingPartyType ();
+      // Find the tax scheme that uses VAT
+      for (final PartyTaxSchemeType aUBLPartyTaxScheme : aUBLBuyer.getParty ().getPartyTaxScheme ())
+        if (SUPPORTED_TAX_SCHEME_ID.getID ().equals (aUBLPartyTaxScheme.getTaxScheme ().getIDValue ()))
+        {
+          aEbiOrderingParty.setVATIdentificationNumber (StringHelper.trim (aUBLPartyTaxScheme.getCompanyIDValue ()));
+          break;
+        }
+      if (StringHelper.hasNoText (aEbiOrderingParty.getVATIdentificationNumber ()))
+      {
+        // Required by ebInterface 4.1
+        aTransformationErrorList.addError ("BuyerCustomerParty/PartyTaxScheme",
+                                           EText.SUPPLIER_VAT_MISSING.getDisplayText (m_aDisplayLocale));
+      }
+      aEbiOrderingParty.setAddress (EbInterface41Helper.convertParty (aUBLBuyer.getParty (),
+                                                                      "BuyerCustomerParty",
+                                                                      aTransformationErrorList,
+                                                                      m_aContentLocale,
+                                                                      m_aDisplayLocale));
+      aEbiDoc.setOrderingParty (aEbiOrderingParty);
+    }
+
     // Order reference of invoice recipient
     String sUBLOrderReferenceID = null;
     {
@@ -330,10 +357,10 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
             {
               // Calculate percentage
               aUBLPercentage = MathHelper.isEqualToZero (aUBLTaxableAmount) ? BigDecimal.ZERO
-                                                                           : aUBLTaxAmount.multiply (CGlobal.BIGDEC_100)
-                                                                                          .divide (aUBLTaxableAmount,
-                                                                                                   SCALE_PERC,
-                                                                                                   ROUNDING_MODE);
+                                                                            : aUBLTaxAmount.multiply (CGlobal.BIGDEC_100)
+                                                                            .divide (aUBLTaxableAmount,
+                                                                                     SCALE_PERC,
+                                                                                     ROUNDING_MODE);
             }
           }
 
@@ -356,27 +383,27 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
               {
                 // Calculate (inexact) subtotal
                 aUBLTaxAmount = MathHelper.isEqualToZero (aUBLPercentage) ? BigDecimal.ZERO
-                                                                         : aUBLTaxableAmount.multiply (aUBLPercentage)
-                                                                                            .divide (CGlobal.BIGDEC_100,
-                                                                                                     SCALE_PRICE_LINE,
-                                                                                                     ROUNDING_MODE);
+                                                                          : aUBLTaxableAmount.multiply (aUBLPercentage)
+                                                                          .divide (CGlobal.BIGDEC_100,
+                                                                                   SCALE_PRICE_LINE,
+                                                                                   ROUNDING_MODE);
               }
           }
 
           // Save item and put in map
           final String sUBLTaxSchemeSchemeID = StringHelper.trim (aUBLTaxCategory.getTaxScheme ()
-                                                                                 .getID ()
-                                                                                 .getSchemeID ());
+                                                                  .getID ()
+                                                                  .getSchemeID ());
           final String sUBLTaxSchemeID = StringHelper.trim (aUBLTaxCategory.getTaxScheme ().getIDValue ());
 
           if (aUBLTaxCategory.getID () == null)
           {
             aTransformationErrorList.addError ("TaxTotal[" +
-                                                   nTaxTotalIndex +
-                                                   "]/TaxSubtotal[" +
-                                                   nTaxSubtotalIndex +
-                                                   "]/TaxCategory",
-                                               EText.MISSING_TAXCATEGORY_ID.getDisplayText (m_aDisplayLocale));
+                nTaxTotalIndex +
+                "]/TaxSubtotal[" +
+                nTaxSubtotalIndex +
+                "]/TaxCategory",
+                EText.MISSING_TAXCATEGORY_ID.getDisplayText (m_aDisplayLocale));
             break;
           }
 
@@ -385,7 +412,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
 
           aTaxCategoryPercMap.put (new TaxCategoryKey (new SchemedID (sUBLTaxSchemeSchemeID, sUBLTaxSchemeID),
                                                        new SchemedID (sUBLTaxCategorySchemeID, sUBLTaxCategoryID)),
-                                   aUBLPercentage);
+                                                       aUBLPercentage);
 
           if (isSupportedTaxSchemeSchemeID (sUBLTaxSchemeSchemeID))
           {
@@ -393,12 +420,12 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
             if (eUBLTaxScheme == null)
             {
               aTransformationErrorList.addError ("TaxTotal[" +
-                                                     nTaxTotalIndex +
-                                                     "]/TaxSubtotal[" +
-                                                     nTaxSubtotalIndex +
-                                                     "]/TaxCategory/TaxScheme/ID",
-                                                 EText.UNSUPPORTED_TAX_SCHEME_ID.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                                         sUBLTaxSchemeID));
+                  nTaxTotalIndex +
+                  "]/TaxSubtotal[" +
+                  nTaxSubtotalIndex +
+                  "]/TaxCategory/TaxScheme/ID",
+                  EText.UNSUPPORTED_TAX_SCHEME_ID.getDisplayTextWithArgs (m_aDisplayLocale,
+                                                                          sUBLTaxSchemeID));
             }
             else
             {
@@ -407,11 +434,11 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
                 if (aUBLPercentage == null)
                 {
                   aTransformationErrorList.addError ("TaxTotal[" +
-                                                         nTaxTotalIndex +
-                                                         "]/TaxSubtotal[" +
-                                                         nTaxSubtotalIndex +
-                                                         "]/TaxCategory/Percent",
-                                                     EText.TAX_PERCENT_MISSING.getDisplayTextWithArgs (m_aDisplayLocale));
+                      nTaxTotalIndex +
+                      "]/TaxSubtotal[" +
+                      nTaxSubtotalIndex +
+                      "]/TaxCategory/Percent",
+                      EText.TAX_PERCENT_MISSING.getDisplayTextWithArgs (m_aDisplayLocale));
                 }
                 else
                 {
@@ -447,13 +474,13 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
           else
           {
             aTransformationErrorList.addError ("TaxTotal[" +
-                                                   nTaxTotalIndex +
-                                                   "]/TaxSubtotal[" +
-                                                   nTaxSubtotalIndex +
-                                                   "]/TaxCategory/",
-                                               EText.UNSUPPORTED_TAX_SCHEME.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                                    sUBLTaxSchemeSchemeID,
-                                                                                                    sUBLTaxSchemeID));
+                nTaxTotalIndex +
+                "]/TaxSubtotal[" +
+                nTaxSubtotalIndex +
+                "]/TaxCategory/",
+                EText.UNSUPPORTED_TAX_SCHEME.getDisplayTextWithArgs (m_aDisplayLocale,
+                                                                     sUBLTaxSchemeSchemeID,
+                                                                     sUBLTaxSchemeID));
           }
           ++nTaxSubtotalIndex;
         }
@@ -482,8 +509,8 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
             {
               // Only handle VAT items
               if (SUPPORTED_TAX_SCHEME_ID.getID ().equals (aUBLTaxSubTotal.getTaxCategory ()
-                                                                          .getTaxScheme ()
-                                                                          .getIDValue ()))
+                                                           .getTaxScheme ()
+                                                           .getIDValue ()))
               {
                 // We found one -> just use it
                 aUBLTaxCategory = aUBLTaxSubTotal.getTaxCategory ();
@@ -507,8 +534,8 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
           {
             // Not specified - check from previous map
             final String sUBLTaxSchemeSchemeID = StringHelper.trim (aUBLTaxCategory.getTaxScheme ()
-                                                                                   .getID ()
-                                                                                   .getSchemeID ());
+                                                                    .getID ()
+                                                                    .getSchemeID ());
             final String sUBLTaxSchemeID = StringHelper.trim (aUBLTaxCategory.getTaxScheme ().getIDValue ());
 
             final String sUBLTaxCategorySchemeID = StringHelper.trim (aUBLTaxCategory.getID ().getSchemeID ());
@@ -701,20 +728,20 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
             {
               // Percentage is optional
               final BigDecimal aPerc = aUBLAllowanceCharge.getMultiplierFactorNumericValue ()
-                                                          .multiply (CGlobal.BIGDEC_100);
+                  .multiply (CGlobal.BIGDEC_100);
               aEbiRSItem.setPercentage (bSwapSigns ? aPerc.negate () : aPerc);
             }
 
             if (eSurcharge.isTrue ())
             {
               aEbiRSDetails.getReductionListLineItemOrSurchargeListLineItemOrOtherVATableTaxListLineItem ()
-                           .add (new ObjectFactory ().createSurchargeListLineItem (aEbiRSItem));
+              .add (new ObjectFactory ().createSurchargeListLineItem (aEbiRSItem));
               aEbiBaseAmount = aEbiBaseAmount.add (aEbiRSItem.getAmount ());
             }
             else
             {
               aEbiRSDetails.getReductionListLineItemOrSurchargeListLineItemOrOtherVATableTaxListLineItem ()
-                           .add (new ObjectFactory ().createReductionListLineItem (aEbiRSItem));
+              .add (new ObjectFactory ().createReductionListLineItem (aEbiRSItem));
               aEbiBaseAmount = aEbiBaseAmount.subtract (aEbiRSItem.getAmount ());
             }
           }
@@ -762,8 +789,8 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
                   aUBLDoc.getAccountingCustomerParty ().getParty () != null)
               {
                 for (final PartyNameType aUBLPartyName : aUBLDoc.getAccountingCustomerParty ()
-                                                                .getParty ()
-                                                                .getPartyName ())
+                    .getParty ()
+                    .getPartyName ())
                 {
                   sAddressName = StringHelper.trim (aUBLPartyName.getNameValue ());
                   if (StringHelper.hasText (sAddressName))
@@ -963,8 +990,8 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
                 aUBLDoc.getAccountingCustomerParty ().getParty () != null)
             {
               for (final PartyNameType aUBLPartyName : aUBLDoc.getAccountingCustomerParty ()
-                                                              .getParty ()
-                                                              .getPartyName ())
+                  .getParty ()
+                  .getPartyName ())
               {
                 sAddressName = StringHelper.trim (aUBLPartyName.getNameValue ());
                 if (StringHelper.hasText (sAddressName))
