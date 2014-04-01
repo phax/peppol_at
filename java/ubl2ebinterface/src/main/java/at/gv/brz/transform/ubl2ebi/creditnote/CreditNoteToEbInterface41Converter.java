@@ -374,7 +374,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
               {
                 // Calculate (inexact) subtotal
                 aUBLTaxableAmount = aUBLTaxAmount.multiply (CGlobal.BIGDEC_100).divide (aUBLPercentage,
-                                                                                        SCALE_PRICE_LINE,
+                                                                                        SCALE_PRICE4,
                                                                                         ROUNDING_MODE);
               }
             }
@@ -385,7 +385,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
                 aUBLTaxAmount = MathHelper.isEqualToZero (aUBLPercentage) ? BigDecimal.ZERO
                                                                           : aUBLTaxableAmount.multiply (aUBLPercentage)
                                                                           .divide (CGlobal.BIGDEC_100,
-                                                                                   SCALE_PRICE_LINE,
+                                                                                   SCALE_PRICE4,
                                                                                    ROUNDING_MODE);
               }
           }
@@ -445,7 +445,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
                   // add VAT item
                   final Ebi41VATItemType aEbiVATItem = new Ebi41VATItemType ();
                   // Base amount
-                  aEbiVATItem.setTaxedAmount (aUBLTaxableAmount);
+                  aEbiVATItem.setTaxedAmount (aUBLTaxableAmount.setScale (SCALE_PRICE2, ROUNDING_MODE));
                   // tax rate
                   final Ebi41VATRateType aEbiVATVATRate = new Ebi41VATRateType ();
                   // Optional
@@ -454,7 +454,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
                   aEbiVATVATRate.setValue (aUBLPercentage);
                   aEbiVATItem.setVATRate (aEbiVATVATRate);
                   // Tax amount (mandatory)
-                  aEbiVATItem.setAmount (aUBLTaxAmount);
+                  aEbiVATItem.setAmount (aUBLTaxAmount.setScale (SCALE_PRICE2, ROUNDING_MODE));
                   // Add to list
                   aEbiVAT.getVATItem ().add (aEbiVATItem);
                 }
@@ -466,7 +466,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
                 // As no comment is present, use the scheme ID
                 aOtherTax.setComment (sUBLTaxSchemeID);
                 // Tax amount (mandatory)
-                aOtherTax.setAmount (aUBLTaxAmount);
+                aOtherTax.setAmount (aUBLTaxAmount.setScale (SCALE_PRICE2, ROUNDING_MODE));
                 aEbiTax.getOtherTax ().add (aOtherTax);
               }
             }
@@ -633,7 +633,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
             aEbiUnitPrice.setValue (BigDecimal.ZERO);
           else
             aEbiUnitPrice.setValue (aUBLLineExtensionAmount.divide (aEbiQuantity.getValue (),
-                                                                    SCALE_PRICE_LINE,
+                                                                    SCALE_PRICE4,
                                                                     ROUNDING_MODE));
           aEbiListLineItem.setUnitPrice (aEbiUnitPrice);
         }
@@ -641,7 +641,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
         BigDecimal aEbiUnitPriceValue = aEbiListLineItem.getUnitPrice ().getValue ();
         if (aEbiListLineItem.getUnitPrice ().getBaseQuantity () != null)
           aEbiUnitPriceValue = aEbiUnitPriceValue.divide (aEbiListLineItem.getUnitPrice ().getBaseQuantity (),
-                                                          SCALE_PRICE_LINE,
+                                                          SCALE_PRICE4,
                                                           ROUNDING_MODE);
 
         // Tax rate (mandatory)
@@ -654,11 +654,12 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
         aEbiListLineItem.setVATRate (aEbiVATRate);
 
         // Line item amount (quantity * unit price +- reduction / surcharge)
-        aEbiListLineItem.setLineItemAmount (aUBLLine.getLineExtensionAmountValue ());
+        aEbiListLineItem.setLineItemAmount (aUBLLine.getLineExtensionAmountValue ().setScale (SCALE_PRICE2,
+                                                                                              ROUNDING_MODE));
 
         // Special handling in case no VAT item is present
         if (MathHelper.isEqualToZero (aUBLPercent))
-          aTotalZeroPercLineExtensionAmount = aTotalZeroPercLineExtensionAmount.add (aUBLLine.getLineExtensionAmountValue ());
+          aTotalZeroPercLineExtensionAmount = aTotalZeroPercLineExtensionAmount.add (aEbiListLineItem.getLineItemAmount ());
 
         // Order reference per line (UBL 2.1 only)
         for (final OrderLineReferenceType aUBLOrderLineReference : aUBLLine.getOrderLineReference ())
@@ -924,12 +925,13 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
 
     // Total gross amount
     if (aUBLMonetaryTotal.getTaxInclusiveAmountValue () != null)
-      aEbiDoc.setTotalGrossAmount (aUBLMonetaryTotal.getTaxInclusiveAmountValue ());
+      aEbiDoc.setTotalGrossAmount (aUBLMonetaryTotal.getTaxInclusiveAmountValue ().setScale (SCALE_PRICE2,
+                                                                                             ROUNDING_MODE));
     else
-      aEbiDoc.setTotalGrossAmount (aUBLMonetaryTotal.getPayableAmountValue ());
+      aEbiDoc.setTotalGrossAmount (aUBLMonetaryTotal.getPayableAmountValue ().setScale (SCALE_PRICE2, ROUNDING_MODE));
 
     // Payable amount
-    aEbiDoc.setPayableAmount (aUBLMonetaryTotal.getPayableAmountValue ());
+    aEbiDoc.setPayableAmount (aUBLMonetaryTotal.getPayableAmountValue ().setScale (SCALE_PRICE2, ROUNDING_MODE));
 
     // Always no payment
     final Ebi41PaymentMethodType aEbiPaymentMethod = new Ebi41PaymentMethodType ();

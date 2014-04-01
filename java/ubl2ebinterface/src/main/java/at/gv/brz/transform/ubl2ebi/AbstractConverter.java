@@ -35,7 +35,7 @@ import eu.europa.ec.cipa.peppol.codelist.ETaxSchemeID;
 
 /**
  * Base class for PEPPOL UBL 2.0 to ebInterface converter
- * 
+ *
  * @author philip
  */
 @Immutable
@@ -124,7 +124,8 @@ public abstract class AbstractConverter
   public static final ETaxSchemeID SUPPORTED_TAX_SCHEME_ID = ETaxSchemeID.VALUE_ADDED_TAX;
   public static final String EBI_GENERATING_SYSTEM_41 = "UBL 2.1 to ebInterface 4.1 converter";
   public static final int SCALE_PERC = 2;
-  public static final int SCALE_PRICE_LINE = 4;
+  public static final int SCALE_PRICE2 = 2;
+  public static final int SCALE_PRICE4 = 4;
   // Austria uses HALF_UP mode!
   public static final RoundingMode ROUNDING_MODE = RoundingMode.HALF_UP;
   /** The invoice type code to use */
@@ -136,7 +137,7 @@ public abstract class AbstractConverter
 
   /**
    * Constructor
-   * 
+   *
    * @param aDisplayLocale
    *        The locale for error messages. May not be <code>null</code>.
    * @param aContentLocale
