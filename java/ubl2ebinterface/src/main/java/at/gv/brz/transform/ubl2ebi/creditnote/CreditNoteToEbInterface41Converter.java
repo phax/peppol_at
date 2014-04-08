@@ -761,6 +761,10 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
           {
             final Ebi41DeliveryType aEbiDelivery = new Ebi41DeliveryType ();
 
+            // Set the delivery ID
+            aEbiDelivery.setDeliveryID (aUBLDelivery.getIDValue ());
+
+            // Set the delivery date
             aEbiDelivery.setDate (aUBLDelivery.getActualDeliveryDateValue ());
 
             // Address present?
@@ -961,9 +965,13 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
       int nDeliveryIndex = 0;
       for (final DeliveryType aUBLDelivery : aUBLDoc.getDelivery ())
       {
+        // Use the first delivery with a delivery date
         if (aUBLDelivery.getActualDeliveryDate () != null)
         {
-          // Use the first delivery with a delivery date
+          // Set the delivery ID
+          aEbiDelivery.setDeliveryID (aUBLDelivery.getIDValue ());
+
+          // Set the delivery date
           aEbiDelivery.setDate (aUBLDelivery.getActualDeliveryDateValue ());
 
           // Address
