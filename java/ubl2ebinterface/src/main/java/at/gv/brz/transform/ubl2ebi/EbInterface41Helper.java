@@ -25,10 +25,14 @@ import javax.annotation.Nullable;
 
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.AddressType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.ContactType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.CustomerPartyType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.DeliveryType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.LocationType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PartyIdentificationType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PartyNameType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PartyType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PersonType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.DescriptionType;
 import at.gv.brz.transform.ubl2ebi.AbstractConverter.EText;
 
 import com.phloc.commons.collections.ContainerHelper;
@@ -39,6 +43,7 @@ import com.phloc.ebinterface.v41.Ebi41AddressIdentifierTypeType;
 import com.phloc.ebinterface.v41.Ebi41AddressType;
 import com.phloc.ebinterface.v41.Ebi41CountryCodeType;
 import com.phloc.ebinterface.v41.Ebi41CountryType;
+import com.phloc.ebinterface.v41.Ebi41DeliveryType;
 import com.phloc.validation.error.ErrorList;
 
 public final class EbInterface41Helper
@@ -218,5 +223,85 @@ public final class EbInterface41Helper
     }
 
     return aEbiAddress;
+  }
+
+  @Nonnull
+  protected static final String getAggregated (@Nonnull final List <DescriptionType> aList)
+  {
+    final StringBuilder aSB = new StringBuilder ();
+    for (final DescriptionType aItem : aList)
+    {
+      if (aSB.length () > 0)
+        aSB.append ('\n');
+      aSB.append (aItem.getValue ());
+    }
+    return aSB.toString ();
+  }
+
+  @Nonnull
+  public static Ebi41DeliveryType convertDelivery (@Nonnull final DeliveryType aUBLDelivery,
+                                                   @Nonnull final String sDeliveryType,
+                                                   @Nullable final CustomerPartyType aCustomerParty,
+                                                   @Nonnull final ErrorList aTransformationErrorList,
+                                                   @Nonnull final Locale aContentLocale,
+                                                   @Nonnull final Locale aDisplayLocale)
+  {
+    final Ebi41DeliveryType aEbiDelivery = new Ebi41DeliveryType ();
+
+    // Set the delivery ID
+    aEbiDelivery.setDeliveryID (aUBLDelivery.getIDValue ());
+
+    // Set the delivery date
+    aEbiDelivery.setDate (aUBLDelivery.getActualDeliveryDateValue ());
+
+    // Address present?
+    final LocationType aUBLDeliveryLocation = aUBLDelivery.getDeliveryLocation ();
+    if (aUBLDeliveryLocation != null && aUBLDeliveryLocation.getAddress () != null)
+    {
+      // Optional description
+      aEbiDelivery.setDescription (getAggregated (aUBLDeliveryLocation.getDescription ()));
+
+      final Ebi41AddressType aEbiAddress = new Ebi41AddressType ();
+      EbInterface41Helper.setAddressData (aUBLDeliveryLocation.getAddress (),
+                                          aEbiAddress,
+                                          sDeliveryType,
+                                          aTransformationErrorList,
+                                          aContentLocale,
+                                          aDisplayLocale);
+
+      // Check delivery party
+      String sAddressName = null;
+      if (aUBLDelivery.getDeliveryParty () != null)
+        for (final PartyNameType aUBLPartyName : aUBLDelivery.getDeliveryParty ().getPartyName ())
+        {
+          sAddressName = StringHelper.trim (aUBLPartyName.getNameValue ());
+          if (StringHelper.hasText (sAddressName))
+            break;
+        }
+
+      // As fallback use location name
+      if (StringHelper.hasNoText (sAddressName))
+        sAddressName = StringHelper.trim (aUBLDeliveryLocation.getNameValue ());
+
+      // As fallback use accounting customer party
+      if (StringHelper.hasNoText (sAddressName) && aCustomerParty != null && aCustomerParty.getParty () != null)
+      {
+        for (final PartyNameType aUBLPartyName : aCustomerParty.getParty ().getPartyName ())
+        {
+          sAddressName = StringHelper.trim (aUBLPartyName.getNameValue ());
+          if (StringHelper.hasText (sAddressName))
+            break;
+        }
+      }
+      aEbiAddress.setName (sAddressName);
+
+      if (StringHelper.hasNoText (aEbiAddress.getName ()))
+        aTransformationErrorList.addError (sDeliveryType + "/DeliveryParty",
+                                           EText.DELIVERY_WITHOUT_NAME.getDisplayText (aDisplayLocale));
+
+      aEbiDelivery.setAddress (aEbiAddress);
+    }
+
+    return aEbiDelivery;
   }
 }

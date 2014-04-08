@@ -67,7 +67,6 @@ import com.phloc.commons.string.StringHelper;
 import com.phloc.commons.string.StringParser;
 import com.phloc.ebinterface.codelist.ETaxCode;
 import com.phloc.ebinterface.v41.Ebi41AccountType;
-import com.phloc.ebinterface.v41.Ebi41AddressType;
 import com.phloc.ebinterface.v41.Ebi41BillerType;
 import com.phloc.ebinterface.v41.Ebi41CurrencyType;
 import com.phloc.ebinterface.v41.Ebi41DeliveryType;
@@ -791,59 +790,16 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
 
           if (aUBLDelivery.getActualDeliveryDate () != null)
           {
-            final Ebi41DeliveryType aEbiDelivery = new Ebi41DeliveryType ();
-
-            // Set the delivery ID
-            aEbiDelivery.setDeliveryID (aUBLDelivery.getIDValue ());
-
-            // Set the delivery date
-            aEbiDelivery.setDate (aUBLDelivery.getActualDeliveryDateValue ());
-
-            // Address present?
-            if (aUBLDelivery.getDeliveryLocation () != null &&
-                aUBLDelivery.getDeliveryLocation ().getAddress () != null)
-            {
-              final Ebi41AddressType aEbiAddress = new Ebi41AddressType ();
-              EbInterface41Helper.setAddressData (aUBLDelivery.getDeliveryLocation ().getAddress (),
-                                                  aEbiAddress,
-                                                  "Delivery",
-                                                  aTransformationErrorList,
-                                                  m_aContentLocale,
-                                                  m_aDisplayLocale);
-
-              // Check delivery party
-              String sAddressName = null;
-              if (aUBLDelivery.getDeliveryParty () != null)
-                for (final PartyNameType aUBLPartyName : aUBLDelivery.getDeliveryParty ().getPartyName ())
-                {
-                  sAddressName = StringHelper.trim (aUBLPartyName.getNameValue ());
-                  if (StringHelper.hasText (sAddressName))
-                    break;
-                }
-
-              // As fallback use accounting customer party
-              if (StringHelper.hasNoText (sAddressName) &&
-                  aUBLDoc.getAccountingCustomerParty () != null &&
-                  aUBLDoc.getAccountingCustomerParty ().getParty () != null)
-              {
-                for (final PartyNameType aUBLPartyName : aUBLDoc.getAccountingCustomerParty ()
-                                                                .getParty ()
-                                                                .getPartyName ())
-                {
-                  sAddressName = StringHelper.trim (aUBLPartyName.getNameValue ());
-                  if (StringHelper.hasText (sAddressName))
-                    break;
-                }
-              }
-              aEbiAddress.setName (sAddressName);
-
-              if (StringHelper.hasNoText (aEbiAddress.getName ()))
-                aTransformationErrorList.addError ("Delivery[" + nDeliveryIndex + "]/DeliveryParty",
-                                                   EText.DELIVERY_WITHOUT_NAME.getDisplayText (m_aDisplayLocale));
-
-              aEbiDelivery.setAddress (aEbiAddress);
-            }
-
+            final Ebi41DeliveryType aEbiDelivery = EbInterface41Helper.convertDelivery (aUBLDelivery,
+                                                                                        "InvoiceLine[" +
+                                                                                            nLineIndex +
+                                                                                            "]/Delivery[" +
+                                                                                            nDeliveryIndex +
+                                                                                            "]",
+                                                                                        aUBLDoc.getAccountingCustomerParty (),
+                                                                                        aTransformationErrorList,
+                                                                                        m_aContentLocale,
+                                                                                        m_aDisplayLocale);
             aEbiListLineItem.setDelivery (aEbiDelivery);
           }
         }
@@ -1190,7 +1146,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
     }
 
     // Delivery
-    final Ebi41DeliveryType aEbiDelivery = new Ebi41DeliveryType ();
+    Ebi41DeliveryType aEbiDelivery = null;
     {
       // Delivery address
       int nDeliveryIndex = 0;
@@ -1199,59 +1155,19 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
         // Use the first delivery with a delivery date
         if (aUBLDelivery.getActualDeliveryDate () != null)
         {
-          // Set the delivery ID
-          aEbiDelivery.setDeliveryID (aUBLDelivery.getIDValue ());
-
-          // Set the delivery date
-          aEbiDelivery.setDate (aUBLDelivery.getActualDeliveryDateValue ());
-
-          // Address
-          if (aUBLDelivery.getDeliveryLocation () != null && aUBLDelivery.getDeliveryLocation ().getAddress () != null)
-          {
-            final Ebi41AddressType aEbiAddress = new Ebi41AddressType ();
-            EbInterface41Helper.setAddressData (aUBLDelivery.getDeliveryLocation ().getAddress (),
-                                                aEbiAddress,
-                                                "Delivery",
-                                                aTransformationErrorList,
-                                                m_aContentLocale,
-                                                m_aDisplayLocale);
-
-            // Check delivery party
-            String sAddressName = null;
-            if (aUBLDelivery.getDeliveryParty () != null)
-              for (final PartyNameType aUBLPartyName : aUBLDelivery.getDeliveryParty ().getPartyName ())
-              {
-                sAddressName = StringHelper.trim (aUBLPartyName.getNameValue ());
-                if (StringHelper.hasText (sAddressName))
-                  break;
-              }
-
-            // As fallback use accounting customer party
-            if (StringHelper.hasNoText (sAddressName) &&
-                aUBLDoc.getAccountingCustomerParty () != null &&
-                aUBLDoc.getAccountingCustomerParty ().getParty () != null)
-            {
-              for (final PartyNameType aUBLPartyName : aUBLDoc.getAccountingCustomerParty ()
-                                                              .getParty ()
-                                                              .getPartyName ())
-              {
-                sAddressName = StringHelper.trim (aUBLPartyName.getNameValue ());
-                if (StringHelper.hasText (sAddressName))
-                  break;
-              }
-            }
-            aEbiAddress.setName (sAddressName);
-
-            if (StringHelper.hasNoText (aEbiAddress.getName ()))
-              aTransformationErrorList.addError ("Delivery[" + nDeliveryIndex + "]/DeliveryParty",
-                                                 EText.DELIVERY_WITHOUT_NAME.getDisplayText (m_aDisplayLocale));
-
-            aEbiDelivery.setAddress (aEbiAddress);
-          }
+          aEbiDelivery = EbInterface41Helper.convertDelivery (aUBLDelivery,
+                                                              "Delivery[" + nDeliveryIndex + "]",
+                                                              aUBLDoc.getAccountingCustomerParty (),
+                                                              aTransformationErrorList,
+                                                              m_aContentLocale,
+                                                              m_aDisplayLocale);
           break;
         }
         ++nDeliveryIndex;
       }
+
+      if (aEbiDelivery == null)
+        aEbiDelivery = new Ebi41DeliveryType ();
 
       if (aEbiDelivery.getDate () == null)
       {
