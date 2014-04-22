@@ -23,6 +23,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
+import com.phloc.commons.ValueEnforcer;
 import com.phloc.commons.annotations.Translatable;
 import com.phloc.commons.name.IHasDisplayText;
 import com.phloc.commons.name.IHasDisplayTextWithArgs;
@@ -35,7 +36,7 @@ import eu.europa.ec.cipa.peppol.codelist.ETaxSchemeID;
 
 /**
  * Base class for PEPPOL UBL 2.0 to ebInterface converter
- *
+ * 
  * @author philip
  */
 @Immutable
@@ -137,7 +138,7 @@ public abstract class AbstractConverter
 
   /**
    * Constructor
-   *
+   * 
    * @param aDisplayLocale
    *        The locale for error messages. May not be <code>null</code>.
    * @param aContentLocale
@@ -150,13 +151,8 @@ public abstract class AbstractConverter
                             @Nonnull final Locale aContentLocale,
                             final boolean bStrictERBMode)
   {
-    if (aDisplayLocale == null)
-      throw new NullPointerException ("DisplayLocale");
-    if (aContentLocale == null)
-      throw new NullPointerException ("ContentLocale");
-
-    m_aDisplayLocale = aDisplayLocale;
-    m_aContentLocale = aContentLocale;
+    m_aDisplayLocale = ValueEnforcer.notNull (aDisplayLocale, "DisplayLocale");
+    m_aContentLocale = ValueEnforcer.notNull (aContentLocale, "ContentLocale");
     m_bStrictERBMode = bStrictERBMode;
   }
 
