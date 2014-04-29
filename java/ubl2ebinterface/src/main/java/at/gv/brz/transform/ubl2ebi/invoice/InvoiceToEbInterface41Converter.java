@@ -108,7 +108,7 @@ import eu.europa.ec.cipa.peppol.codelist.ETaxSchemeID;
 
 /**
  * Main converter between UBL 2.1 invoice and ebInterface 4.1 invoice.
- *
+ * 
  * @author philip
  */
 @Immutable
@@ -118,7 +118,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
 
   /**
    * Constructor
-   *
+   * 
    * @param aDisplayLocale
    *        The locale for error messages. May not be <code>null</code>.
    * @param aContentLocale
@@ -153,7 +153,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
 
   /**
    * Main conversion method to convert from UBL to ebInterface 4.1
-   *
+   * 
    * @param aUBLDoc
    *        The UBL invoice to be converted
    * @param aTransformationErrorList
@@ -228,11 +228,15 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
       final SupplierPartyType aUBLSupplier = aUBLDoc.getAccountingSupplierParty ();
       final Ebi41BillerType aEbiBiller = new Ebi41BillerType ();
       // Find the tax scheme that uses VAT
-      for (final PartyTaxSchemeType aUBLPartyTaxScheme : aUBLSupplier.getParty ().getPartyTaxScheme ())
-        if (SUPPORTED_TAX_SCHEME_ID.getID ().equals (aUBLPartyTaxScheme.getTaxScheme ().getIDValue ()))
+      if (aUBLSupplier.getParty () != null)
+        for (final PartyTaxSchemeType aUBLPartyTaxScheme : aUBLSupplier.getParty ().getPartyTaxScheme ())
         {
-          aEbiBiller.setVATIdentificationNumber (StringHelper.trim (aUBLPartyTaxScheme.getCompanyIDValue ()));
-          break;
+          // TaxScheme is a mandatory field
+          if (SUPPORTED_TAX_SCHEME_ID.getID ().equals (aUBLPartyTaxScheme.getTaxScheme ().getIDValue ()))
+          {
+            aEbiBiller.setVATIdentificationNumber (StringHelper.trim (aUBLPartyTaxScheme.getCompanyIDValue ()));
+            break;
+          }
         }
       if (StringHelper.hasNoText (aEbiBiller.getVATIdentificationNumber ()))
       {
@@ -267,11 +271,15 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
       final CustomerPartyType aUBLCustomer = aUBLDoc.getAccountingCustomerParty ();
       final Ebi41InvoiceRecipientType aEbiRecipient = new Ebi41InvoiceRecipientType ();
       // Find the tax scheme that uses VAT
-      for (final PartyTaxSchemeType aUBLPartyTaxScheme : aUBLCustomer.getParty ().getPartyTaxScheme ())
-        if (SUPPORTED_TAX_SCHEME_ID.getID ().equals (aUBLPartyTaxScheme.getTaxScheme ().getIDValue ()))
+      if (aUBLCustomer.getParty () != null)
+        for (final PartyTaxSchemeType aUBLPartyTaxScheme : aUBLCustomer.getParty ().getPartyTaxScheme ())
         {
-          aEbiRecipient.setVATIdentificationNumber (StringHelper.trim (aUBLPartyTaxScheme.getCompanyIDValue ()));
-          break;
+          // TaxScheme is a mandatory field
+          if (SUPPORTED_TAX_SCHEME_ID.getID ().equals (aUBLPartyTaxScheme.getTaxScheme ().getIDValue ()))
+          {
+            aEbiRecipient.setVATIdentificationNumber (StringHelper.trim (aUBLPartyTaxScheme.getCompanyIDValue ()));
+            break;
+          }
         }
       if (StringHelper.hasNoText (aEbiRecipient.getVATIdentificationNumber ()))
       {
@@ -301,11 +309,15 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
     {
       final Ebi41OrderingPartyType aEbiOrderingParty = new Ebi41OrderingPartyType ();
       // Find the tax scheme that uses VAT
-      for (final PartyTaxSchemeType aUBLPartyTaxScheme : aUBLBuyer.getParty ().getPartyTaxScheme ())
-        if (SUPPORTED_TAX_SCHEME_ID.getID ().equals (aUBLPartyTaxScheme.getTaxScheme ().getIDValue ()))
+      if (aUBLBuyer.getParty () != null)
+        for (final PartyTaxSchemeType aUBLPartyTaxScheme : aUBLBuyer.getParty ().getPartyTaxScheme ())
         {
-          aEbiOrderingParty.setVATIdentificationNumber (StringHelper.trim (aUBLPartyTaxScheme.getCompanyIDValue ()));
-          break;
+          // TaxScheme is a mandatory field
+          if (SUPPORTED_TAX_SCHEME_ID.getID ().equals (aUBLPartyTaxScheme.getTaxScheme ().getIDValue ()))
+          {
+            aEbiOrderingParty.setVATIdentificationNumber (StringHelper.trim (aUBLPartyTaxScheme.getCompanyIDValue ()));
+            break;
+          }
         }
       if (StringHelper.hasNoText (aEbiOrderingParty.getVATIdentificationNumber ()))
       {
