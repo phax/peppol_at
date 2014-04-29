@@ -17,6 +17,7 @@
 package at.gv.brz.transform.ubl2ebi.invoice;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -61,6 +62,15 @@ import eu.europa.ec.cipa.test.TestFiles;
  */
 public class InvoiceToEbInterface41ConverterTest
 {
+  private static final class MyEbiMarshaller extends EbInterface41Marshaller
+  {
+    @Override
+    protected void customizeMarshaller (@Nonnull final Marshaller aMarshaller)
+    {
+      JAXBMarshallerUtils.setSunNamespacePrefixMapper (aMarshaller, new EbiNamespacePrefixMapper ());
+    }
+  }
+
   private static final Logger s_aLogger = LoggerFactory.getLogger (InvoiceToEbInterface41ConverterTest.class);
 
   @Test
@@ -96,14 +106,7 @@ public class InvoiceToEbInterface41ConverterTest
         s_aLogger.info ("  " + aErrorList.getAllItems ());
 
       // Convert ebInterface to XML
-      final Document aDocEb = new EbInterface41Marshaller ()
-      {
-        @Override
-        protected void customizeMarshaller (@Nonnull final Marshaller aMarshaller)
-        {
-          JAXBMarshallerUtils.setSunNamespacePrefixMapper (aMarshaller, new EbiNamespacePrefixMapper ());
-        }
-      }.write (aEbInvoice);
+      final Document aDocEb = new MyEbiMarshaller ().write (aEbInvoice);
       assertNotNull (aDocEb);
 
       XMLWriter.writeToStream (aDocEb,
@@ -142,19 +145,45 @@ public class InvoiceToEbInterface41ConverterTest
         s_aLogger.info ("  " + aErrorList.getAllItems ());
 
       // Convert ebInterface to XML
-      final Document aDocEb = new EbInterface41Marshaller ()
-      {
-        @Override
-        protected void customizeMarshaller (@Nonnull final Marshaller aMarshaller)
-        {
-          JAXBMarshallerUtils.setSunNamespacePrefixMapper (aMarshaller, new EbiNamespacePrefixMapper ());
-        }
-      }.write (aEbInvoice);
+      final Document aDocEb = new MyEbiMarshaller ().write (aEbInvoice);
       assertNotNull (aDocEb);
 
       XMLWriter.writeToStream (aDocEb,
                                FileUtils.getOutputStream ("generated-ebi41-files/" +
                                                           FilenameHelper.getWithoutPath (aRes.getPath ())));
+    }
+  }
+
+  @Test
+  public void testConvertPEPPOLInvoiceLaxBad ()
+  {
+    final List <IReadableResource> aTestFiles = new ArrayList <IReadableResource> ();
+    for (final File aFile : FileSystemRecursiveIterator.create (new File ("src/test/resources/ubl20/invoice_bad"),
+                                                                new FilenameFilterEndsWith (".xml")))
+      aTestFiles.add (new FileSystemResource (aFile));
+
+    // For all PEPPOL test invoices
+    for (final IReadableResource aRes : aTestFiles)
+    {
+      s_aLogger.info (aRes.getPath ());
+      assertTrue (aRes.exists ());
+
+      // Read UBL
+      final InvoiceType aUBLInvoice = UBL21Reader.readInvoice (aRes);
+      assertNotNull (aUBLInvoice);
+
+      // Convert to ebInterface
+      final ErrorList aErrorList = new ErrorList ();
+      final Ebi41InvoiceType aEbInvoice = new InvoiceToEbInterface41Converter (Locale.GERMANY, Locale.GERMANY, false).convertToEbInterface (aUBLInvoice,
+                                                                                                                                            aErrorList);
+      assertNotNull (aEbInvoice);
+      assertTrue (aRes.getPath () + ": " + aErrorList.toString (),
+                  !aErrorList.isEmpty () &&
+                      aErrorList.getMostSevereErrorLevel ().isMoreOrEqualSevereThan (EErrorLevel.ERROR));
+
+      // Convert ebInterface to XML
+      final Document aDocEb = new MyEbiMarshaller ().write (aEbInvoice);
+      assertNull (aDocEb);
     }
   }
 }

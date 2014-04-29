@@ -44,7 +44,6 @@ import eu.europa.ec.cipa.peppol.identifier.process.PredefinedProcessIdentifierMa
 @Immutable
 public abstract class AbstractInvoiceConverter extends AbstractConverter
 {
-
   /**
    * Constructor
    * 

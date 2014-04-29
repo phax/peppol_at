@@ -225,11 +225,13 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
           aTransformationErrorList.addError ("AccountingSupplierParty/CustomerAssignedAccountID",
                                              EText.ERB_CUSTOMER_ASSIGNED_ACCOUNTID_MISSING.getDisplayText (m_aDisplayLocale));
         }
-      aEbiBiller.setAddress (EbInterface41Helper.convertParty (aUBLSupplier.getParty (),
-                                                               "AccountingSupplierParty",
-                                                               aTransformationErrorList,
-                                                               m_aContentLocale,
-                                                               m_aDisplayLocale));
+
+      if (aUBLSupplier.getParty () != null)
+        aEbiBiller.setAddress (EbInterface41Helper.convertParty (aUBLSupplier.getParty (),
+                                                                 "AccountingSupplierParty",
+                                                                 aTransformationErrorList,
+                                                                 m_aContentLocale,
+                                                                 m_aDisplayLocale));
       aEbiDoc.setBiller (aEbiBiller);
     }
 
@@ -262,11 +264,13 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
         final String sBillersInvoiceRecipientID = StringHelper.trim (aUBLCustomer.getSupplierAssignedAccountIDValue ());
         aEbiRecipient.setBillersInvoiceRecipientID (sBillersInvoiceRecipientID);
       }
-      aEbiRecipient.setAddress (EbInterface41Helper.convertParty (aUBLCustomer.getParty (),
-                                                                  "AccountingCustomerParty",
-                                                                  aTransformationErrorList,
-                                                                  m_aContentLocale,
-                                                                  m_aDisplayLocale));
+
+      if (aUBLCustomer.getParty () != null)
+        aEbiRecipient.setAddress (EbInterface41Helper.convertParty (aUBLCustomer.getParty (),
+                                                                    "AccountingCustomerParty",
+                                                                    aTransformationErrorList,
+                                                                    m_aContentLocale,
+                                                                    m_aDisplayLocale));
       aEbiDoc.setInvoiceRecipient (aEbiRecipient);
     }
 
@@ -292,11 +296,13 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
         aTransformationErrorList.addError ("BuyerCustomerParty/PartyTaxScheme",
                                            EText.SUPPLIER_VAT_MISSING.getDisplayText (m_aDisplayLocale));
       }
-      aEbiOrderingParty.setAddress (EbInterface41Helper.convertParty (aUBLBuyer.getParty (),
-                                                                      "BuyerCustomerParty",
-                                                                      aTransformationErrorList,
-                                                                      m_aContentLocale,
-                                                                      m_aDisplayLocale));
+
+      if (aUBLBuyer.getParty () != null)
+        aEbiOrderingParty.setAddress (EbInterface41Helper.convertParty (aUBLBuyer.getParty (),
+                                                                        "BuyerCustomerParty",
+                                                                        aTransformationErrorList,
+                                                                        m_aContentLocale,
+                                                                        m_aDisplayLocale));
       aEbiDoc.setOrderingParty (aEbiOrderingParty);
     }
 
