@@ -3,7 +3,7 @@
   <parent>
     <groupId>com.phloc</groupId>
     <artifactId>parent-pom</artifactId>
-    <version>22.7</version>
+    <version>23.1</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>at.peppol.oss</groupId>
@@ -44,16 +44,6 @@
 
   <repositories>
     <repository>
-      <id>phloc</id>
-      <url>http://repo.phloc.com/maven2/</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-    <repository>
       <id>joinup.nexus</id>
       <url>https://joinup.ec.europa.eu/nexus/content/repositories/releases/</url>
       <releases>
@@ -69,12 +59,12 @@
     <dependency>
       <groupId>com.phloc</groupId>
       <artifactId>phloc-commons</artifactId>
-      <version>4.3.1</version>
+      <version>4.3.3</version>
     </dependency>
     <dependency>
       <groupId>com.phloc</groupId>
       <artifactId>phloc-ubl</artifactId>
-      <version>3.1.5</version>
+      <version>3.2.0</version>
       <exclusions>
         <exclusion>
           <groupId>com.phloc</groupId>
@@ -89,17 +79,17 @@
     <dependency>
       <groupId>com.phloc</groupId>
       <artifactId>phloc-datetime</artifactId>
-      <version>3.1.2</version>
+      <version>3.1.4</version>
     </dependency>
     <dependency>
       <groupId>com.phloc</groupId>
       <artifactId>phloc-ebinterface</artifactId>
-      <version>3.0.7</version>
+      <version>3.0.8</version>
     </dependency>
     <dependency>
       <groupId>com.phloc</groupId>
       <artifactId>phloc-validation</artifactId>
-      <version>3.1.3</version>
+      <version>3.2.0</version>
     </dependency>
     <dependency>
       <groupId>eu.europa.ec.cipa</groupId>
