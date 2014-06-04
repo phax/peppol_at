@@ -19,6 +19,7 @@ package at.gv.brz.transform.ubl2ebi.helper;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
+import com.phloc.commons.ValueEnforcer;
 import com.phloc.commons.hash.HashCodeGenerator;
 import com.phloc.commons.string.ToStringGenerator;
 
@@ -37,10 +38,8 @@ public final class TaxCategoryKey
 
   public TaxCategoryKey (@Nonnull final SchemedID aTaxCategoryScheme, @Nonnull final SchemedID aTaxCategoryID)
   {
-    if (aTaxCategoryScheme == null)
-      throw new NullPointerException ("taxCategoryScheme");
-    if (aTaxCategoryID == null)
-      throw new NullPointerException ("taxCategoryID");
+    ValueEnforcer.notNull (aTaxCategoryScheme, "TaxCategoryScheme");
+    ValueEnforcer.notNull (aTaxCategoryID, "TaxCategoryID");
     m_aTaxCategoryScheme = aTaxCategoryScheme;
     m_aTaxCategoryID = aTaxCategoryID;
   }

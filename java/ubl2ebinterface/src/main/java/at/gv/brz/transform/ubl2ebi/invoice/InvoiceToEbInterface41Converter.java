@@ -59,6 +59,7 @@ import at.gv.brz.transform.ubl2ebi.helper.SchemedID;
 import at.gv.brz.transform.ubl2ebi.helper.TaxCategoryKey;
 
 import com.phloc.commons.CGlobal;
+import com.phloc.commons.ValueEnforcer;
 import com.phloc.commons.collections.ContainerHelper;
 import com.phloc.commons.math.MathHelper;
 import com.phloc.commons.regex.RegExHelper;
@@ -166,10 +167,8 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
   public Ebi41InvoiceType convertToEbInterface (@Nonnull final InvoiceType aUBLDoc,
                                                 @Nonnull final ErrorList aTransformationErrorList)
   {
-    if (aUBLDoc == null)
-      throw new NullPointerException ("UBLInvoice");
-    if (aTransformationErrorList == null)
-      throw new NullPointerException ("TransformationErrorList");
+    ValueEnforcer.notNull (aUBLDoc, "UBLInvoice");
+    ValueEnforcer.notNull (aTransformationErrorList, "TransformationErrorList");
     if (!aTransformationErrorList.isEmpty ())
       throw new IllegalArgumentException ("TransformationErrorList must be empty!");
 

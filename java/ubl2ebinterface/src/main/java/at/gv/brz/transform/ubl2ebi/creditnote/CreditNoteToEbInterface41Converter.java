@@ -52,6 +52,7 @@ import at.gv.brz.transform.ubl2ebi.helper.SchemedID;
 import at.gv.brz.transform.ubl2ebi.helper.TaxCategoryKey;
 
 import com.phloc.commons.CGlobal;
+import com.phloc.commons.ValueEnforcer;
 import com.phloc.commons.collections.ContainerHelper;
 import com.phloc.commons.math.MathHelper;
 import com.phloc.commons.state.ETriState;
@@ -133,10 +134,8 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
   public Ebi41InvoiceType convertToEbInterface (@Nonnull final CreditNoteType aUBLDoc,
                                                 @Nonnull final ErrorList aTransformationErrorList)
   {
-    if (aUBLDoc == null)
-      throw new NullPointerException ("UBLCreditNote");
-    if (aTransformationErrorList == null)
-      throw new NullPointerException ("TransformationErrorList");
+    ValueEnforcer.notNull (aUBLDoc, "UBLCreditNote");
+    ValueEnforcer.notNull (aTransformationErrorList, "TransformationErrorList");
     if (!aTransformationErrorList.isEmpty ())
       throw new IllegalArgumentException ("TransformationErrorList must be empty!");
 
