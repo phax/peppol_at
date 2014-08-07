@@ -36,7 +36,7 @@ import eu.europa.ec.cipa.peppol.codelist.ETaxSchemeID;
 
 /**
  * Base class for PEPPOL UBL 2.0 to ebInterface converter
- * 
+ *
  * @author philip
  */
 @Immutable
@@ -138,14 +138,15 @@ public abstract class AbstractConverter
 
   /**
    * Constructor
-   * 
+   *
    * @param aDisplayLocale
    *        The locale for error messages. May not be <code>null</code>.
    * @param aContentLocale
    *        The locale for the created ebInterface files. May not be
    *        <code>null</code>.
    * @param bStrictERBMode
-   *        <code>true</code> if ER>B specific checks should be performed
+   *        <code>true</code> if E-RECHNUNG.GV.AT specific checks should be
+   *        performed
    */
   public AbstractConverter (@Nonnull final Locale aDisplayLocale,
                             @Nonnull final Locale aContentLocale,

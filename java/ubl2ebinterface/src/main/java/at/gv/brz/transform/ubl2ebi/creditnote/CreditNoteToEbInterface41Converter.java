@@ -95,7 +95,7 @@ import eu.europa.ec.cipa.peppol.codelist.ETaxSchemeID;
 
 /**
  * Main converter between UBL 2.1 credit note and ebInterface 4.1 credit note.
- * 
+ *
  * @author philip
  */
 @Immutable
@@ -103,14 +103,15 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
 {
   /**
    * Constructor
-   * 
+   *
    * @param aDisplayLocale
    *        The locale for error messages. May not be <code>null</code>.
    * @param aContentLocale
    *        The locale for the created ebInterface files. May not be
    *        <code>null</code>.
    * @param bStrictERBMode
-   *        <code>true</code> if ER>B specific checks should be performed
+   *        <code>true</code> if E-RECHNUNG.GV.AT specific checks should be
+   *        performed
    */
   public CreditNoteToEbInterface41Converter (@Nonnull final Locale aDisplayLocale,
                                              @Nonnull final Locale aContentLocale,
@@ -121,7 +122,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
 
   /**
    * Main conversion method to convert from UBL to ebInterface 4.1
-   * 
+   *
    * @param aUBLDoc
    *        The UBL invoice to be converted
    * @param aTransformationErrorList

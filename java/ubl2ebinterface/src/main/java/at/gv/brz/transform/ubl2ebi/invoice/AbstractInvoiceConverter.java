@@ -38,7 +38,7 @@ import eu.europa.ec.cipa.peppol.identifier.process.PredefinedProcessIdentifierMa
 
 /**
  * Base class for UBL 2.1 Invoice to ebInterface converter
- * 
+ *
  * @author philip
  */
 @Immutable
@@ -46,14 +46,15 @@ public abstract class AbstractInvoiceConverter extends AbstractConverter
 {
   /**
    * Constructor
-   * 
+   *
    * @param aDisplayLocale
    *        The locale for error messages. May not be <code>null</code>.
    * @param aContentLocale
    *        The locale for the created ebInterface files. May not be
    *        <code>null</code>.
    * @param bStrictERBMode
-   *        <code>true</code> if ER>B specific checks should be performed
+   *        <code>true</code> if E-RECHNUNG.GV.AT specific checks should be
+   *        performed
    */
   public AbstractInvoiceConverter (@Nonnull final Locale aDisplayLocale,
                                    @Nonnull final Locale aContentLocale,
@@ -64,7 +65,7 @@ public abstract class AbstractInvoiceConverter extends AbstractConverter
 
   /**
    * Check if the passed UBL invoice is transformable
-   * 
+   *
    * @param aUBLInvoice
    *        The UBL invoice to check
    */
