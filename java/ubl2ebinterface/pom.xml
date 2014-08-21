@@ -59,7 +59,7 @@
     <dependency>
       <groupId>com.phloc</groupId>
       <artifactId>phloc-commons</artifactId>
-      <version>4.3.3</version>
+      <version>4.3.5</version>
     </dependency>
     <dependency>
       <groupId>com.phloc</groupId>
@@ -79,7 +79,7 @@
     <dependency>
       <groupId>com.phloc</groupId>
       <artifactId>phloc-datetime</artifactId>
-      <version>3.1.4</version>
+      <version>3.1.5</version>
     </dependency>
     <dependency>
       <groupId>com.phloc</groupId>
