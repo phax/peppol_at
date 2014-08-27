@@ -20,15 +20,15 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
-import com.phloc.commons.annotations.Nonempty;
-import com.phloc.commons.equals.EqualsUtils;
-import com.phloc.commons.hash.HashCodeGenerator;
-import com.phloc.commons.string.StringHelper;
-import com.phloc.commons.string.ToStringGenerator;
+import com.helger.commons.annotations.Nonempty;
+import com.helger.commons.equals.EqualsUtils;
+import com.helger.commons.hash.HashCodeGenerator;
+import com.helger.commons.string.StringHelper;
+import com.helger.commons.string.ToStringGenerator;
 
 /**
  * Represents a generic ID consisting of schemeID and the main ID value.
- * 
+ *
  * @author philip
  */
 @Immutable

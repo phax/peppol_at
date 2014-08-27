@@ -23,13 +23,13 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
-import com.phloc.commons.ValueEnforcer;
-import com.phloc.commons.annotations.Translatable;
-import com.phloc.commons.name.IHasDisplayText;
-import com.phloc.commons.name.IHasDisplayTextWithArgs;
-import com.phloc.commons.text.ITextProvider;
-import com.phloc.commons.text.impl.TextProvider;
-import com.phloc.commons.text.resolve.DefaultTextResolver;
+import com.helger.commons.ValueEnforcer;
+import com.helger.commons.annotations.Translatable;
+import com.helger.commons.name.IHasDisplayText;
+import com.helger.commons.name.IHasDisplayTextWithArgs;
+import com.helger.commons.text.ITextProvider;
+import com.helger.commons.text.impl.TextProvider;
+import com.helger.commons.text.resolve.DefaultTextResolver;
 
 import eu.europa.ec.cipa.peppol.codelist.EInvoiceTypeCode;
 import eu.europa.ec.cipa.peppol.codelist.ETaxSchemeID;

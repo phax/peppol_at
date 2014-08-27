@@ -19,15 +19,15 @@ package at.gv.brz.transform.ubl2ebi.helper;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-import com.phloc.commons.ValueEnforcer;
-import com.phloc.commons.hash.HashCodeGenerator;
-import com.phloc.commons.string.ToStringGenerator;
+import com.helger.commons.ValueEnforcer;
+import com.helger.commons.hash.HashCodeGenerator;
+import com.helger.commons.string.ToStringGenerator;
 
 /**
  * This class contains the data of a single TaxtCategory. That is required when
  * the details items don't have a percentage and the percentage values must be
  * evaluated from the tax subtotal elements.
- * 
+ *
  * @author philip
  */
 @Immutable
