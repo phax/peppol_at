@@ -16,8 +16,8 @@
  */
 package at.gv.brz.transform.ubl2ebi;
 
+import com.helger.ebinterface.CEbInterface;
 import com.phloc.commons.xml.CXML;
-import com.phloc.ebinterface.CEbInterface;
 import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
 
 public class EbiNamespacePrefixMapper extends NamespacePrefixMapper

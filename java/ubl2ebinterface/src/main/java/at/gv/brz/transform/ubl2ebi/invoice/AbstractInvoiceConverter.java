@@ -29,8 +29,8 @@ import oasis.names.specification.ubl.schema.xsd.invoice_21.InvoiceType;
 import at.gv.brz.transform.ubl2ebi.AbstractConverter;
 import at.gv.brz.transform.ubl2ebi.CPeppolUBL;
 
+import com.helger.validation.error.ErrorList;
 import com.phloc.commons.string.StringHelper;
-import com.phloc.validation.error.ErrorList;
 
 import eu.europa.ec.cipa.peppol.identifier.doctype.IPeppolPredefinedDocumentTypeIdentifier;
 import eu.europa.ec.cipa.peppol.identifier.process.IPeppolPredefinedProcessIdentifier;

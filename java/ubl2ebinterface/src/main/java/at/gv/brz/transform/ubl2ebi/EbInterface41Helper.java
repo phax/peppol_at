@@ -35,16 +35,16 @@ import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.Per
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.DescriptionType;
 import at.gv.brz.transform.ubl2ebi.AbstractConverter.EText;
 
+import com.helger.ebinterface.v41.Ebi41AddressIdentifierType;
+import com.helger.ebinterface.v41.Ebi41AddressIdentifierTypeType;
+import com.helger.ebinterface.v41.Ebi41AddressType;
+import com.helger.ebinterface.v41.Ebi41CountryCodeType;
+import com.helger.ebinterface.v41.Ebi41CountryType;
+import com.helger.ebinterface.v41.Ebi41DeliveryType;
+import com.helger.validation.error.ErrorList;
 import com.phloc.commons.collections.ContainerHelper;
 import com.phloc.commons.locale.country.CountryCache;
 import com.phloc.commons.string.StringHelper;
-import com.phloc.ebinterface.v41.Ebi41AddressIdentifierType;
-import com.phloc.ebinterface.v41.Ebi41AddressIdentifierTypeType;
-import com.phloc.ebinterface.v41.Ebi41AddressType;
-import com.phloc.ebinterface.v41.Ebi41CountryCodeType;
-import com.phloc.ebinterface.v41.Ebi41CountryType;
-import com.phloc.ebinterface.v41.Ebi41DeliveryType;
-import com.phloc.validation.error.ErrorList;
 
 public final class EbInterface41Helper
 {

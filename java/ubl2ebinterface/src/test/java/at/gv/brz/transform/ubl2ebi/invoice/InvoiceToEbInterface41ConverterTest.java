@@ -37,27 +37,24 @@ import org.w3c.dom.Document;
 
 import at.gv.brz.transform.ubl2ebi.EbiNamespacePrefixMapper;
 
-import com.phloc.commons.error.EErrorLevel;
-import com.phloc.commons.io.IReadableResource;
-import com.phloc.commons.io.file.FileUtils;
-import com.phloc.commons.io.file.FilenameHelper;
-import com.phloc.commons.io.file.filter.FilenameFilterEndsWith;
-import com.phloc.commons.io.file.iterate.FileSystemIterator;
-import com.phloc.commons.io.file.iterate.FileSystemRecursiveIterator;
-import com.phloc.commons.io.resource.FileSystemResource;
-import com.phloc.commons.jaxb.JAXBMarshallerUtils;
-import com.phloc.commons.xml.serialize.XMLWriter;
-import com.phloc.ebinterface.EbInterface41Marshaller;
-import com.phloc.ebinterface.v41.Ebi41InvoiceType;
-import com.phloc.ubl.UBL21Reader;
-import com.phloc.validation.error.ErrorList;
-
-import eu.europa.ec.cipa.test.ETestFileType;
-import eu.europa.ec.cipa.test.TestFiles;
+import com.helger.commons.error.EErrorLevel;
+import com.helger.commons.io.IReadableResource;
+import com.helger.commons.io.file.FileUtils;
+import com.helger.commons.io.file.FilenameHelper;
+import com.helger.commons.io.file.filter.FilenameFilterEndsWith;
+import com.helger.commons.io.file.iterate.FileSystemIterator;
+import com.helger.commons.io.file.iterate.FileSystemRecursiveIterator;
+import com.helger.commons.io.resource.FileSystemResource;
+import com.helger.commons.jaxb.JAXBMarshallerUtils;
+import com.helger.commons.xml.serialize.XMLWriter;
+import com.helger.ebinterface.EbInterface41Marshaller;
+import com.helger.ebinterface.v41.Ebi41InvoiceType;
+import com.helger.ubl.UBL21Reader;
+import com.helger.validation.error.ErrorList;
 
 /**
  * Test class for class {@link InvoiceToEbInterface41Converter}.
- * 
+ *
  * @author PEPPOL.AT, BRZ, Philip Helger
  */
 public class InvoiceToEbInterface41ConverterTest
@@ -77,8 +74,6 @@ public class InvoiceToEbInterface41ConverterTest
   public void testConvertPEPPOLInvoiceLax ()
   {
     final List <IReadableResource> aTestFiles = new ArrayList <IReadableResource> ();
-    if (false)
-      aTestFiles.addAll (TestFiles.getSuccessFiles (ETestFileType.INVOICE));
     for (final File aFile : FileSystemRecursiveIterator.create (new File ("src/test/resources/ubl20/invoice"),
                                                                 new FilenameFilterEndsWith (".xml")))
       aTestFiles.add (new FileSystemResource (aFile));
