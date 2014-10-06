@@ -207,9 +207,10 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
         }
       if (StringHelper.hasNoText (aEbiBiller.getVATIdentificationNumber ()))
       {
-        // Required by ebInterface 4.0
-        aTransformationErrorList.addError ("AccountingSupplierParty/Party/PartyTaxScheme",
-                                           EText.BILLER_VAT_MISSING.getDisplayText (m_aDisplayLocale));
+        // Required by ebInterface 4.1
+        aEbiBiller.setVATIdentificationNumber ("ATU00000000");
+        aTransformationErrorList.addWarning ("AccountingSupplierParty/Party/PartyTaxScheme",
+                                             EText.BILLER_VAT_MISSING.getDisplayText (m_aDisplayLocale));
       }
       if (aUBLSupplier.getCustomerAssignedAccountID () != null)
       {
@@ -252,9 +253,10 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
         }
       if (StringHelper.hasNoText (aEbiRecipient.getVATIdentificationNumber ()))
       {
-        // Required by ebInterface 4.0
-        aTransformationErrorList.addError ("AccountingCustomerParty/PartyTaxScheme",
-                                           EText.SUPPLIER_VAT_MISSING.getDisplayText (m_aDisplayLocale));
+        // Required by ebInterface 4.1
+        aEbiRecipient.setVATIdentificationNumber ("ATU00000000");
+        aTransformationErrorList.addWarning ("AccountingCustomerParty/PartyTaxScheme",
+                                             EText.SUPPLIER_VAT_MISSING.getDisplayText (m_aDisplayLocale));
       }
       if (aUBLCustomer.getSupplierAssignedAccountID () != null)
       {

@@ -241,8 +241,9 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
       if (StringHelper.hasNoText (aEbiBiller.getVATIdentificationNumber ()))
       {
         // Required by ebInterface 4.1
-        aTransformationErrorList.addError ("AccountingSupplierParty/Party/PartyTaxScheme",
-                                           EText.BILLER_VAT_MISSING.getDisplayText (m_aDisplayLocale));
+        aEbiBiller.setVATIdentificationNumber ("ATU00000000");
+        aTransformationErrorList.addWarning ("AccountingSupplierParty/Party/PartyTaxScheme",
+                                             EText.BILLER_VAT_MISSING.getDisplayText (m_aDisplayLocale));
       }
       if (aUBLSupplier.getCustomerAssignedAccountID () != null)
       {
@@ -285,8 +286,9 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
       if (StringHelper.hasNoText (aEbiRecipient.getVATIdentificationNumber ()))
       {
         // Required by ebInterface 4.1
-        aTransformationErrorList.addError ("AccountingCustomerParty/PartyTaxScheme",
-                                           EText.SUPPLIER_VAT_MISSING.getDisplayText (m_aDisplayLocale));
+        aEbiRecipient.setVATIdentificationNumber ("ATU00000000");
+        aTransformationErrorList.addWarning ("AccountingCustomerParty/PartyTaxScheme",
+                                             EText.SUPPLIER_VAT_MISSING.getDisplayText (m_aDisplayLocale));
       }
       if (aUBLCustomer.getSupplierAssignedAccountID () != null)
       {
@@ -951,11 +953,12 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
         final String sPaymentMeansCode = StringHelper.trim (aUBLPaymentMeans.getPaymentMeansCodeValue ());
         final EPaymentMeansCode21 ePaymentMeans = EPaymentMeansCode21.getFromIDOrNull (sPaymentMeansCode);
         // Debit transfer
-        if (ePaymentMeans == EPaymentMeansCode21._31)
+        if (ePaymentMeans == EPaymentMeansCode21._31 || ePaymentMeans == EPaymentMeansCode21._42)
         {
           // Is a payment channel code present?
           final String sPaymentChannelCode = StringHelper.trim (aUBLPaymentMeans.getPaymentChannelCodeValue ());
-          if (PAYMENT_CHANNEL_CODE_IBAN.equals (sPaymentChannelCode))
+          // null for standard PEPPOL BIS
+          if (sPaymentChannelCode == null || PAYMENT_CHANNEL_CODE_IBAN.equals (sPaymentChannelCode))
           {
             _setPaymentMeansComment (aUBLPaymentMeans, aEbiPaymentMethod);
             final Ebi41UniversalBankTransactionType aEbiUBTMethod = new Ebi41UniversalBankTransactionType ();
