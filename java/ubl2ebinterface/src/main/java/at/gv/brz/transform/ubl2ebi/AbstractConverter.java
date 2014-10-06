@@ -127,10 +127,15 @@ public abstract class AbstractConverter
   public static final int SCALE_PERC = 2;
   public static final int SCALE_PRICE2 = 2;
   public static final int SCALE_PRICE4 = 4;
-  // Austria uses HALF_UP mode!
+  /** Austria uses HALF_UP mode! */
   public static final RoundingMode ROUNDING_MODE = RoundingMode.HALF_UP;
   /** The invoice type code to use */
   public static final String INVOICE_TYPE_CODE = EInvoiceTypeCode.COMMERCIAL_INVOICE.getID ();
+  /**
+   * The fake email address used by PEPPOL when no biller email address is in
+   * the original XML file
+   */
+  public static final String PEPPOL_FAKE_BILLER_EMAIL_ADDRESS = "no-email-address-provided@peppol.eu";
 
   protected final Locale m_aDisplayLocale;
   protected final Locale m_aContentLocale;

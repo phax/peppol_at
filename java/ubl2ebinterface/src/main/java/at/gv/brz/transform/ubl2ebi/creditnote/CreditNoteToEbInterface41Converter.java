@@ -228,11 +228,17 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
         }
 
       if (aUBLSupplier.getParty () != null)
+      {
         aEbiBiller.setAddress (EbInterface41Helper.convertParty (aUBLSupplier.getParty (),
                                                                  "AccountingSupplierParty",
                                                                  aTransformationErrorList,
                                                                  m_aContentLocale,
                                                                  m_aDisplayLocale));
+
+        // Ensure a fake biller email address is present
+        if (StringHelper.hasNoText (aEbiBiller.getAddress ().getEmail ()))
+          aEbiBiller.getAddress ().setEmail (PEPPOL_FAKE_BILLER_EMAIL_ADDRESS);
+      }
       aEbiDoc.setBiller (aEbiBiller);
     }
 

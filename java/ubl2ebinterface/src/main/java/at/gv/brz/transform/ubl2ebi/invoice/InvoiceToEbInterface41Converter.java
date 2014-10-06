@@ -260,11 +260,17 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
                                              EText.ERB_CUSTOMER_ASSIGNED_ACCOUNTID_MISSING.getDisplayText (m_aDisplayLocale));
         }
       if (aUBLSupplier.getParty () != null)
+      {
         aEbiBiller.setAddress (EbInterface41Helper.convertParty (aUBLSupplier.getParty (),
                                                                  "AccountingSupplierParty",
                                                                  aTransformationErrorList,
                                                                  m_aContentLocale,
                                                                  m_aDisplayLocale));
+
+        // Ensure a fake biller email address is present
+        if (StringHelper.hasNoText (aEbiBiller.getAddress ().getEmail ()))
+          aEbiBiller.getAddress ().setEmail (PEPPOL_FAKE_BILLER_EMAIL_ADDRESS);
+      }
       aEbiDoc.setBiller (aEbiBiller);
     }
 
