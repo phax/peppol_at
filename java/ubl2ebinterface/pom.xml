@@ -48,7 +48,7 @@
   </repositories>
   
   <properties>
-    <cipa.version>2.2.0-SNAPSHOT</cipa.version>
+    <cipa.version>2.2.0</cipa.version>
   </properties>
 
   <dependencies>
