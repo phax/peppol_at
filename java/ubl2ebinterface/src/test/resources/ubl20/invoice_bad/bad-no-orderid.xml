@@ -46,9 +46,6 @@
     <cbc:StartDate>2009-11-01</cbc:StartDate>
     <cbc:EndDate>2009-11-30</cbc:EndDate>
   </cac:InvoicePeriod>
-  <cac:OrderReference>
-    <cbc:ID>Z01</cbc:ID>
-  </cac:OrderReference>
   <cac:ContractDocumentReference>
     <cbc:ID>Contract321</cbc:ID>
     <cbc:DocumentType>Framework agreement</cbc:DocumentType>
