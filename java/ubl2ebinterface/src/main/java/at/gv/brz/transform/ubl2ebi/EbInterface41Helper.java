@@ -94,7 +94,7 @@ public final class EbInterface41Helper
         if (StringHelper.hasNoText (sCountryName) && eEbiCountryCode != null)
         {
           // Write locale of country in content locale
-          final Locale aLocale = CountryCache.getCountry (eEbiCountryCode.value ());
+          final Locale aLocale = CountryCache.getInstance ().getCountry (eEbiCountryCode.value ());
           if (aLocale != null)
             aEbiCountry.setContent (aLocale.getDisplayCountry (aContentLocale));
         }
