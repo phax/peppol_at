@@ -21,7 +21,6 @@ import java.util.Locale;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.CustomizationIDType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.InvoiceTypeCodeType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.ProfileIDType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.UBLVersionIDType;
@@ -32,9 +31,9 @@ import at.gv.brz.transform.ubl2ebi.CPeppolUBL;
 import com.helger.commons.string.StringHelper;
 import com.helger.validation.error.ErrorList;
 
-import eu.europa.ec.cipa.peppol.identifier.doctype.IPeppolPredefinedDocumentTypeIdentifier;
 import eu.europa.ec.cipa.peppol.identifier.process.IPeppolPredefinedProcessIdentifier;
 import eu.europa.ec.cipa.peppol.identifier.process.PredefinedProcessIdentifierManager;
+import eu.europa.ec.cipa.peppol.identifier.process.SimpleProcessIdentifier;
 
 /**
  * Base class for UBL 2.1 Invoice to ebInterface converter
@@ -95,7 +94,7 @@ public abstract class AbstractInvoiceConverter extends AbstractConverter
     }
 
     // Check ProfileID
-    IPeppolPredefinedProcessIdentifier aProcID = null;
+    SimpleProcessIdentifier aProcID = null;
     final ProfileIDType aProfileID = aUBLInvoice.getProfileID ();
     if (aProfileID == null)
     {
@@ -104,7 +103,15 @@ public abstract class AbstractInvoiceConverter extends AbstractConverter
     else
     {
       final String sProfileID = StringHelper.trim (aProfileID.getValue ());
-      aProcID = PredefinedProcessIdentifierManager.getProcessIdentifierOfID (sProfileID);
+      final IPeppolPredefinedProcessIdentifier aPredefProcID = PredefinedProcessIdentifierManager.getProcessIdentifierOfID (sProfileID);
+      if (aPredefProcID != null)
+        aProcID = aPredefProcID.getAsProcessIdentifier ();
+      if (aProcID == null)
+      {
+        // Parse basically
+        aProcID = SimpleProcessIdentifier.createWithDefaultScheme (sProfileID);
+      }
+
       if (aProcID == null)
       {
         aTransformationErrorList.addError ("ProfileID",
@@ -115,36 +122,41 @@ public abstract class AbstractInvoiceConverter extends AbstractConverter
 
     // Check CustomizationID
     // I'm not quite sure whether the document ID or "PEPPOL" should be used!
-    if (false)
-    {
-      final CustomizationIDType aCustomizationID = aUBLInvoice.getCustomizationID ();
-      if (aCustomizationID == null)
-        aTransformationErrorList.addError ("CustomizationID",
-                                           EText.NO_CUSTOMIZATION_ID.getDisplayText (m_aDisplayLocale));
-      else
-        if (!CPeppolUBL.CUSTOMIZATION_SCHEMEID.equals (aCustomizationID.getSchemeID ()))
-          aTransformationErrorList.addError ("CustomizationID/schemeID",
-                                             EText.INVALID_CUSTOMIZATION_SCHEME_ID.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                                           aCustomizationID.getSchemeID (),
-                                                                                                           CPeppolUBL.CUSTOMIZATION_SCHEMEID));
-        else
-          if (aProcID != null)
-          {
-            final String sCustomizationID = StringHelper.trim (aCustomizationID.getValue ());
-            IPeppolPredefinedDocumentTypeIdentifier aMatchingDocID = null;
-            for (final IPeppolPredefinedDocumentTypeIdentifier aDocID : aProcID.getDocumentTypeIdentifiers ())
-              if (aDocID.getAsUBLCustomizationID ().equals (sCustomizationID))
-              {
-                // We found a match
-                aMatchingDocID = aDocID;
-                break;
-              }
-            if (aMatchingDocID == null)
-              aTransformationErrorList.addError ("CustomizationID",
-                                                 EText.INVALID_CUSTOMIZATION_ID.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                                        sCustomizationID));
-          }
-    }
+    // if (false)
+    // {
+    // final CustomizationIDType aCustomizationID =
+    // aUBLInvoice.getCustomizationID ();
+    // if (aCustomizationID == null)
+    // aTransformationErrorList.addError ("CustomizationID",
+    // EText.NO_CUSTOMIZATION_ID.getDisplayText (m_aDisplayLocale));
+    // else
+    // if (!CPeppolUBL.CUSTOMIZATION_SCHEMEID.equals
+    // (aCustomizationID.getSchemeID ()))
+    // aTransformationErrorList.addError ("CustomizationID/schemeID",
+    // EText.INVALID_CUSTOMIZATION_SCHEME_ID.getDisplayTextWithArgs
+    // (m_aDisplayLocale,
+    // aCustomizationID.getSchemeID (),
+    // CPeppolUBL.CUSTOMIZATION_SCHEMEID));
+    // else
+    // if (aProcID != null)
+    // {
+    // final String sCustomizationID = StringHelper.trim
+    // (aCustomizationID.getValue ());
+    // IPeppolPredefinedDocumentTypeIdentifier aMatchingDocID = null;
+    // for (final IPeppolPredefinedDocumentTypeIdentifier aDocID :
+    // aProcID.getDocumentTypeIdentifiers ())
+    // if (aDocID.getAsUBLCustomizationID ().equals (sCustomizationID))
+    // {
+    // // We found a match
+    // aMatchingDocID = aDocID;
+    // break;
+    // }
+    // if (aMatchingDocID == null)
+    // aTransformationErrorList.addError ("CustomizationID",
+    // EText.INVALID_CUSTOMIZATION_ID.getDisplayTextWithArgs (m_aDisplayLocale,
+    // sCustomizationID));
+    // }
+    // }
 
     // Invoice type code
     final InvoiceTypeCodeType aInvoiceTypeCode = aUBLInvoice.getInvoiceTypeCode ();
