@@ -48,7 +48,7 @@
   </repositories>
   
   <properties>
-    <cipa.version>2.2.2</cipa.version>
+    <cipa.version>2.2.3</cipa.version>
   </properties>
 
   <dependencies>
