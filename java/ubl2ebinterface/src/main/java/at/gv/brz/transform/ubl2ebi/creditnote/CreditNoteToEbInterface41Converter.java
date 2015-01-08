@@ -771,7 +771,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
               aEbiBaseAmount = aEbiBaseAmount.subtract (aEbiRSItem.getAmount ());
             }
 
-            aEbiRSItem.setComment (_getAllowanceChargeComment (aUBLAllowanceCharge));
+            aEbiRSItem.setComment (getAllowanceChargeComment (aUBLAllowanceCharge));
           }
           aEbiListLineItem.setReductionAndSurchargeListLineItemDetails (aEbiRSDetails);
         }
@@ -863,7 +863,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
           aEbiRSItem.setPercentage (aPerc);
         }
 
-        aEbiRSItem.setComment (_getAllowanceChargeComment (aUBLAllowanceCharge));
+        aEbiRSItem.setComment (getAllowanceChargeComment (aUBLAllowanceCharge));
 
         Ebi41VATRateType aEbiVATRate = null;
         for (final TaxCategoryType aUBLTaxCategory : aUBLAllowanceCharge.getTaxCategory ())

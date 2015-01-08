@@ -30,6 +30,7 @@ import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotations.Translatable;
 import com.helger.commons.name.IHasDisplayText;
 import com.helger.commons.name.IHasDisplayTextWithArgs;
+import com.helger.commons.string.StringHelper;
 import com.helger.commons.text.ITextProvider;
 import com.helger.commons.text.impl.TextProvider;
 import com.helger.commons.text.resolve.DefaultTextResolver;
@@ -173,15 +174,19 @@ public abstract class AbstractConverter
   }
 
   @Nonnull
-  protected static String _getAllowanceChargeComment (@Nonnull AllowanceChargeType aUBLAllowanceCharge)
+  protected static String getAllowanceChargeComment (@Nonnull final AllowanceChargeType aUBLAllowanceCharge)
   {
     // AllowanceChargeReason to Comment
-    StringBuilder aSB = new StringBuilder ();
-    for (AllowanceChargeReasonType aUBLReason : aUBLAllowanceCharge.getAllowanceChargeReason ())
+    final StringBuilder aSB = new StringBuilder ();
+    for (final AllowanceChargeReasonType aUBLReason : aUBLAllowanceCharge.getAllowanceChargeReason ())
     {
-      if (aSB.length () > 0)
-        aSB.append ('\n');
-      aSB.append (aUBLReason.getValue ());
+      final String sReason = StringHelper.trim (aUBLReason.getValue ());
+      if (StringHelper.hasText (sReason))
+      {
+        if (aSB.length () > 0)
+          aSB.append ('\n');
+        aSB.append (sReason);
+      }
     }
     return aSB.toString ();
   }
