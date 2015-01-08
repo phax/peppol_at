@@ -802,6 +802,8 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
                            .add (new ObjectFactory ().createReductionListLineItem (aEbiRSItem));
               aEbiBaseAmount = aEbiBaseAmount.subtract (aEbiRSItem.getAmount ());
             }
+
+            aEbiRSItem.setComment (_getAllowanceChargeComment (aUBLAllowanceCharge));
           }
           aEbiListLineItem.setReductionAndSurchargeListLineItemDetails (aEbiRSDetails);
         }
@@ -891,6 +893,8 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
           final BigDecimal aPerc = aUBLAllowanceCharge.getMultiplierFactorNumericValue ().multiply (CGlobal.BIGDEC_100);
           aEbiRSItem.setPercentage (aPerc);
         }
+
+        aEbiRSItem.setComment (_getAllowanceChargeComment (aUBLAllowanceCharge));
 
         Ebi41VATRateType aEbiVATRate = null;
         for (final TaxCategoryType aUBLTaxCategory : aUBLAllowanceCharge.getTaxCategory ())

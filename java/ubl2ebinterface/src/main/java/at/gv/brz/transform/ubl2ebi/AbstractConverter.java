@@ -23,6 +23,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.AllowanceChargeType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.AllowanceChargeReasonType;
+
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotations.Translatable;
 import com.helger.commons.name.IHasDisplayText;
@@ -167,5 +170,19 @@ public abstract class AbstractConverter
     return sUBLTaxSchemeSchemeID == null ||
            sUBLTaxSchemeSchemeID.equals (SUPPORTED_TAX_SCHEME_SCHEME_ID) ||
            sUBLTaxSchemeSchemeID.equals (SUPPORTED_TAX_SCHEME_SCHEME_ID_SUBSET);
+  }
+
+  @Nonnull
+  protected static String _getAllowanceChargeComment (@Nonnull AllowanceChargeType aUBLAllowanceCharge)
+  {
+    // AllowanceChargeReason to Comment
+    StringBuilder aSB = new StringBuilder ();
+    for (AllowanceChargeReasonType aUBLReason : aUBLAllowanceCharge.getAllowanceChargeReason ())
+    {
+      if (aSB.length () > 0)
+        aSB.append ('\n');
+      aSB.append (aUBLReason.getValue ());
+    }
+    return aSB.toString ();
   }
 }
