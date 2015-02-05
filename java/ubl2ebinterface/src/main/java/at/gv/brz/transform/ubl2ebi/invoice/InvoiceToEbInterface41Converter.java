@@ -153,9 +153,9 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
     }
   }
 
-  private void _convertPaymentMeansAndMethod (@Nonnull final InvoiceType aUBLDoc,
-                                              @Nonnull final ErrorList aTransformationErrorList,
-                                              @Nonnull final Ebi41InvoiceType aEbiDoc)
+  private void _convertPayment (@Nonnull final InvoiceType aUBLDoc,
+                                @Nonnull final ErrorList aTransformationErrorList,
+                                @Nonnull final Ebi41InvoiceType aEbiDoc)
   {
     final Ebi41PaymentMethodType aEbiPaymentMethod = new Ebi41PaymentMethodType ();
     final Ebi41PaymentConditionsType aEbiPaymentConditions = new Ebi41PaymentConditionsType ();
@@ -439,6 +439,9 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
     // Is duplicate/copy indicator?
     if (aUBLDoc.getCopyIndicator () != null)
       aEbiDoc.setIsDuplicate (Boolean.valueOf (aUBLDoc.getCopyIndicator ().isValue ()));
+
+    // CancelledOriginalDocument
+    convertCancelledOriginalDocument (aUBLDoc.getBillingReference (), aEbiDoc);
 
     // Global comment
     {
@@ -1181,7 +1184,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
     aEbiDoc.setPayableAmount (aUBLMonetaryTotal.getPayableAmountValue ().setScale (SCALE_PRICE2, ROUNDING_MODE));
 
     // Payment method
-    _convertPaymentMeansAndMethod (aUBLDoc, aTransformationErrorList, aEbiDoc);
+    _convertPayment (aUBLDoc, aTransformationErrorList, aEbiDoc);
 
     // Delivery
     Ebi41DeliveryType aEbiDelivery = null;

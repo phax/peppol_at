@@ -120,6 +120,29 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
     super (aDisplayLocale, aContentLocale, bStrictERBMode);
   }
 
+  private void _convertPayment (final ErrorList aTransformationErrorList, final Ebi41InvoiceType aEbiDoc)
+  {
+    // Always no payment
+    final Ebi41PaymentMethodType aEbiPaymentMethod = new Ebi41PaymentMethodType ();
+    final Ebi41NoPaymentType aEbiNoPayment = new Ebi41NoPaymentType ();
+    aEbiPaymentMethod.setNoPayment (aEbiNoPayment);
+    aEbiDoc.setPaymentMethod (aEbiPaymentMethod);
+
+    final Ebi41PaymentConditionsType aEbiPaymentConditions = new Ebi41PaymentConditionsType ();
+    if (aEbiPaymentConditions.getDueDate () == null)
+    {
+      // ebInterface requires due date
+      if (aEbiPaymentConditions.hasDiscountEntries ())
+        aTransformationErrorList.addError ("PaymentMeans/PaymentDueDate",
+                                           EText.DISCOUNT_WITHOUT_DUEDATE.getDisplayTextWithArgs (m_aDisplayLocale));
+    }
+    else
+    {
+      // Independent if discounts are present or not
+      aEbiDoc.setPaymentConditions (aEbiPaymentConditions);
+    }
+  }
+
   /**
    * Main conversion method to convert from UBL to ebInterface 4.1
    *
@@ -179,6 +202,9 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
     // Is duplicate/copy indicator?
     if (aUBLDoc.getCopyIndicator () != null)
       aEbiDoc.setIsDuplicate (Boolean.valueOf (aUBLDoc.getCopyIndicator ().isValue ()));
+
+    // CancelledOriginalDocument
+    convertCancelledOriginalDocument (aUBLDoc.getBillingReference (), aEbiDoc);
 
     // Global comment
     {
@@ -923,25 +949,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
     // Payable amount
     aEbiDoc.setPayableAmount (aUBLMonetaryTotal.getPayableAmountValue ().setScale (SCALE_PRICE2, ROUNDING_MODE));
 
-    // Always no payment
-    final Ebi41PaymentMethodType aEbiPaymentMethod = new Ebi41PaymentMethodType ();
-    final Ebi41NoPaymentType aEbiNoPayment = new Ebi41NoPaymentType ();
-    aEbiPaymentMethod.setNoPayment (aEbiNoPayment);
-    aEbiDoc.setPaymentMethod (aEbiPaymentMethod);
-
-    final Ebi41PaymentConditionsType aEbiPaymentConditions = new Ebi41PaymentConditionsType ();
-    if (aEbiPaymentConditions.getDueDate () == null)
-    {
-      // ebInterface requires due date
-      if (aEbiPaymentConditions.hasDiscountEntries ())
-        aTransformationErrorList.addError ("PaymentMeans/PaymentDueDate",
-                                           EText.DISCOUNT_WITHOUT_DUEDATE.getDisplayTextWithArgs (m_aDisplayLocale));
-    }
-    else
-    {
-      // Independent if discounts are present or not
-      aEbiDoc.setPaymentConditions (aEbiPaymentConditions);
-    }
+    _convertPayment (aTransformationErrorList, aEbiDoc);
 
     // Delivery
     Ebi41DeliveryType aEbiDelivery = null;

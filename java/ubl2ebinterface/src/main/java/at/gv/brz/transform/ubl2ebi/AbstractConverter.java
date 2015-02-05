@@ -17,6 +17,7 @@
 package at.gv.brz.transform.ubl2ebi;
 
 import java.math.RoundingMode;
+import java.util.List;
 import java.util.Locale;
 
 import javax.annotation.Nonnull;
@@ -24,6 +25,7 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.AllowanceChargeType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.BillingReferenceType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.AllowanceChargeReasonType;
 
 import com.helger.commons.ValueEnforcer;
@@ -34,6 +36,9 @@ import com.helger.commons.string.StringHelper;
 import com.helger.commons.text.ITextProvider;
 import com.helger.commons.text.impl.TextProvider;
 import com.helger.commons.text.resolve.DefaultTextResolver;
+import com.helger.ebinterface.v41.Ebi41CancelledOriginalDocumentType;
+import com.helger.ebinterface.v41.Ebi41DocumentTypeType;
+import com.helger.ebinterface.v41.Ebi41InvoiceType;
 
 import eu.europa.ec.cipa.peppol.codelist.EInvoiceTypeCode;
 import eu.europa.ec.cipa.peppol.codelist.ETaxSchemeID;
@@ -189,5 +194,41 @@ public abstract class AbstractConverter
       }
     }
     return aSB.toString ();
+  }
+
+  protected static void convertCancelledOriginalDocument (@Nonnull final List <BillingReferenceType> aUBLBillingReferences,
+                                                          @Nonnull final Ebi41InvoiceType aEbiDoc)
+  {
+    for (final BillingReferenceType aUBLBillingReference : aUBLBillingReferences)
+    {
+      if (aUBLBillingReference.getInvoiceDocumentReference () != null &&
+          aUBLBillingReference.getInvoiceDocumentReference ().getIDValue () != null)
+      {
+        final Ebi41CancelledOriginalDocumentType aEbiCancelledOriginalDocument = new Ebi41CancelledOriginalDocumentType ();
+        aEbiCancelledOriginalDocument.setInvoiceNumber (aUBLBillingReference.getInvoiceDocumentReference ()
+                                                                            .getIDValue ());
+        aEbiCancelledOriginalDocument.setInvoiceDate (aUBLBillingReference.getInvoiceDocumentReference ()
+                                                                          .getIssueDateValue ());
+        aEbiCancelledOriginalDocument.setDocumentType (Ebi41DocumentTypeType.INVOICE);
+        aEbiDoc.setCancelledOriginalDocument (aEbiCancelledOriginalDocument);
+        // ebInterface supports only a single cancelled original document
+        break;
+      }
+      else
+        if (aUBLBillingReference.getCreditNoteDocumentReference () != null &&
+            aUBLBillingReference.getCreditNoteDocumentReference ().getIDValue () != null)
+        {
+          final Ebi41CancelledOriginalDocumentType aEbiCancelledOriginalDocument = new Ebi41CancelledOriginalDocumentType ();
+          aEbiCancelledOriginalDocument.setInvoiceNumber (aUBLBillingReference.getCreditNoteDocumentReference ()
+                                                                              .getIDValue ());
+          aEbiCancelledOriginalDocument.setInvoiceDate (aUBLBillingReference.getCreditNoteDocumentReference ()
+                                                                            .getIssueDateValue ());
+          aEbiCancelledOriginalDocument.setDocumentType (Ebi41DocumentTypeType.CREDIT_MEMO);
+          aEbiDoc.setCancelledOriginalDocument (aEbiCancelledOriginalDocument);
+          // ebInterface supports only a single cancelled original document
+          break;
+        }
+      // Ignore other values
+    }
   }
 }
