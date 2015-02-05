@@ -153,6 +153,233 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
     }
   }
 
+  private void _convertPaymentMeansAndMethod (@Nonnull final InvoiceType aUBLDoc,
+                                              @Nonnull final ErrorList aTransformationErrorList,
+                                              @Nonnull final Ebi41InvoiceType aEbiDoc)
+  {
+    final Ebi41PaymentMethodType aEbiPaymentMethod = new Ebi41PaymentMethodType ();
+    final Ebi41PaymentConditionsType aEbiPaymentConditions = new Ebi41PaymentConditionsType ();
+
+    {
+      int nPaymentMeansIndex = 0;
+      for (final PaymentMeansType aUBLPaymentMeans : aUBLDoc.getPaymentMeans ())
+      {
+        final String sPaymentMeansCode = StringHelper.trim (aUBLPaymentMeans.getPaymentMeansCodeValue ());
+        final EPaymentMeansCode21 ePaymentMeans = EPaymentMeansCode21.getFromIDOrNull (sPaymentMeansCode);
+        // Debit transfer
+        if (ePaymentMeans == EPaymentMeansCode21._31 || ePaymentMeans == EPaymentMeansCode21._42)
+        {
+          // Is a payment channel code present?
+          final String sPaymentChannelCode = StringHelper.trim (aUBLPaymentMeans.getPaymentChannelCodeValue ());
+          // null for standard PEPPOL BIS
+          if (sPaymentChannelCode == null || PAYMENT_CHANNEL_CODE_IBAN.equals (sPaymentChannelCode))
+          {
+            _setPaymentMeansComment (aUBLPaymentMeans, aEbiPaymentMethod);
+            final Ebi41UniversalBankTransactionType aEbiUBTMethod = new Ebi41UniversalBankTransactionType ();
+
+            // Find payment reference
+            int nPaymentIDIndex = 0;
+            for (final PaymentIDType aUBLPaymentID : aUBLPaymentMeans.getPaymentID ())
+            {
+              String sUBLPaymentID = StringHelper.trim (aUBLPaymentID.getValue ());
+              if (StringHelper.hasText (sUBLPaymentID))
+              {
+                if (sUBLPaymentID.length () > PAYMENT_REFERENCE_MAX_LENGTH)
+                {
+                  // Reference
+                  aTransformationErrorList.addWarning ("PaymentMeans[" +
+                                                           nPaymentMeansIndex +
+                                                           "]/PaymentID[" +
+                                                           nPaymentIDIndex +
+                                                           "]",
+                                                       EText.PAYMENT_ID_TOO_LONG_CUT.getDisplayTextWithArgs (m_aDisplayLocale,
+                                                                                                             sUBLPaymentID));
+                  sUBLPaymentID = sUBLPaymentID.substring (0, PAYMENT_REFERENCE_MAX_LENGTH);
+                }
+
+                final Ebi41PaymentReferenceType aEbiPaymentReference = new Ebi41PaymentReferenceType ();
+                aEbiPaymentReference.setValue (sUBLPaymentID);
+                aEbiUBTMethod.setPaymentReference (aEbiPaymentReference);
+              }
+              ++nPaymentIDIndex;
+            }
+
+            // Beneficiary account
+            final Ebi41AccountType aEbiAccount = new Ebi41AccountType ();
+
+            // BIC
+            final FinancialAccountType aUBLFinancialAccount = aUBLPaymentMeans.getPayeeFinancialAccount ();
+            if (aUBLFinancialAccount.getFinancialInstitutionBranch () != null &&
+                aUBLFinancialAccount.getFinancialInstitutionBranch ().getFinancialInstitution () != null)
+            {
+              final String sBIC = StringHelper.trim (aUBLFinancialAccount.getFinancialInstitutionBranch ()
+                                                                         .getFinancialInstitution ()
+                                                                         .getIDValue ());
+
+              aEbiAccount.setBIC (sBIC);
+
+              if (StringHelper.hasNoText (sBIC) || !RegExHelper.stringMatchesPattern (REGEX_BIC, sBIC))
+              {
+                aTransformationErrorList.addError ("PaymentMeans[" +
+                                                       nPaymentMeansIndex +
+                                                       "]/PayeeFinancialAccount/FinancialInstitutionBranch/FinancialInstitution/ID",
+                                                   EText.BIC_INVALID.getDisplayTextWithArgs (m_aDisplayLocale, sBIC));
+                aEbiAccount.setBIC (null);
+              }
+            }
+
+            // IBAN
+            final String sIBAN = StringHelper.trim (aUBLPaymentMeans.getPayeeFinancialAccount ().getIDValue ());
+            aEbiAccount.setIBAN (sIBAN);
+            if (StringHelper.getLength (sIBAN) > IBAN_MAX_LENGTH)
+            {
+              aTransformationErrorList.addWarning ("PaymentMeans[" + nPaymentMeansIndex + "]/PayeeFinancialAccount/ID",
+                                                   EText.IBAN_TOO_LONG.getDisplayTextWithArgs (m_aDisplayLocale,
+                                                                                               sIBAN,
+                                                                                               Integer.valueOf (IBAN_MAX_LENGTH)));
+              aEbiAccount.setIBAN (sIBAN.substring (0, IBAN_MAX_LENGTH));
+            }
+
+            // Bank Account Owner - no field present - check PayeePart or
+            // SupplierPartyName
+            String sBankAccountOwnerName = null;
+            if (aUBLDoc.getPayeeParty () != null)
+              for (final PartyNameType aPartyName : aUBLDoc.getPayeeParty ().getPartyName ())
+              {
+                sBankAccountOwnerName = StringHelper.trim (aPartyName.getNameValue ());
+                if (StringHelper.hasText (sBankAccountOwnerName))
+                  break;
+              }
+            if (StringHelper.hasNoText (sBankAccountOwnerName))
+            {
+              final PartyType aSupplierParty = aUBLDoc.getAccountingSupplierParty ().getParty ();
+              if (aSupplierParty != null)
+                for (final PartyNameType aPartyName : aSupplierParty.getPartyName ())
+                {
+                  sBankAccountOwnerName = StringHelper.trim (aPartyName.getNameValue ());
+                  if (StringHelper.hasText (sBankAccountOwnerName))
+                    break;
+                }
+            }
+            aEbiAccount.setBankAccountOwner (sBankAccountOwnerName);
+
+            aEbiUBTMethod.getBeneficiaryAccount ().add (aEbiAccount);
+            aEbiPaymentMethod.setUniversalBankTransaction (aEbiUBTMethod);
+            aEbiDoc.setPaymentMethod (aEbiPaymentMethod);
+
+            // Set due date (optional)
+            aEbiPaymentConditions.setDueDate (aUBLPaymentMeans.getPaymentDueDateValue ());
+
+            break;
+          }
+
+          aTransformationErrorList.addWarning ("PaymentMeans[" + nPaymentMeansIndex + "]",
+                                               EText.PAYMENTMEANS_UNSUPPORTED_CHANNELCODE.getDisplayTextWithArgs (m_aDisplayLocale,
+                                                                                                                  sPaymentChannelCode));
+        }
+        else
+          // Direct debit
+          if (ePaymentMeans == EPaymentMeansCode21._49)
+          {
+            _setPaymentMeansComment (aUBLPaymentMeans, aEbiPaymentMethod);
+            final Ebi41DirectDebitType aEbiDirectDebit = new Ebi41DirectDebitType ();
+            aEbiPaymentMethod.setDirectDebit (aEbiDirectDebit);
+            aEbiDoc.setPaymentMethod (aEbiPaymentMethod);
+
+            // Set due date (optional)
+            aEbiPaymentConditions.setDueDate (aUBLPaymentMeans.getPaymentDueDateValue ());
+
+            break;
+          }
+          else
+          {
+            // No supported payment means code
+            if (MathHelper.isEqualToZero (aEbiDoc.getPayableAmount ()))
+            {
+              // As nothing is to be paid we can safely use NoPayment
+              _setPaymentMeansComment (aUBLPaymentMeans, aEbiPaymentMethod);
+              final Ebi41NoPaymentType aEbiNoPayment = new Ebi41NoPaymentType ();
+              aEbiPaymentMethod.setNoPayment (aEbiNoPayment);
+              break;
+            }
+
+            aTransformationErrorList.addError ("PaymentMeans[" + nPaymentMeansIndex + "]",
+                                               EText.PAYMENTMEANS_CODE_INVALID.getDisplayTextWithArgs (m_aDisplayLocale,
+                                                                                                       ePaymentMeans.getID (),
+                                                                                                       EPaymentMeansCode21._31.getID (),
+                                                                                                       EPaymentMeansCode21._49.getID ()));
+          }
+
+        ++nPaymentMeansIndex;
+      }
+    }
+
+    if (m_bStrictERBMode)
+    {
+      if (aEbiDoc.getPaymentMethod () == null)
+        aTransformationErrorList.addError ("Invoice", EText.ERB_NO_PAYMENT_METHOD.getDisplayText (m_aDisplayLocale));
+    }
+
+    // Payment terms
+    {
+      final List <String> aPaymentConditionsNotes = new ArrayList <String> ();
+      int nPaymentTermsIndex = 0;
+      for (final PaymentTermsType aUBLPaymentTerms : aUBLDoc.getPaymentTerms ())
+      {
+        if (aUBLPaymentTerms.getSettlementDiscountPercent () != null)
+        {
+          if (aUBLPaymentTerms.getSettlementPeriod () == null ||
+              aUBLPaymentTerms.getSettlementPeriod ().getEndDate () == null)
+          {
+            aTransformationErrorList.addWarning ("PaymentTerms[" + nPaymentTermsIndex + "]/SettlementPeriod",
+                                                 EText.SETTLEMENT_PERIOD_MISSING.getDisplayText (m_aDisplayLocale));
+          }
+          else
+          {
+            // Add notes
+            for (final NoteType aUBLNote : aUBLPaymentTerms.getNote ())
+            {
+              final String sUBLNote = StringHelper.trim (aUBLNote.getValue ());
+              if (StringHelper.hasText (sUBLNote))
+                aPaymentConditionsNotes.add (sUBLNote);
+            }
+
+            final Ebi41DiscountType aEbiDiscount = new Ebi41DiscountType ();
+            aEbiDiscount.setPaymentDate (aUBLPaymentTerms.getSettlementPeriod ().getEndDateValue ());
+            aEbiDiscount.setPercentage (aUBLPaymentTerms.getSettlementDiscountPercentValue ());
+            // Optional amount value
+            aEbiDiscount.setAmount (aUBLPaymentTerms.getAmountValue ());
+            aEbiPaymentConditions.getDiscount ().add (aEbiDiscount);
+          }
+        }
+        else
+          if (aUBLPaymentTerms.getPenaltySurchargePercent () != null)
+          {
+            aTransformationErrorList.addWarning ("PaymentTerms[" + nPaymentTermsIndex + "]",
+                                                 EText.PENALTY_NOT_ALLOWED.getDisplayText (m_aDisplayLocale));
+          }
+
+        ++nPaymentTermsIndex;
+      }
+
+      if (!aPaymentConditionsNotes.isEmpty ())
+        aEbiPaymentConditions.setComment (StringHelper.getImploded ('\n', aPaymentConditionsNotes));
+    }
+
+    if (aEbiPaymentConditions.getDueDate () == null)
+    {
+      // ebInterface requires due date
+      if (aEbiPaymentConditions.hasDiscountEntries ())
+        aTransformationErrorList.addError ("PaymentMeans/PaymentDueDate",
+                                           EText.DISCOUNT_WITHOUT_DUEDATE.getDisplayTextWithArgs (m_aDisplayLocale));
+    }
+    else
+    {
+      // Independent if discounts are present or not
+      aEbiDoc.setPaymentConditions (aEbiPaymentConditions);
+    }
+  }
+
   /**
    * Main conversion method to convert from UBL to ebInterface 4.1
    *
@@ -954,226 +1181,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
     aEbiDoc.setPayableAmount (aUBLMonetaryTotal.getPayableAmountValue ().setScale (SCALE_PRICE2, ROUNDING_MODE));
 
     // Payment method
-    final Ebi41PaymentMethodType aEbiPaymentMethod = new Ebi41PaymentMethodType ();
-    final Ebi41PaymentConditionsType aEbiPaymentConditions = new Ebi41PaymentConditionsType ();
-    {
-      int nPaymentMeansIndex = 0;
-      for (final PaymentMeansType aUBLPaymentMeans : aUBLDoc.getPaymentMeans ())
-      {
-        final String sPaymentMeansCode = StringHelper.trim (aUBLPaymentMeans.getPaymentMeansCodeValue ());
-        final EPaymentMeansCode21 ePaymentMeans = EPaymentMeansCode21.getFromIDOrNull (sPaymentMeansCode);
-        // Debit transfer
-        if (ePaymentMeans == EPaymentMeansCode21._31 || ePaymentMeans == EPaymentMeansCode21._42)
-        {
-          // Is a payment channel code present?
-          final String sPaymentChannelCode = StringHelper.trim (aUBLPaymentMeans.getPaymentChannelCodeValue ());
-          // null for standard PEPPOL BIS
-          if (sPaymentChannelCode == null || PAYMENT_CHANNEL_CODE_IBAN.equals (sPaymentChannelCode))
-          {
-            _setPaymentMeansComment (aUBLPaymentMeans, aEbiPaymentMethod);
-            final Ebi41UniversalBankTransactionType aEbiUBTMethod = new Ebi41UniversalBankTransactionType ();
-
-            // Find payment reference
-            int nPaymentIDIndex = 0;
-            for (final PaymentIDType aUBLPaymentID : aUBLPaymentMeans.getPaymentID ())
-            {
-              String sUBLPaymentID = StringHelper.trim (aUBLPaymentID.getValue ());
-              if (StringHelper.hasText (sUBLPaymentID))
-              {
-                if (sUBLPaymentID.length () > PAYMENT_REFERENCE_MAX_LENGTH)
-                {
-                  // Reference
-                  aTransformationErrorList.addWarning ("PaymentMeans[" +
-                                                           nPaymentMeansIndex +
-                                                           "]/PaymentID[" +
-                                                           nPaymentIDIndex +
-                                                           "]",
-                                                       EText.PAYMENT_ID_TOO_LONG_CUT.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                                             sUBLPaymentID));
-                  sUBLPaymentID = sUBLPaymentID.substring (0, PAYMENT_REFERENCE_MAX_LENGTH);
-                }
-
-                final Ebi41PaymentReferenceType aEbiPaymentReference = new Ebi41PaymentReferenceType ();
-                aEbiPaymentReference.setValue (sUBLPaymentID);
-                aEbiUBTMethod.setPaymentReference (aEbiPaymentReference);
-              }
-              ++nPaymentIDIndex;
-            }
-
-            // Beneficiary account
-            final Ebi41AccountType aEbiAccount = new Ebi41AccountType ();
-
-            // BIC
-            final FinancialAccountType aUBLFinancialAccount = aUBLPaymentMeans.getPayeeFinancialAccount ();
-            if (aUBLFinancialAccount.getFinancialInstitutionBranch () != null &&
-                aUBLFinancialAccount.getFinancialInstitutionBranch ().getFinancialInstitution () != null)
-            {
-              final String sBIC = StringHelper.trim (aUBLFinancialAccount.getFinancialInstitutionBranch ()
-                                                                         .getFinancialInstitution ()
-                                                                         .getIDValue ());
-
-              aEbiAccount.setBIC (sBIC);
-
-              if (StringHelper.hasNoText (sBIC) || !RegExHelper.stringMatchesPattern (REGEX_BIC, sBIC))
-              {
-                aTransformationErrorList.addError ("PaymentMeans[" +
-                                                       nPaymentMeansIndex +
-                                                       "]/PayeeFinancialAccount/FinancialInstitutionBranch/FinancialInstitution/ID",
-                                                   EText.BIC_INVALID.getDisplayTextWithArgs (m_aDisplayLocale, sBIC));
-                aEbiAccount.setBIC (null);
-              }
-            }
-
-            // IBAN
-            final String sIBAN = StringHelper.trim (aUBLPaymentMeans.getPayeeFinancialAccount ().getIDValue ());
-            aEbiAccount.setIBAN (sIBAN);
-            if (StringHelper.getLength (sIBAN) > IBAN_MAX_LENGTH)
-            {
-              aTransformationErrorList.addWarning ("PaymentMeans[" + nPaymentMeansIndex + "]/PayeeFinancialAccount/ID",
-                                                   EText.IBAN_TOO_LONG.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                               sIBAN,
-                                                                                               Integer.valueOf (IBAN_MAX_LENGTH)));
-              aEbiAccount.setIBAN (sIBAN.substring (0, IBAN_MAX_LENGTH));
-            }
-
-            // Bank Account Owner - no field present - check PayeePart or
-            // SupplierPartyName
-            String sBankAccountOwnerName = null;
-            if (aUBLDoc.getPayeeParty () != null)
-              for (final PartyNameType aPartyName : aUBLDoc.getPayeeParty ().getPartyName ())
-              {
-                sBankAccountOwnerName = StringHelper.trim (aPartyName.getNameValue ());
-                if (StringHelper.hasText (sBankAccountOwnerName))
-                  break;
-              }
-            if (StringHelper.hasNoText (sBankAccountOwnerName))
-            {
-              final PartyType aSupplierParty = aUBLDoc.getAccountingSupplierParty ().getParty ();
-              if (aSupplierParty != null)
-                for (final PartyNameType aPartyName : aSupplierParty.getPartyName ())
-                {
-                  sBankAccountOwnerName = StringHelper.trim (aPartyName.getNameValue ());
-                  if (StringHelper.hasText (sBankAccountOwnerName))
-                    break;
-                }
-            }
-            aEbiAccount.setBankAccountOwner (sBankAccountOwnerName);
-
-            aEbiUBTMethod.getBeneficiaryAccount ().add (aEbiAccount);
-            aEbiPaymentMethod.setUniversalBankTransaction (aEbiUBTMethod);
-            aEbiDoc.setPaymentMethod (aEbiPaymentMethod);
-
-            // Set due date (optional)
-            aEbiPaymentConditions.setDueDate (aUBLPaymentMeans.getPaymentDueDateValue ());
-
-            break;
-          }
-
-          aTransformationErrorList.addWarning ("PaymentMeans[" + nPaymentMeansIndex + "]",
-                                               EText.PAYMENTMEANS_UNSUPPORTED_CHANNELCODE.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                                                  sPaymentChannelCode));
-        }
-        else
-          // Direct debit
-          if (ePaymentMeans == EPaymentMeansCode21._49)
-          {
-            _setPaymentMeansComment (aUBLPaymentMeans, aEbiPaymentMethod);
-            final Ebi41DirectDebitType aEbiDirectDebit = new Ebi41DirectDebitType ();
-            aEbiPaymentMethod.setDirectDebit (aEbiDirectDebit);
-            aEbiDoc.setPaymentMethod (aEbiPaymentMethod);
-
-            // Set due date (optional)
-            aEbiPaymentConditions.setDueDate (aUBLPaymentMeans.getPaymentDueDateValue ());
-
-            break;
-          }
-          else
-          {
-            // No supported payment means code
-            if (MathHelper.isEqualToZero (aEbiDoc.getPayableAmount ()))
-            {
-              // As nothing is to be paid we can safely use NoPayment
-              _setPaymentMeansComment (aUBLPaymentMeans, aEbiPaymentMethod);
-              final Ebi41NoPaymentType aEbiNoPayment = new Ebi41NoPaymentType ();
-              aEbiPaymentMethod.setNoPayment (aEbiNoPayment);
-              break;
-            }
-
-            aTransformationErrorList.addError ("PaymentMeans[" + nPaymentMeansIndex + "]",
-                                               EText.PAYMENTMEANS_CODE_INVALID.getDisplayTextWithArgs (m_aDisplayLocale,
-                                                                                                       ePaymentMeans.getID (),
-                                                                                                       EPaymentMeansCode21._31.getID (),
-                                                                                                       EPaymentMeansCode21._49.getID ()));
-          }
-
-        ++nPaymentMeansIndex;
-      }
-    }
-
-    if (m_bStrictERBMode)
-    {
-      if (aEbiDoc.getPaymentMethod () == null)
-        aTransformationErrorList.addError ("Invoice", EText.ERB_NO_PAYMENT_METHOD.getDisplayText (m_aDisplayLocale));
-    }
-
-    // Payment terms
-    {
-      final List <String> aPaymentConditionsNotes = new ArrayList <String> ();
-      int nPaymentTermsIndex = 0;
-      for (final PaymentTermsType aUBLPaymentTerms : aUBLDoc.getPaymentTerms ())
-      {
-        if (aUBLPaymentTerms.getSettlementDiscountPercent () != null)
-        {
-          if (aUBLPaymentTerms.getSettlementPeriod () == null ||
-              aUBLPaymentTerms.getSettlementPeriod ().getEndDate () == null)
-          {
-            aTransformationErrorList.addWarning ("PaymentTerms[" + nPaymentTermsIndex + "]/SettlementPeriod",
-                                                 EText.SETTLEMENT_PERIOD_MISSING.getDisplayText (m_aDisplayLocale));
-          }
-          else
-          {
-            // Add notes
-            for (final NoteType aUBLNote : aUBLPaymentTerms.getNote ())
-            {
-              final String sUBLNote = StringHelper.trim (aUBLNote.getValue ());
-              if (StringHelper.hasText (sUBLNote))
-                aPaymentConditionsNotes.add (sUBLNote);
-            }
-
-            final Ebi41DiscountType aEbiDiscount = new Ebi41DiscountType ();
-            aEbiDiscount.setPaymentDate (aUBLPaymentTerms.getSettlementPeriod ().getEndDateValue ());
-            aEbiDiscount.setPercentage (aUBLPaymentTerms.getSettlementDiscountPercentValue ());
-            // Optional amount value
-            aEbiDiscount.setAmount (aUBLPaymentTerms.getAmountValue ());
-            aEbiPaymentConditions.getDiscount ().add (aEbiDiscount);
-          }
-        }
-        else
-          if (aUBLPaymentTerms.getPenaltySurchargePercent () != null)
-          {
-            aTransformationErrorList.addWarning ("PaymentTerms[" + nPaymentTermsIndex + "]",
-                                                 EText.PENALTY_NOT_ALLOWED.getDisplayText (m_aDisplayLocale));
-          }
-
-        ++nPaymentTermsIndex;
-      }
-
-      if (!aPaymentConditionsNotes.isEmpty ())
-        aEbiPaymentConditions.setComment (StringHelper.getImploded ('\n', aPaymentConditionsNotes));
-    }
-
-    if (aEbiPaymentConditions.getDueDate () == null)
-    {
-      // ebInterface requires due date
-      if (aEbiPaymentConditions.hasDiscountEntries ())
-        aTransformationErrorList.addError ("PaymentMeans/PaymentDueDate",
-                                           EText.DISCOUNT_WITHOUT_DUEDATE.getDisplayTextWithArgs (m_aDisplayLocale));
-    }
-    else
-    {
-      // Independent if discounts are present or not
-      aEbiDoc.setPaymentConditions (aEbiPaymentConditions);
-    }
+    _convertPaymentMeansAndMethod (aUBLDoc, aTransformationErrorList, aEbiDoc);
 
     // Delivery
     Ebi41DeliveryType aEbiDelivery = null;
