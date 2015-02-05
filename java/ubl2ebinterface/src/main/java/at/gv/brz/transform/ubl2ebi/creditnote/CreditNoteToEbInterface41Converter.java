@@ -204,7 +204,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
       aEbiDoc.setIsDuplicate (Boolean.valueOf (aUBLDoc.getCopyIndicator ().isValue ()));
 
     // CancelledOriginalDocument
-    convertCancelledOriginalDocument (aUBLDoc.getBillingReference (), aEbiDoc);
+    convertRelatedDocuments (aUBLDoc.getBillingReference (), aEbiDoc);
 
     // Global comment
     {

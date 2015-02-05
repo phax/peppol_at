@@ -36,9 +36,9 @@ import com.helger.commons.string.StringHelper;
 import com.helger.commons.text.ITextProvider;
 import com.helger.commons.text.impl.TextProvider;
 import com.helger.commons.text.resolve.DefaultTextResolver;
-import com.helger.ebinterface.v41.Ebi41CancelledOriginalDocumentType;
 import com.helger.ebinterface.v41.Ebi41DocumentTypeType;
 import com.helger.ebinterface.v41.Ebi41InvoiceType;
+import com.helger.ebinterface.v41.Ebi41RelatedDocumentType;
 
 import eu.europa.ec.cipa.peppol.codelist.EInvoiceTypeCode;
 import eu.europa.ec.cipa.peppol.codelist.ETaxSchemeID;
@@ -196,37 +196,30 @@ public abstract class AbstractConverter
     return aSB.toString ();
   }
 
-  protected static void convertCancelledOriginalDocument (@Nonnull final List <BillingReferenceType> aUBLBillingReferences,
-                                                          @Nonnull final Ebi41InvoiceType aEbiDoc)
+  protected static void convertRelatedDocuments (@Nonnull final List <BillingReferenceType> aUBLBillingReferences,
+                                                 @Nonnull final Ebi41InvoiceType aEbiDoc)
   {
     for (final BillingReferenceType aUBLBillingReference : aUBLBillingReferences)
     {
       if (aUBLBillingReference.getInvoiceDocumentReference () != null &&
           aUBLBillingReference.getInvoiceDocumentReference ().getIDValue () != null)
       {
-        final Ebi41CancelledOriginalDocumentType aEbiCancelledOriginalDocument = new Ebi41CancelledOriginalDocumentType ();
-        aEbiCancelledOriginalDocument.setInvoiceNumber (aUBLBillingReference.getInvoiceDocumentReference ()
-                                                                            .getIDValue ());
-        aEbiCancelledOriginalDocument.setInvoiceDate (aUBLBillingReference.getInvoiceDocumentReference ()
-                                                                          .getIssueDateValue ());
-        aEbiCancelledOriginalDocument.setDocumentType (Ebi41DocumentTypeType.INVOICE);
-        aEbiDoc.setCancelledOriginalDocument (aEbiCancelledOriginalDocument);
-        // ebInterface supports only a single cancelled original document
-        break;
+        final Ebi41RelatedDocumentType aEbiRelatedDocument = new Ebi41RelatedDocumentType ();
+        aEbiRelatedDocument.setInvoiceNumber (aUBLBillingReference.getInvoiceDocumentReference ().getIDValue ());
+        aEbiRelatedDocument.setInvoiceDate (aUBLBillingReference.getInvoiceDocumentReference ().getIssueDateValue ());
+        aEbiRelatedDocument.setDocumentType (Ebi41DocumentTypeType.INVOICE);
+        aEbiDoc.getRelatedDocument ().add (aEbiRelatedDocument);
       }
       else
         if (aUBLBillingReference.getCreditNoteDocumentReference () != null &&
             aUBLBillingReference.getCreditNoteDocumentReference ().getIDValue () != null)
         {
-          final Ebi41CancelledOriginalDocumentType aEbiCancelledOriginalDocument = new Ebi41CancelledOriginalDocumentType ();
-          aEbiCancelledOriginalDocument.setInvoiceNumber (aUBLBillingReference.getCreditNoteDocumentReference ()
-                                                                              .getIDValue ());
-          aEbiCancelledOriginalDocument.setInvoiceDate (aUBLBillingReference.getCreditNoteDocumentReference ()
-                                                                            .getIssueDateValue ());
-          aEbiCancelledOriginalDocument.setDocumentType (Ebi41DocumentTypeType.CREDIT_MEMO);
-          aEbiDoc.setCancelledOriginalDocument (aEbiCancelledOriginalDocument);
-          // ebInterface supports only a single cancelled original document
-          break;
+          final Ebi41RelatedDocumentType aEbiRelatedDocument = new Ebi41RelatedDocumentType ();
+          aEbiRelatedDocument.setInvoiceNumber (aUBLBillingReference.getCreditNoteDocumentReference ().getIDValue ());
+          aEbiRelatedDocument.setInvoiceDate (aUBLBillingReference.getCreditNoteDocumentReference ()
+                                                                  .getIssueDateValue ());
+          aEbiRelatedDocument.setDocumentType (Ebi41DocumentTypeType.CREDIT_MEMO);
+          aEbiDoc.getRelatedDocument ().add (aEbiRelatedDocument);
         }
       // Ignore other values
     }

@@ -441,7 +441,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
       aEbiDoc.setIsDuplicate (Boolean.valueOf (aUBLDoc.getCopyIndicator ().isValue ()));
 
     // CancelledOriginalDocument
-    convertCancelledOriginalDocument (aUBLDoc.getBillingReference (), aEbiDoc);
+    convertRelatedDocuments (aUBLDoc.getBillingReference (), aEbiDoc);
 
     // Global comment
     {
