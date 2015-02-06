@@ -153,7 +153,6 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
    * @return The created ebInterface 4.1 document or <code>null</code> in case
    *         of a severe error.
    */
-  @SuppressWarnings ("null")
   @Nullable
   public Ebi41InvoiceType convertToEbInterface (@Nonnull final CreditNoteType aUBLDoc,
                                                 @Nonnull final ErrorList aTransformationErrorList)

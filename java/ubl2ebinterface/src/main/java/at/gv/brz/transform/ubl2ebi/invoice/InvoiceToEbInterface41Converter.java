@@ -390,7 +390,6 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
    * @return The created ebInterface 4.1 document or <code>null</code> in case
    *         of a severe error.
    */
-  @SuppressWarnings ("null")
   @Nullable
   public Ebi41InvoiceType convertToEbInterface (@Nonnull final InvoiceType aUBLDoc,
                                                 @Nonnull final ErrorList aTransformationErrorList)
