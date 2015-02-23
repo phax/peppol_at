@@ -479,6 +479,15 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
         // The customer's internal identifier for the supplier.
         aEbiBiller.setInvoiceRecipientsBillerID (StringHelper.trim (aUBLSupplier.getCustomerAssignedAccountIDValue ()));
       }
+      if (StringHelper.hasNoText (aEbiBiller.getInvoiceRecipientsBillerID ()) &&
+          aUBLSupplier.getParty () != null &&
+          aUBLSupplier.getParty ().hasPartyIdentificationEntries ())
+      {
+        // New version for BIS V2
+        aEbiBiller.setInvoiceRecipientsBillerID (StringHelper.trim (aUBLSupplier.getParty ()
+                                                                                .getPartyIdentificationAtIndex (0)
+                                                                                .getIDValue ()));
+      }
 
       // Disabled because field is optional
       if (false)
