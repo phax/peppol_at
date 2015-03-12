@@ -53,7 +53,7 @@ import at.gv.brz.transform.ubl2ebi.helper.TaxCategoryKey;
 
 import com.helger.commons.CGlobal;
 import com.helger.commons.ValueEnforcer;
-import com.helger.commons.collections.ContainerHelper;
+import com.helger.commons.collections.CollectionHelper;
 import com.helger.commons.math.MathHelper;
 import com.helger.commons.state.ETriState;
 import com.helger.commons.string.StringHelper;
@@ -559,7 +559,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
       for (final CreditNoteLineType aUBLLine : aUBLDoc.getCreditNoteLine ())
       {
         // Try to resolve tax category
-        TaxCategoryType aUBLTaxCategory = ContainerHelper.getSafe (aUBLLine.getItem ().getClassifiedTaxCategory (), 0);
+        TaxCategoryType aUBLTaxCategory = CollectionHelper.getSafe (aUBLLine.getItem ().getClassifiedTaxCategory (), 0);
         if (aUBLTaxCategory == null)
         {
           // No direct tax category -> check if it is somewhere in the tax total
@@ -986,7 +986,7 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
       if (aEbiDelivery.getDate () == null)
       {
         // No delivery date is present - check for service period
-        final PeriodType aUBLCreditNotePeriod = ContainerHelper.getSafe (aUBLDoc.getInvoicePeriod (), 0);
+        final PeriodType aUBLCreditNotePeriod = CollectionHelper.getSafe (aUBLDoc.getInvoicePeriod (), 0);
         if (aUBLCreditNotePeriod != null)
         {
           final XMLGregorianCalendar aStartDate = aUBLCreditNotePeriod.getStartDateValue ();

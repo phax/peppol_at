@@ -60,7 +60,7 @@ import at.gv.brz.transform.ubl2ebi.helper.TaxCategoryKey;
 
 import com.helger.commons.CGlobal;
 import com.helger.commons.ValueEnforcer;
-import com.helger.commons.collections.ContainerHelper;
+import com.helger.commons.collections.CollectionHelper;
 import com.helger.commons.math.MathHelper;
 import com.helger.commons.regex.RegExHelper;
 import com.helger.commons.state.ETriState;
@@ -795,7 +795,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
       for (final InvoiceLineType aUBLLine : aUBLDoc.getInvoiceLine ())
       {
         // Try to resolve tax category
-        TaxCategoryType aUBLTaxCategory = ContainerHelper.getSafe (aUBLLine.getItem ().getClassifiedTaxCategory (), 0);
+        TaxCategoryType aUBLTaxCategory = CollectionHelper.getSafe (aUBLLine.getItem ().getClassifiedTaxCategory (), 0);
         if (aUBLTaxCategory == null)
         {
           // No direct tax category -> check if it is somewhere in the tax total
@@ -1221,7 +1221,7 @@ public final class InvoiceToEbInterface41Converter extends AbstractInvoiceConver
       if (aEbiDelivery.getDate () == null)
       {
         // No delivery date is present - check for service period
-        final PeriodType aUBLInvoicePeriod = ContainerHelper.getSafe (aUBLDoc.getInvoicePeriod (), 0);
+        final PeriodType aUBLInvoicePeriod = CollectionHelper.getSafe (aUBLDoc.getInvoicePeriod (), 0);
         if (aUBLInvoicePeriod != null)
         {
           final XMLGregorianCalendar aStartDate = aUBLInvoicePeriod.getStartDateValue ();

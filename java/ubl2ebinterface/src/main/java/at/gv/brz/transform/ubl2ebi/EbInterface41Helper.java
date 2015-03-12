@@ -35,7 +35,7 @@ import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.Per
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.DescriptionType;
 import at.gv.brz.transform.ubl2ebi.AbstractConverter.EText;
 
-import com.helger.commons.collections.ContainerHelper;
+import com.helger.commons.collections.CollectionHelper;
 import com.helger.commons.locale.country.CountryCache;
 import com.helger.commons.string.StringHelper;
 import com.helger.ebinterface.v41.Ebi41AddressIdentifierType;
@@ -130,7 +130,7 @@ public final class EbInterface41Helper
                                            EText.MULTIPLE_PARTIES.getDisplayText (aDisplayLocale));
 
     // Convert name
-    final PartyNameType aUBLPartyName = ContainerHelper.getSafe (aUBLParty.getPartyName (), 0);
+    final PartyNameType aUBLPartyName = CollectionHelper.getSafe (aUBLParty.getPartyName (), 0);
     if (aUBLPartyName != null)
       aEbiAddress.setName (StringHelper.trim (aUBLPartyName.getNameValue ()));
 
