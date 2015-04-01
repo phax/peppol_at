@@ -88,10 +88,9 @@ import com.helger.ebinterface.v41.Ebi41VATItemType;
 import com.helger.ebinterface.v41.Ebi41VATRateType;
 import com.helger.ebinterface.v41.Ebi41VATType;
 import com.helger.ebinterface.v41.ObjectFactory;
+import com.helger.peppol.codelist.ETaxSchemeID;
 import com.helger.ubl21.codelist.EUnitOfMeasureCode21;
 import com.helger.validation.error.ErrorList;
-
-import eu.europa.ec.cipa.peppol.codelist.ETaxSchemeID;
 
 /**
  * Main converter between UBL 2.1 credit note and ebInterface 4.1 credit note.

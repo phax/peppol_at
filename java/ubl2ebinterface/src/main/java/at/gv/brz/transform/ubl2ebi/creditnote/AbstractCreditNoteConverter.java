@@ -29,11 +29,10 @@ import at.gv.brz.transform.ubl2ebi.AbstractConverter;
 import at.gv.brz.transform.ubl2ebi.CPeppolUBL;
 
 import com.helger.commons.string.StringHelper;
+import com.helger.peppol.identifier.doctype.IPeppolPredefinedDocumentTypeIdentifier;
+import com.helger.peppol.identifier.process.IPeppolPredefinedProcessIdentifier;
+import com.helger.peppol.identifier.process.PredefinedProcessIdentifierManager;
 import com.helger.validation.error.ErrorList;
-
-import eu.europa.ec.cipa.peppol.identifier.doctype.IPeppolPredefinedDocumentTypeIdentifier;
-import eu.europa.ec.cipa.peppol.identifier.process.IPeppolPredefinedProcessIdentifier;
-import eu.europa.ec.cipa.peppol.identifier.process.PredefinedProcessIdentifierManager;
 
 /**
  * Base class for UBL 2.1 CreditNote to ebInterface converter

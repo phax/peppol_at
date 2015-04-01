@@ -39,9 +39,8 @@ import com.helger.commons.text.resolve.DefaultTextResolver;
 import com.helger.ebinterface.v41.Ebi41DocumentTypeType;
 import com.helger.ebinterface.v41.Ebi41InvoiceType;
 import com.helger.ebinterface.v41.Ebi41RelatedDocumentType;
-
-import eu.europa.ec.cipa.peppol.codelist.EInvoiceTypeCode;
-import eu.europa.ec.cipa.peppol.codelist.ETaxSchemeID;
+import com.helger.peppol.codelist.EInvoiceTypeCode;
+import com.helger.peppol.codelist.ETaxSchemeID;
 
 /**
  * Base class for PEPPOL UBL 2.0 to ebInterface converter
