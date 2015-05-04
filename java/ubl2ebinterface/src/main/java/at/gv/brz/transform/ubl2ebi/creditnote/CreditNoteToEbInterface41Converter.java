@@ -382,8 +382,12 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
       for (final DocumentReferenceType aDocumentReference : aUBLDoc.getContractDocumentReference ())
         if (StringHelper.hasTextAfterTrim (aDocumentReference.getIDValue ()))
         {
+          final String sKey = StringHelper.hasText (aDocumentReference.getID ().getSchemeID ()) ? aDocumentReference.getID ()
+                                                                                                                    .getSchemeID ()
+                                                                                               : "Contract";
+
           final Ebi41FurtherIdentificationType aEbiFurtherIdentification = new Ebi41FurtherIdentificationType ();
-          aEbiFurtherIdentification.setIdentificationType ("Contract");
+          aEbiFurtherIdentification.setIdentificationType (sKey);
           aEbiFurtherIdentification.setValue (StringHelper.trim (aDocumentReference.getIDValue ()));
           aEbiDoc.getInvoiceRecipient ().getFurtherIdentification ().add (aEbiFurtherIdentification);
         }

@@ -41,7 +41,7 @@
     <cbc:ID>Z01</cbc:ID>
   </cac:OrderReference>
   <cac:ContractDocumentReference>
-    <cbc:ID>Contract321</cbc:ID>
+    <cbc:ID schemeID="BBG-GZ">Contract321</cbc:ID>
     <cbc:DocumentType>Framework agreement</cbc:DocumentType>
   </cac:ContractDocumentReference>
   <cac:AdditionalDocumentReference>
