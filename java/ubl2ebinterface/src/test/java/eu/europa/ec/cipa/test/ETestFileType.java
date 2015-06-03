@@ -45,14 +45,8 @@ import com.helger.commons.io.resource.ClassPathResource;
 
 public enum ETestFileType
 {
-  CALLFORTENDERS ("test-callfortenders"),
-  CATALOGUE ("test-catalogues"),
   CREDITNOTE ("test-creditnotes"),
-  INVOICE ("test-invoices"),
-  ORDER ("test-orders"),
-  ORDERRESPONSE ("test-orderresponses"),
-  TENDER ("test-tenders"),
-  TENDERINGCATALOGUE ("test-tenderingcatalogues");
+  INVOICE ("test-invoices");
 
   private final String m_sDirName;
 

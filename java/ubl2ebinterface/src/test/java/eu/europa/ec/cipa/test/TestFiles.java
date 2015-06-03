@@ -68,8 +68,6 @@ import eu.europa.ec.cipa.test.error.Warning;
 public final class TestFiles
 {
   private static final Logger s_aLogger = LoggerFactory.getLogger (TestFiles.class);
-  private static final String [] CALLFORTENDERS_SUCCESS = new String [] { "Catalogue pre award_Call for Tender_RDO MEPA_BIS 12a.xml" };
-  private static final String [] CATALOGUES_SUCCESS = new String [] { "Consip_Catalogo_UBL.xml" };
   private static final String [] CREDITNOTES_SUCCESS = new String [] { "BII05 TRDM014 example is.xml" };
   private static final String [] CREDITNOTES_AT_SUCCESS = new String [] { "atgov_BIS5aCreditNote.xml",
                                                                          "atgov-t14-BIS5A-valid.xml",
@@ -95,19 +93,6 @@ public final class TestFiles
                                                                       "atgov-t10-BIS4A-valid.xml",
                                                                       "atgov-t10-BIS5A-valid.xml",
                                                                       "atgov-ubl-42-8.xml" };
-  private static final String [] ORDERS_SUCCESS = new String [] { "ADVORD_03_03_00_Order_v2p2.xml",
-                                                                 "BII03 Order example 01.xml",
-                                                                 "PEPPOL BIS-3a-FULL.xml",
-                                                                 "PEPPOL BIS-3a-Small.xml",
-                                                                 "TC01.0.TS1.xml",
-                                                                 "test-order.xml",
-                                                                 "UBL-Order-2.0-Example-International.xml",
-                                                                 "UBL-Order-2.0-Example.xml" };
-  private static final String [] ORDERRESPONSES_SUCCESS = new String [] { "CENBII-AcceptOrder-maximal.xml",
-                                                                         "CENBII-RejectOrder-maximal.xml" };
-  private static final String [] TENDER_SUCCESS = new String [] { "Catalogo preaward_Tender_Risposta con offerta ad una RDO MEPA_BIS 12a.xml" };
-  private static final String [] TENDERINGCATALOGUES_SUCCESS = new String [] { "Tender-Sample.xml" };
-
   public static final TestDocument [] INVOICES_ERROR = new TestDocument [] { new TestDocument ("ERR-2 BII04 minimal invoice example 02.xml",
                                                                                                new Warning ("BIIRULE-T10-R002"),
                                                                                                new Warning ("EUGEN-T10-R001"),
@@ -663,12 +648,6 @@ public final class TestFiles
     String [] aFilenames;
     switch (eFileType)
     {
-      case CALLFORTENDERS:
-        aFilenames = CALLFORTENDERS_SUCCESS;
-        break;
-      case CATALOGUE:
-        aFilenames = CATALOGUES_SUCCESS;
-        break;
       case CREDITNOTE:
         if ("AT".equals (sCountry))
           aFilenames = CREDITNOTES_AT_SUCCESS;
@@ -680,18 +659,6 @@ public final class TestFiles
           aFilenames = INVOICES_AT_SUCCESS;
         else
           aFilenames = ArrayHelper.getConcatenated (INVOICES_SUCCESS, INVOICES_AT_SUCCESS);
-        break;
-      case ORDER:
-        aFilenames = ORDERS_SUCCESS;
-        break;
-      case ORDERRESPONSE:
-        aFilenames = ORDERRESPONSES_SUCCESS;
-        break;
-      case TENDER:
-        aFilenames = TENDER_SUCCESS;
-        break;
-      case TENDERINGCATALOGUE:
-        aFilenames = TENDERINGCATALOGUES_SUCCESS;
         break;
       default:
         s_aLogger.warn ("No success test files present for type " +
@@ -741,9 +708,6 @@ public final class TestFiles
           aFilenames = INVOICES_AT_ERROR;
         else
           aFilenames = INVOICES_ERROR;
-        break;
-      case ORDER:
-        aFilenames = ORDERS_ERROR;
         break;
       default:
         s_aLogger.warn ("No error test files present for type " +
