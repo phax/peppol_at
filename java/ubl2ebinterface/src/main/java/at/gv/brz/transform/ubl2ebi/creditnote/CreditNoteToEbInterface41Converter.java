@@ -503,23 +503,33 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
                                                      EText.TAX_PERCENT_MISSING.getDisplayTextWithArgs (m_aDisplayLocale));
                 }
                 else
-                {
-                  // add VAT item
-                  final Ebi41VATItemType aEbiVATItem = new Ebi41VATItemType ();
-                  // Base amount
-                  aEbiVATItem.setTaxedAmount (aUBLTaxableAmount.setScale (SCALE_PRICE2, ROUNDING_MODE));
-                  // tax rate
-                  final Ebi41VATRateType aEbiVATVATRate = new Ebi41VATRateType ();
-                  // Optional
-                  if (false)
-                    aEbiVATVATRate.setTaxCode (sUBLTaxCategoryID);
-                  aEbiVATVATRate.setValue (aUBLPercentage);
-                  aEbiVATItem.setVATRate (aEbiVATVATRate);
-                  // Tax amount (mandatory)
-                  aEbiVATItem.setAmount (aUBLTaxAmount.setScale (SCALE_PRICE2, ROUNDING_MODE));
-                  // Add to list
-                  aEbiVAT.getVATItem ().add (aEbiVATItem);
-                }
+                  if (aUBLTaxableAmount == null)
+                  {
+                    aTransformationErrorList.addError ("TaxTotal[" +
+                                                           nTaxTotalIndex +
+                                                           "]/TaxSubtotal[" +
+                                                           nTaxSubtotalIndex +
+                                                           "]/TaxableAmount",
+                                                       EText.TAXABLE_AMOUNT_MISSING.getDisplayText (m_aDisplayLocale));
+                  }
+                  else
+                  {
+                    // add VAT item
+                    final Ebi41VATItemType aEbiVATItem = new Ebi41VATItemType ();
+                    // Base amount
+                    aEbiVATItem.setTaxedAmount (aUBLTaxableAmount.setScale (SCALE_PRICE2, ROUNDING_MODE));
+                    // tax rate
+                    final Ebi41VATRateType aEbiVATVATRate = new Ebi41VATRateType ();
+                    // Optional
+                    if (false)
+                      aEbiVATVATRate.setTaxCode (sUBLTaxCategoryID);
+                    aEbiVATVATRate.setValue (aUBLPercentage);
+                    aEbiVATItem.setVATRate (aEbiVATVATRate);
+                    // Tax amount (mandatory)
+                    aEbiVATItem.setAmount (aUBLTaxAmount.setScale (SCALE_PRICE2, ROUNDING_MODE));
+                    // Add to list
+                    aEbiVAT.getVATItem ().add (aEbiVATItem);
+                  }
               }
               else
               {
