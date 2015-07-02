@@ -61,7 +61,7 @@ public final class TaxCategoryKey
   {
     if (o == this)
       return true;
-    if (!(o instanceof TaxCategoryKey))
+    if (o == null || !getClass ().equals (o.getClass ()))
       return false;
     final TaxCategoryKey rhs = (TaxCategoryKey) o;
     return m_aTaxCategoryScheme.equals (rhs.m_aTaxCategoryScheme) && m_aTaxCategoryID.equals (rhs.m_aTaxCategoryID);

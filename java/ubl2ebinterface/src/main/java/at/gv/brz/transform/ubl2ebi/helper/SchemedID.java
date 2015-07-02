@@ -63,7 +63,7 @@ public final class SchemedID
   {
     if (o == this)
       return true;
-    if (!(o instanceof SchemedID))
+    if (o == null || !getClass ().equals (o.getClass ()))
       return false;
     final SchemedID rhs = (SchemedID) o;
     return EqualsUtils.equals (m_sSchemeID, rhs.m_sSchemeID) && m_sID.equals (rhs.m_sID);
