@@ -27,29 +27,28 @@ import java.util.Locale;
 import javax.annotation.Nonnull;
 import javax.xml.bind.Marshaller;
 
-import oasis.names.specification.ubl.schema.xsd.creditnote_21.CreditNoteType;
-
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import at.gv.brz.transform.ubl2ebi.EbiNamespacePrefixMapper;
-
 import com.helger.commons.error.EErrorLevel;
-import com.helger.commons.io.IReadableResource;
-import com.helger.commons.io.file.FileUtils;
+import com.helger.commons.io.file.FileHelper;
 import com.helger.commons.io.file.FilenameHelper;
-import com.helger.commons.io.file.filter.FilenameFilterEndsWith;
+import com.helger.commons.io.file.filter.FileFilterFilenameEndsWith;
 import com.helger.commons.io.file.iterate.FileSystemIterator;
 import com.helger.commons.io.file.iterate.FileSystemRecursiveIterator;
 import com.helger.commons.io.resource.FileSystemResource;
-import com.helger.commons.jaxb.JAXBMarshallerUtils;
-import com.helger.commons.xml.serialize.XMLWriter;
+import com.helger.commons.io.resource.IReadableResource;
+import com.helger.commons.xml.serialize.write.XMLWriter;
 import com.helger.ebinterface.EbInterface41Marshaller;
 import com.helger.ebinterface.v41.Ebi41InvoiceType;
-import com.helger.ubl.UBL21Reader;
+import com.helger.jaxb.JAXBMarshallerHelper;
+import com.helger.ubl21.UBL21Reader;
 import com.helger.validation.error.ErrorList;
+
+import at.gv.brz.transform.ubl2ebi.EbiNamespacePrefixMapper;
+import oasis.names.specification.ubl.schema.xsd.creditnote_21.CreditNoteType;
 
 /**
  * Test class for class {@link CreditNoteToEbInterface41Converter}.
@@ -65,7 +64,7 @@ public class CreditNoteToEbInterface41ConverterTest
   {
     final List <IReadableResource> aTestFiles = new ArrayList <IReadableResource> ();
     for (final File aFile : FileSystemRecursiveIterator.create (new File ("src/test/resources/ubl20/creditnote"),
-                                                                new FilenameFilterEndsWith (".xml")))
+                                                                new FileFilterFilenameEndsWith (".xml")))
       aTestFiles.add (new FileSystemResource (aFile));
 
     // For all PEPPOL test invoices
@@ -80,11 +79,14 @@ public class CreditNoteToEbInterface41ConverterTest
 
       // Convert to ebInterface
       final ErrorList aErrorList = new ErrorList ();
-      final Ebi41InvoiceType aEbInvoice = new CreditNoteToEbInterface41Converter (Locale.GERMANY, Locale.GERMANY, false).convertToEbInterface (aUBLCreditNote,
-                                                                                                                                               aErrorList);
-      assertTrue (aRes.getPath () + ": " + aErrorList.toString (), aErrorList.isEmpty () ||
-                                                                   aErrorList.getMostSevereErrorLevel ()
-                                                                             .isLessSevereThan (EErrorLevel.ERROR));
+      final Ebi41InvoiceType aEbInvoice = new CreditNoteToEbInterface41Converter (Locale.GERMANY,
+                                                                                  Locale.GERMANY,
+                                                                                  false).convertToEbInterface (aUBLCreditNote,
+                                                                                                               aErrorList);
+      assertTrue (aRes.getPath () +
+                  ": " +
+                  aErrorList.toString (),
+                  aErrorList.isEmpty () || aErrorList.getMostSevereErrorLevel ().isLessSevereThan (EErrorLevel.ERROR));
       assertNotNull (aEbInvoice);
 
       if (!aErrorList.isEmpty () && aErrorList.getMostSevereErrorLevel ().isMoreOrEqualSevereThan (EErrorLevel.WARN))
@@ -96,14 +98,13 @@ public class CreditNoteToEbInterface41ConverterTest
         @Override
         protected void customizeMarshaller (@Nonnull final Marshaller aMarshaller)
         {
-          JAXBMarshallerUtils.setSunNamespacePrefixMapper (aMarshaller, new EbiNamespacePrefixMapper ());
+          JAXBMarshallerHelper.setSunNamespacePrefixMapper (aMarshaller, new EbiNamespacePrefixMapper ());
         }
       }.write (aEbInvoice);
       assertNotNull (aDocEb);
 
-      XMLWriter.writeToStream (aDocEb,
-                               FileUtils.getOutputStream ("generated-ebi41-files/" +
-                                                          FilenameHelper.getWithoutPath (aRes.getPath ())));
+      XMLWriter.writeToStream (aDocEb, FileHelper.getOutputStream ("generated-ebi41-files/" +
+                                                                   FilenameHelper.getWithoutPath (aRes.getPath ())));
     }
   }
 
@@ -112,7 +113,7 @@ public class CreditNoteToEbInterface41ConverterTest
   {
     final List <IReadableResource> aTestFiles = new ArrayList <IReadableResource> ();
     for (final File aFile : FileSystemIterator.create (new File ("src/test/resources/ubl20/creditnote"),
-                                                       new FilenameFilterEndsWith (".xml")))
+                                                       new FileFilterFilenameEndsWith (".xml")))
       aTestFiles.add (new FileSystemResource (aFile));
 
     // For all PEPPOL test invoices
@@ -127,10 +128,14 @@ public class CreditNoteToEbInterface41ConverterTest
 
       // Convert to ebInterface
       final ErrorList aErrorList = new ErrorList ();
-      final Ebi41InvoiceType aEbInvoice = new CreditNoteToEbInterface41Converter (Locale.GERMANY, Locale.GERMANY, true).convertToEbInterface (aUBLCreditNote,
-                                                                                                                                              aErrorList);
-      assertTrue (aRes.getPath () + ": " + aErrorList.toString (), aErrorList.getMostSevereErrorLevel ()
-                                                                             .isLessSevereThan (EErrorLevel.ERROR));
+      final Ebi41InvoiceType aEbInvoice = new CreditNoteToEbInterface41Converter (Locale.GERMANY,
+                                                                                  Locale.GERMANY,
+                                                                                  true).convertToEbInterface (aUBLCreditNote,
+                                                                                                              aErrorList);
+      assertTrue (aRes.getPath () +
+                  ": " +
+                  aErrorList.toString (),
+                  aErrorList.getMostSevereErrorLevel ().isLessSevereThan (EErrorLevel.ERROR));
       assertNotNull (aEbInvoice);
 
       if (aErrorList.getMostSevereErrorLevel ().isMoreOrEqualSevereThan (EErrorLevel.WARN))
@@ -142,14 +147,13 @@ public class CreditNoteToEbInterface41ConverterTest
         @Override
         protected void customizeMarshaller (@Nonnull final Marshaller aMarshaller)
         {
-          JAXBMarshallerUtils.setSunNamespacePrefixMapper (aMarshaller, new EbiNamespacePrefixMapper ());
+          JAXBMarshallerHelper.setSunNamespacePrefixMapper (aMarshaller, new EbiNamespacePrefixMapper ());
         }
       }.write (aEbInvoice);
       assertNotNull (aDocEb);
 
-      XMLWriter.writeToStream (aDocEb,
-                               FileUtils.getOutputStream ("generated-ebi41-files/" +
-                                                          FilenameHelper.getWithoutPath (aRes.getPath ())));
+      XMLWriter.writeToStream (aDocEb, FileHelper.getOutputStream ("generated-ebi41-files/" +
+                                                                   FilenameHelper.getWithoutPath (aRes.getPath ())));
     }
   }
 }

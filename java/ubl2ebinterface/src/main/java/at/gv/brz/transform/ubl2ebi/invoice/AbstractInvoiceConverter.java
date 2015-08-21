@@ -21,18 +21,18 @@ import java.util.Locale;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.InvoiceTypeCodeType;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.ProfileIDType;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.UBLVersionIDType;
-import oasis.names.specification.ubl.schema.xsd.invoice_21.InvoiceType;
-import at.gv.brz.transform.ubl2ebi.AbstractConverter;
-import at.gv.brz.transform.ubl2ebi.CPeppolUBL;
-
 import com.helger.commons.string.StringHelper;
 import com.helger.peppol.identifier.process.IPeppolPredefinedProcessIdentifier;
 import com.helger.peppol.identifier.process.PredefinedProcessIdentifierManager;
 import com.helger.peppol.identifier.process.SimpleProcessIdentifier;
 import com.helger.validation.error.ErrorList;
+
+import at.gv.brz.transform.ubl2ebi.AbstractConverter;
+import at.gv.brz.transform.ubl2ebi.CPeppolUBL;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.InvoiceTypeCodeType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.ProfileIDType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.UBLVersionIDType;
+import oasis.names.specification.ubl.schema.xsd.invoice_21.InvoiceType;
 
 /**
  * Base class for UBL 2.1 Invoice to ebInterface converter

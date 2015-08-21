@@ -20,10 +20,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
-import com.helger.commons.annotations.Nonempty;
-import com.helger.commons.equals.EqualsUtils;
-import com.helger.commons.hash.HashCodeGenerator;
-import com.helger.commons.string.StringHelper;
+import com.helger.commons.ValueEnforcer;
+import com.helger.commons.annotation.Nonempty;
+import com.helger.commons.equals.EqualsHelper;
+import com.helger.commons.hashcode.HashCodeGenerator;
 import com.helger.commons.string.ToStringGenerator;
 
 /**
@@ -39,10 +39,8 @@ public final class SchemedID
 
   public SchemedID (@Nullable final String sSchemeID, @Nonnull @Nonempty final String sID)
   {
-    if (StringHelper.hasNoText (sID))
-      throw new IllegalArgumentException ("ID");
     m_sSchemeID = sSchemeID;
-    m_sID = sID;
+    m_sID = ValueEnforcer.notEmpty (sID, "ID");
   }
 
   @Nullable
@@ -66,7 +64,7 @@ public final class SchemedID
     if (o == null || !getClass ().equals (o.getClass ()))
       return false;
     final SchemedID rhs = (SchemedID) o;
-    return EqualsUtils.equals (m_sSchemeID, rhs.m_sSchemeID) && m_sID.equals (rhs.m_sID);
+    return EqualsHelper.equals (m_sSchemeID, rhs.m_sSchemeID) && m_sID.equals (rhs.m_sID);
   }
 
   @Override

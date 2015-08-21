@@ -21,18 +21,18 @@ import java.util.Locale;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.CustomizationIDType;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.ProfileIDType;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.UBLVersionIDType;
-import oasis.names.specification.ubl.schema.xsd.creditnote_21.CreditNoteType;
-import at.gv.brz.transform.ubl2ebi.AbstractConverter;
-import at.gv.brz.transform.ubl2ebi.CPeppolUBL;
-
 import com.helger.commons.string.StringHelper;
 import com.helger.peppol.identifier.doctype.IPeppolPredefinedDocumentTypeIdentifier;
 import com.helger.peppol.identifier.process.IPeppolPredefinedProcessIdentifier;
 import com.helger.peppol.identifier.process.PredefinedProcessIdentifierManager;
 import com.helger.validation.error.ErrorList;
+
+import at.gv.brz.transform.ubl2ebi.AbstractConverter;
+import at.gv.brz.transform.ubl2ebi.CPeppolUBL;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.CustomizationIDType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.ProfileIDType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.UBLVersionIDType;
+import oasis.names.specification.ubl.schema.xsd.creditnote_21.CreditNoteType;
 
 /**
  * Base class for UBL 2.1 CreditNote to ebInterface converter

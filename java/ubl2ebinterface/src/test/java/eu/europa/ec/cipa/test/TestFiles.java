@@ -49,9 +49,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.helger.commons.ValueEnforcer;
-import com.helger.commons.annotations.ReturnsMutableCopy;
-import com.helger.commons.collections.ArrayHelper;
-import com.helger.commons.io.IReadableResource;
+import com.helger.commons.annotation.ReturnsMutableCopy;
+import com.helger.commons.collection.ArrayHelper;
+import com.helger.commons.io.resource.IReadableResource;
 
 import eu.europa.ec.cipa.test.error.FatalError;
 import eu.europa.ec.cipa.test.error.TestDocument;

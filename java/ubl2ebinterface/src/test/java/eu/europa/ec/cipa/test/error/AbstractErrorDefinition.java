@@ -40,9 +40,9 @@ package eu.europa.ec.cipa.test.error;
 import javax.annotation.Nonnull;
 
 import com.helger.commons.ValueEnforcer;
-import com.helger.commons.annotations.Nonempty;
+import com.helger.commons.annotation.Nonempty;
 import com.helger.commons.error.EErrorLevel;
-import com.helger.commons.hash.HashCodeGenerator;
+import com.helger.commons.hashcode.HashCodeGenerator;
 import com.helger.commons.string.ToStringGenerator;
 
 public abstract class AbstractErrorDefinition implements Comparable <AbstractErrorDefinition>

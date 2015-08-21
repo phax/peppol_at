@@ -29,31 +29,9 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.AllowanceChargeType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.CreditNoteLineType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.CustomerPartyType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.DeliveryType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.DocumentReferenceType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.MonetaryTotalType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.OrderLineReferenceType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.OrderReferenceType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PartyTaxSchemeType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PeriodType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.SupplierPartyType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.TaxCategoryType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.TaxSubtotalType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.TaxTotalType;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.DescriptionType;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.NameType;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.NoteType;
-import oasis.names.specification.ubl.schema.xsd.creditnote_21.CreditNoteType;
-import at.gv.brz.transform.ubl2ebi.EbInterface41Helper;
-import at.gv.brz.transform.ubl2ebi.helper.SchemedID;
-import at.gv.brz.transform.ubl2ebi.helper.TaxCategoryKey;
-
 import com.helger.commons.CGlobal;
 import com.helger.commons.ValueEnforcer;
-import com.helger.commons.collections.CollectionHelper;
+import com.helger.commons.collection.CollectionHelper;
 import com.helger.commons.math.MathHelper;
 import com.helger.commons.state.ETriState;
 import com.helger.commons.string.StringHelper;
@@ -91,6 +69,28 @@ import com.helger.ebinterface.v41.ObjectFactory;
 import com.helger.peppol.codelist.ETaxSchemeID;
 import com.helger.ubl21.codelist.EUnitOfMeasureCode21;
 import com.helger.validation.error.ErrorList;
+
+import at.gv.brz.transform.ubl2ebi.EbInterface41Helper;
+import at.gv.brz.transform.ubl2ebi.helper.SchemedID;
+import at.gv.brz.transform.ubl2ebi.helper.TaxCategoryKey;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.AllowanceChargeType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.CreditNoteLineType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.CustomerPartyType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.DeliveryType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.DocumentReferenceType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.MonetaryTotalType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.OrderLineReferenceType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.OrderReferenceType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PartyTaxSchemeType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PeriodType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.SupplierPartyType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.TaxCategoryType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.TaxSubtotalType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.TaxTotalType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.DescriptionType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.NameType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.NoteType;
+import oasis.names.specification.ubl.schema.xsd.creditnote_21.CreditNoteType;
 
 /**
  * Main converter between UBL 2.1 credit note and ebInterface 4.1 credit note.
@@ -382,9 +382,10 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
       for (final DocumentReferenceType aDocumentReference : aUBLDoc.getContractDocumentReference ())
         if (StringHelper.hasTextAfterTrim (aDocumentReference.getIDValue ()))
         {
-          final String sKey = StringHelper.hasText (aDocumentReference.getID ().getSchemeID ()) ? aDocumentReference.getID ()
+          final String sKey = StringHelper.hasText (aDocumentReference.getID ().getSchemeID ())
+                                                                                                ? aDocumentReference.getID ()
                                                                                                                     .getSchemeID ()
-                                                                                               : "Contract";
+                                                                                                : "Contract";
 
           final Ebi41FurtherIdentificationType aEbiFurtherIdentification = new Ebi41FurtherIdentificationType ();
           aEbiFurtherIdentification.setIdentificationType (sKey);
@@ -419,10 +420,10 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
             {
               // Calculate percentage
               aUBLPercentage = MathHelper.isEqualToZero (aUBLTaxableAmount) ? BigDecimal.ZERO
-                                                                           : aUBLTaxAmount.multiply (CGlobal.BIGDEC_100)
-                                                                                          .divide (aUBLTaxableAmount,
-                                                                                                   SCALE_PERC,
-                                                                                                   ROUNDING_MODE);
+                                                                            : aUBLTaxAmount.multiply (CGlobal.BIGDEC_100)
+                                                                                           .divide (aUBLTaxableAmount,
+                                                                                                    SCALE_PERC,
+                                                                                                    ROUNDING_MODE);
             }
           }
 
@@ -445,10 +446,10 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
               {
                 // Calculate (inexact) subtotal
                 aUBLTaxAmount = MathHelper.isEqualToZero (aUBLPercentage) ? BigDecimal.ZERO
-                                                                         : aUBLTaxableAmount.multiply (aUBLPercentage)
-                                                                                            .divide (CGlobal.BIGDEC_100,
-                                                                                                     SCALE_PRICE4,
-                                                                                                     ROUNDING_MODE);
+                                                                          : aUBLTaxableAmount.multiply (aUBLPercentage)
+                                                                                             .divide (CGlobal.BIGDEC_100,
+                                                                                                      SCALE_PRICE4,
+                                                                                                      ROUNDING_MODE);
               }
           }
 
@@ -461,10 +462,10 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
           if (aUBLTaxCategory.getID () == null)
           {
             aTransformationErrorList.addError ("TaxTotal[" +
-                                                   nTaxTotalIndex +
-                                                   "]/TaxSubtotal[" +
-                                                   nTaxSubtotalIndex +
-                                                   "]/TaxCategory",
+                                               nTaxTotalIndex +
+                                               "]/TaxSubtotal[" +
+                                               nTaxSubtotalIndex +
+                                               "]/TaxCategory",
                                                EText.MISSING_TAXCATEGORY_ID.getDisplayText (m_aDisplayLocale));
             break;
           }
@@ -482,10 +483,10 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
             if (eUBLTaxScheme == null)
             {
               aTransformationErrorList.addError ("TaxTotal[" +
-                                                     nTaxTotalIndex +
-                                                     "]/TaxSubtotal[" +
-                                                     nTaxSubtotalIndex +
-                                                     "]/TaxCategory/TaxScheme/ID",
+                                                 nTaxTotalIndex +
+                                                 "]/TaxSubtotal[" +
+                                                 nTaxSubtotalIndex +
+                                                 "]/TaxCategory/TaxScheme/ID",
                                                  EText.UNSUPPORTED_TAX_SCHEME_ID.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                                          sUBLTaxSchemeID));
             }
@@ -496,20 +497,20 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
                 if (aUBLPercentage == null)
                 {
                   aTransformationErrorList.addError ("TaxTotal[" +
-                                                         nTaxTotalIndex +
-                                                         "]/TaxSubtotal[" +
-                                                         nTaxSubtotalIndex +
-                                                         "]/TaxCategory/Percent",
+                                                     nTaxTotalIndex +
+                                                     "]/TaxSubtotal[" +
+                                                     nTaxSubtotalIndex +
+                                                     "]/TaxCategory/Percent",
                                                      EText.TAX_PERCENT_MISSING.getDisplayTextWithArgs (m_aDisplayLocale));
                 }
                 else
                   if (aUBLTaxableAmount == null)
                   {
                     aTransformationErrorList.addError ("TaxTotal[" +
-                                                           nTaxTotalIndex +
-                                                           "]/TaxSubtotal[" +
-                                                           nTaxSubtotalIndex +
-                                                           "]/TaxableAmount",
+                                                       nTaxTotalIndex +
+                                                       "]/TaxSubtotal[" +
+                                                       nTaxSubtotalIndex +
+                                                       "]/TaxableAmount",
                                                        EText.TAXABLE_AMOUNT_MISSING.getDisplayText (m_aDisplayLocale));
                   }
                   else
@@ -546,10 +547,10 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
           else
           {
             aTransformationErrorList.addError ("TaxTotal[" +
-                                                   nTaxTotalIndex +
-                                                   "]/TaxSubtotal[" +
-                                                   nTaxSubtotalIndex +
-                                                   "]/TaxCategory/",
+                                               nTaxTotalIndex +
+                                               "]/TaxSubtotal[" +
+                                               nTaxSubtotalIndex +
+                                               "]/TaxCategory/",
                                                EText.UNSUPPORTED_TAX_SCHEME.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                                     sUBLTaxSchemeSchemeID,
                                                                                                     sUBLTaxSchemeID));
@@ -580,9 +581,8 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
             for (final TaxSubtotalType aUBLTaxSubTotal : aUBLTaxTotal.getTaxSubtotal ())
             {
               // Only handle VAT items
-              if (SUPPORTED_TAX_SCHEME_ID.getID ().equals (aUBLTaxSubTotal.getTaxCategory ()
-                                                                          .getTaxScheme ()
-                                                                          .getIDValue ()))
+              if (SUPPORTED_TAX_SCHEME_ID.getID ()
+                                         .equals (aUBLTaxSubTotal.getTaxCategory ().getTaxScheme ().getIDValue ()))
               {
                 // We found one -> just use it
                 aUBLTaxCategory = aUBLTaxSubTotal.getTaxCategory ();
@@ -621,7 +621,9 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
         if (aUBLPercent == null)
         {
           aUBLPercent = BigDecimal.ZERO;
-          aTransformationErrorList.addWarning ("CreditNoteLine[" + nLineIndex + "]/Item/ClassifiedTaxCategory",
+          aTransformationErrorList.addWarning ("CreditNoteLine[" +
+                                               nLineIndex +
+                                               "]/Item/ClassifiedTaxCategory",
                                                EText.DETAILS_TAX_PERCENTAGE_NOT_FOUND.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                                               aUBLPercent));
         }
@@ -635,7 +637,9 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
         if (aUBLPositionNumber == null)
         {
           aUBLPositionNumber = BigInteger.valueOf (nLineIndex + 1);
-          aTransformationErrorList.addWarning ("CreditNoteLine[" + nLineIndex + "]/ID",
+          aTransformationErrorList.addWarning ("CreditNoteLine[" +
+                                               nLineIndex +
+                                               "]/ID",
                                                EText.DETAILS_INVALID_POSITION.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                                       sUBLPositionNumber,
                                                                                                       aUBLPositionNumber));
@@ -666,14 +670,18 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
         {
           // ebInterface requires a quantity!
           aEbiQuantity.setUnit (EUnitOfMeasureCode21.C62.getID ());
-          aTransformationErrorList.addWarning ("CreditNoteLine[" + nLineIndex + "]/CreditNotedQuantity/UnitCode",
+          aTransformationErrorList.addWarning ("CreditNoteLine[" +
+                                               nLineIndex +
+                                               "]/CreditNotedQuantity/UnitCode",
                                                EText.DETAILS_INVALID_UNIT.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                                   aEbiQuantity.getUnit ()));
         }
         if (aEbiQuantity.getValue () == null)
         {
           aEbiQuantity.setValue (BigDecimal.ONE);
-          aTransformationErrorList.addWarning ("CreditNoteLine[" + nLineIndex + "]/CreditNotedQuantity",
+          aTransformationErrorList.addWarning ("CreditNoteLine[" +
+                                               nLineIndex +
+                                               "]/CreditNotedQuantity",
                                                EText.DETAILS_INVALID_QUANTITY.getDisplayTextWithArgs (m_aDisplayLocale,
                                                                                                       aEbiQuantity.getValue ()));
         }
@@ -720,8 +728,8 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
         final Ebi41VATRateType aEbiVATRate = new Ebi41VATRateType ();
         aEbiVATRate.setValue (aUBLPercent);
         if (aUBLTaxCategory != null)
-          // Optional
-          if (false)
+                                     // Optional
+                                     if (false)
             aEbiVATRate.setTaxCode (aUBLTaxCategory.getIDValue ());
         aEbiListLineItem.setVATRate (aEbiVATRate);
 
@@ -756,7 +764,9 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
             {
               if (sOrderPosNumber.length () == 0)
               {
-                aTransformationErrorList.addError ("CreditNoteLine[" + nLineIndex + "]/OrderLineReference/LineID",
+                aTransformationErrorList.addError ("CreditNoteLine[" +
+                                                   nLineIndex +
+                                                   "]/OrderLineReference/LineID",
                                                    EText.ORDERLINE_REF_ID_EMPTY.getDisplayText (m_aDisplayLocale));
               }
               else
@@ -834,10 +844,10 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
           {
             final Ebi41DeliveryType aEbiDelivery = EbInterface41Helper.convertDelivery (aUBLDelivery,
                                                                                         "CreditNoteLine[" +
-                                                                                            nLineIndex +
-                                                                                            "]/Delivery[" +
-                                                                                            nDeliveryIndex +
-                                                                                            "]",
+                                                                                                      nLineIndex +
+                                                                                                      "]/Delivery[" +
+                                                                                                      nDeliveryIndex +
+                                                                                                      "]",
                                                                                         aUBLDoc.getAccountingCustomerParty (),
                                                                                         aTransformationErrorList,
                                                                                         m_aContentLocale,
@@ -924,7 +934,9 @@ public final class CreditNoteToEbInterface41Converter extends AbstractCreditNote
           }
         if (aEbiVATRate == null)
         {
-          aTransformationErrorList.addError ("CreditNote/AllowanceCharge[" + nAllowanceChargeIndex + "]",
+          aTransformationErrorList.addError ("CreditNote/AllowanceCharge[" +
+                                             nAllowanceChargeIndex +
+                                             "]",
                                              EText.ALLOWANCE_CHARGE_NO_TAXRATE.getDisplayText (m_aDisplayLocale));
           // No default in this case
           if (false)

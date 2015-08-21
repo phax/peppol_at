@@ -23,6 +23,18 @@ import java.util.Locale;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.helger.commons.collection.CollectionHelper;
+import com.helger.commons.locale.country.CountryCache;
+import com.helger.commons.string.StringHelper;
+import com.helger.ebinterface.v41.Ebi41AddressIdentifierType;
+import com.helger.ebinterface.v41.Ebi41AddressIdentifierTypeType;
+import com.helger.ebinterface.v41.Ebi41AddressType;
+import com.helger.ebinterface.v41.Ebi41CountryCodeType;
+import com.helger.ebinterface.v41.Ebi41CountryType;
+import com.helger.ebinterface.v41.Ebi41DeliveryType;
+import com.helger.validation.error.ErrorList;
+
+import at.gv.brz.transform.ubl2ebi.AbstractConverter.EText;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.AddressType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.ContactType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.CustomerPartyType;
@@ -33,18 +45,6 @@ import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.Par
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PartyType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PersonType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.DescriptionType;
-import at.gv.brz.transform.ubl2ebi.AbstractConverter.EText;
-
-import com.helger.commons.collections.CollectionHelper;
-import com.helger.commons.locale.country.CountryCache;
-import com.helger.commons.string.StringHelper;
-import com.helger.ebinterface.v41.Ebi41AddressIdentifierType;
-import com.helger.ebinterface.v41.Ebi41AddressIdentifierTypeType;
-import com.helger.ebinterface.v41.Ebi41AddressType;
-import com.helger.ebinterface.v41.Ebi41CountryCodeType;
-import com.helger.ebinterface.v41.Ebi41CountryType;
-import com.helger.ebinterface.v41.Ebi41DeliveryType;
-import com.helger.validation.error.ErrorList;
 
 public final class EbInterface41Helper
 {
